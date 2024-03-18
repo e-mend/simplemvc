@@ -1,0 +1,11 @@
+{
+    "name": "godly/simplemvc",
+    "autoload": {
+        "psr-4": {
+            "app\\": "app/"
+        }
+    },
+    "require": {
+        "larapack/dd": "^1.1"
+    }
+}
