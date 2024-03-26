@@ -25,6 +25,7 @@ class ComposerStaticInit99028d73ec07c66fe987bb1bc67affba
         'P' => 
         array (
             'PhpOption\\' => 10,
+            'PHPMailer\\PHPMailer\\' => 20,
         ),
         'L' => 
         array (
@@ -65,6 +66,10 @@ class ComposerStaticInit99028d73ec07c66fe987bb1bc67affba
         'PhpOption\\' => 
         array (
             0 => __DIR__ . '/..' . '/phpoption/phpoption/src/PhpOption',
+        ),
+        'PHPMailer\\PHPMailer\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/phpmailer/phpmailer/src',
         ),
         'Laminas\\Stdlib\\' => 
         array (
