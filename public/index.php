@@ -1,7 +1,11 @@
 <?php 
 
+error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING);
+
+session_start();
+
 require '../vendor/autoload.php';
 
-use app\routes\Router;
+use App\routes\Router;
 
 Router::execute();

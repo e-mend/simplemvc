@@ -1,20 +1,20 @@
 <?php 
-namespace app\routes;
+namespace App\routes;
 
 use Exception;
-use app\Helpers\Request;
-use app\Helpers\Uri;
+use App\Helpers\Request;
+use App\Helpers\Uri;
 
 final class Router
 {
-    private const CONTROLLER_NAMESPACE = 'app\\controllers\\';
+    private const CONTROLLER_NAMESPACE = 'App\\Controllers\\';
 
     public static function load(string $controller, string $method)
     {
         try {
             $controllerNamespace = self::CONTROLLER_NAMESPACE . $controller;
 
-            if(!class_exists($controllerNamespace) || !method_exists($controllerNamespace, $method)) {
+            if(!class_exists($controllerNamespace) || !method_exists($controllerNamespace, $method)) {   
                 throw new Exception('Controller not found');
             } 
 
@@ -30,7 +30,7 @@ final class Router
         return [
           'get' => [
               '/' => fn() => self::load('HomeController', 'index'),
-              '/login' => fn() => self::load('HomeController', 'index'),
+              '/login' => fn() => self::load('HomeController', 'login'),
           ],
           'post' => [
               
