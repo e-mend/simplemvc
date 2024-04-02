@@ -2,7 +2,7 @@
 
 <body>
     <div class="container-fluid vertical-center" id="app">
-        <div class="login-form p-4 rounded bg-primary shadow">
+        <div class="login-form p-4 rounded bg-primary shadow primary-border">
             <div class="bg-primary p-2 rounded fs-1 text-center animate__infinite
                     animate__animated animate__pulse">
                 <h1 class="primary-color">
@@ -11,12 +11,12 @@
                 </h1>
             </div>
             <div class="form-group">
-                <label for="username">Usuário</label>
-                <input type="text" class="form-control" id="username" placeholder="...">
+                <label for="username">Usuário ou Email</label>
+                <input type="text" class="form-control" id="username" placeholder="Usuário/Email">
             </div>
             <div class="form-group">
                 <label for="password">Senha</label>
-                <input type="password" class="form-control" id="password" placeholder="...">
+                <input type="password" class="form-control" id="password" placeholder="Senha">
             </div>
             <button @click="throwError" class="btn btn-primary p-2 my-2 w-100 shadow">
                 Login
