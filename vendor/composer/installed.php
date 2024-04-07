@@ -3,7 +3,7 @@
         'name' => 'godly/simplemvc',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => 'e47d069c1d15f3179ba608a1503c9dd0c067d913',
+        'reference' => '66c4f70fedf15a34f5efb9673454ee80fcaa5bf0',
         'type' => 'library',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -22,7 +22,7 @@
         'godly/simplemvc' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => 'e47d069c1d15f3179ba608a1503c9dd0c067d913',
+            'reference' => '66c4f70fedf15a34f5efb9673454ee80fcaa5bf0',
             'type' => 'library',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
