@@ -5,6 +5,9 @@
 
 *{
     font-family: "Montserrat", sans-serif;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
 }
 
 .btn-primary{
@@ -39,4 +42,22 @@
 
 #logo{
     width: 100px;
+}
+
+#bgVideo {
+    position: relative;
+    height: 100vh;
+    z-index: -1;
+}
+
+#bgVideo video {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+     z-index: -1;
+}
+
+#app{
+
 }

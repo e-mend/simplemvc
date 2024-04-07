@@ -1,8 +1,13 @@
 <?php require 'base/header.php';?>
 
 <body>
-    <div class="container-fluid vertical-center" id="app">
-        <div class="login-form p-4 rounded bg-primary shadow primary-border">
+    <div id="bgVideo">
+            <video src="video/sky.mp4" autoplay loop muted class="w-100" type="video/mp4">
+            Your browser does not support the video tag.
+            </video>
+    </div>
+    <div class="container-fluid vertical-center position-absolute top-0 start-0" id="app">
+        <div class="login-form p-4 rounded bg-primary shadow-lg primary-border z-2">
             <div class="bg-primary p-2 rounded fs-1 text-center animate__infinite
                     animate__animated animate__pulse">
                 <h1 class="primary-color">
@@ -28,7 +33,7 @@
                 </div>
             </div>
         </div>
-        <div class="container position-fixed bottom-0 w-100">
+        <div class="container position-fixed bottom-0 w-100 z-2">
             <div class="row justify-content-center">
                 <div class="col-12 col-md-6">
                     <div v-if="wrongLogin" class="alert alert-danger text-center">
