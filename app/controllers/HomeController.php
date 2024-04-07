@@ -35,6 +35,8 @@ class HomeController extends Controller
 
         $this->user->getUsers();
 
+        dd($json);
+
         Json::send([
             'success' => true
         ]);

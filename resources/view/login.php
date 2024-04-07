@@ -86,7 +86,7 @@
 
                     setTimeout(() => {
                         this.removeMessage(newMessage.id);
-                    }, 5000);
+                    }, 4000);
                 },
                 removeMessage(id) {
                     const index = this.warnings.findIndex(message => message.id === id);
