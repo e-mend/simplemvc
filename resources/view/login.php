@@ -58,14 +58,29 @@
     </div>
 
     <script>
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
         const app = new Vue({
             el: '#app',
             data() {
                 return {
                     message: '',
                     loginForm: {
-                        username: '',
-                        password: ''
+                        username: 'admin',
+                        password: 'Padrao@123'
                     },
                     warnings: [],
                     nextId: 0,
@@ -121,7 +136,7 @@
                             <i class="fa-solid fa-check"></i>`, 
                             ['alert-success']);
 
-                        window.location.href = '/inventario';
+                        window.location.href = json['redirect'];
                     } catch (error) {
                         console.error('There was a problem with the fetch operation:', error);
 
@@ -130,6 +145,15 @@
 
                         this.blocked = false;
                     }
+                }
+            },
+            mounted() {
+                if(getCookie('premature') == true) {
+                    this.throwWarning(
+                    `Algo deu errado <i class="fa-solid fa-circle-exclamation"></i>`, 
+                    ['alert-danger']);
+
+                    document.cookie = 'premature=;';
                 }
             }
         });

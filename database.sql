@@ -6,11 +6,11 @@ CREATE SCHEMA `InventoryApp`;
 
 CREATE TABLE `InventoryApp`.`user`(
     `id` INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
-    `username` VARCHAR(255) NOT NULL,
+    `username` VARCHAR(255) NOT NULL UNIQUE,
     `password` VARCHAR(255) NOT NULL,
     `permission` JSON NOT NULL,
     `created_at` DATETIME NOT NULL,
-    `email` VARCHAR(255) NOT NULL,
+    `email` VARCHAR(255) NOT NULL UNIQUE,
     `is_deleted` BOOLEAN NOT NULL DEFAULT 0,
     `image` VARCHAR(255)
 );
@@ -31,6 +31,7 @@ CREATE TABLE `InventoryApp`.`inventory`(
     `deleted_by` INT,
     `deleted_at` DATETIME,
     `created_by` INT,
+    `favorite` BOOLEAN NOT NULL DEFAULT 0,
     FOREIGN KEY (created_by) REFERENCES user(id),
     FOREIGN KEY (deleted_by) REFERENCES user(id)
 );
@@ -52,6 +53,7 @@ CREATE TABLE `InventoryApp`.`post`(
     `created_by` INT,
     `deleted_by` INT,
     `deleted_at` DATETIME,
+    `favorite` BOOLEAN NOT NULL DEFAULT 0,
     FOREIGN KEY (deleted_by) REFERENCES user(id),
     FOREIGN KEY (created_by) REFERENCES user(id)
 );

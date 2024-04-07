@@ -16,12 +16,15 @@ final class Router
 
             if(!class_exists($controllerNamespace) || !method_exists($controllerNamespace, $method)) {   
                 throw new Exception('Controller not found');
-            } 
+            }
 
             $controller = new $controllerNamespace();
             $controller->$method();
         } catch (\Throwable $th) {
-            echo $th->getMessage();
+            //$th->getMessage();
+
+            setcookie('premature', true, time() + 3600, '/');
+            header('Location: /');
         }
     }
 
@@ -30,6 +33,7 @@ final class Router
         return [
           'get' => [
                 '/' => fn() => self::load('HomeController', 'indexAction'),
+                '/welcome' => fn() => self::load('HomeController', 'welcomeAction'),
                 '/inventario' => fn() => self::load('HomeController', 'dashboardAction'),
           ],
           'post' => [
@@ -50,7 +54,6 @@ final class Router
             }
 
             $router = $routes[$request][$uri];
-        
 
             if(!is_callable($router)) {
                throw new Exception('Route not callable');
@@ -59,7 +62,10 @@ final class Router
             $router();
 
         } catch (\Throwable $th) {
-            echo $th->getMessage();
+            // $th->getMessage();
+            
+            setcookie('premature', true, time() + 3600, '/');
+            header('Location: /');
         }
     }
     

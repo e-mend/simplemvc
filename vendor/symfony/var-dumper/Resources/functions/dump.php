@@ -12,12 +12,12 @@
 use Symfony\Component\VarDumper\Caster\ScalarStub;
 use Symfony\Component\VarDumper\VarDumper;
 
-if (!function_exists('dump')) {
+if (!function_exists('d')) {
     /**
      * @author Nicolas Grekas <p@tchwork.com>
      * @author Alexandre Daubois <alex.daubois@gmail.com>
      */
-    function dump(mixed ...$vars): mixed
+    function d(mixed ...$vars): mixed
     {
         if (!$vars) {
             VarDumper::dump(new ScalarStub('🐛'));

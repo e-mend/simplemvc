@@ -26,7 +26,7 @@ class Database
         return self::$connection;
     }
 
-    public function getConnection(): Sql
+    public function getConnection(): Adapter
     {
         $dotenv = Dotenv::createImmutable(__DIR__ . '/../../');
         $dotenv->load();
@@ -40,7 +40,7 @@ class Database
             'port' => $_ENV['DB_PORT'],
         ]);
 
-        return new Sql($this->adapter);
+        return $this->adapter;
     }
 
     public function ping(): bool
