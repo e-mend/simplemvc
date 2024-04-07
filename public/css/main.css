@@ -10,9 +10,19 @@
     padding: 0;
 }
 
+.spinner-border-small{
+    width: 1rem !important;
+    height: 1rem !important;
+}
+
+.rounded-lot{
+    border-radius: 0.6rem !important;
+}
+
 .btn-primary{
     --bs-btn-bg: rgb(0, 19, 48) !important;
     --bs-btn-hover-bg: rgba(0, 19, 48, 0.7) !important;
+    --bs-btn-disabled-bg: rgba(0, 19, 48, 0.7) !important;
 }
 
 .primary-color{

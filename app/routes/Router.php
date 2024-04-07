@@ -29,11 +29,11 @@ final class Router
     {
         return [
           'get' => [
-              '/' => fn() => self::load('HomeController', 'index'),
-              '/login' => fn() => self::load('HomeController', 'login'),
+                '/' => fn() => self::load('HomeController', 'indexAction'),
+                '/inventario' => fn() => self::load('HomeController', 'dashboardAction'),
           ],
           'post' => [
-              
+                '/login' => fn() => self::load('HomeController', 'loginApi'),
           ]
         ];
     }

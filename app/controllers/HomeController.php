@@ -4,7 +4,7 @@ namespace App\Controllers;
 
 use App\Helpers\View;
 use App\Models\User;
-use App\Requests\JsonResponse;
+use App\Requests\Json;
 
 class HomeController extends Controller
 {
@@ -15,14 +15,27 @@ class HomeController extends Controller
         $this->user = new User();
     }
 
-    public function index()
+    public function indexAction()
     {
         View::render('login');
     }
 
-    public function login()
+    public function dashboardAction()
     {
-        JsonResponse::send([
+        View::render('dashboard');
+    }
+
+    public function loginApi()
+    {
+        $json = Json::getJson();
+
+        if(!$json){
+            Json::sendError('Invalid json', 400);
+        }
+
+        $this->user->getUsers();
+
+        Json::send([
             'success' => true
         ]);
     }
