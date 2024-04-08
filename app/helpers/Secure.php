@@ -12,6 +12,7 @@ class Secure
         'email' => "/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,64}$/",
         'password' => "/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,64}$/",
         'username' => "/^[A-Za-z\d]{4,32}$/",
+        'pin' => "/^[0-9]{6}$/",
     ];
 
     private function __construct()
@@ -70,7 +71,8 @@ class Secure
 
     public function verifyPin(string $pin): bool
     {
-        return $this->verify((string) $pin, $_SESSION['pin']);
+        return preg_match(self::REGEX['pin'], $pin) &&
+        $this->verify((string) $pin, $_SESSION['pin']);
     }
 
     public function getPin(): int

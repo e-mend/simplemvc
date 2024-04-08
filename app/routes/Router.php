@@ -21,7 +21,7 @@ final class Router
             $controller = new $controllerNamespace();
             $controller->$method();
         } catch (\Throwable $th) {
-            //$th->getMessage();
+            //echo $th->getMessage();
 
             $_SESSION['premature'] = true;
             header('Location: /');
@@ -38,6 +38,9 @@ final class Router
           ],
           'post' => [
                 '/login' => fn() => self::load('HomeController', 'loginApi'),
+                '/newAdmin' => fn() => self::load('HomeController', 'newAdminApi'),
+                '/userExists' => fn() => self::load('HomeController', 'userExistsApi'),
+                '/validateEmail' => fn() => self::load('HomeController', 'validateEmailApi'),
           ]
         ];
     }

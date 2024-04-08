@@ -15,41 +15,48 @@
                     {{ typedText }}
                 </h1>
             </div>
-            <div class="form-group fs-5 mb-2">
-                <input type="text" class="form-control fs-5" id="username" 
-                @focus="changeText('username')"
-                v-model="loginForm.username" placeholder="Usuário">
-            </div>
-            <div class="form-group fs-5 mb-2">
-                <input type="text" class="form-control fs-5" 
-                @focus="changeText('email')"
-                v-model="loginForm.email" id="email" placeholder="Email">
-            </div>
-            <div class="form-group fs-5 mb-2">
-                <input type="password" class="form-control fs-5" 
-                @focus="changeText('password')"
-                @input="passwordEnter"
-                v-model="loginForm.password" id="password" placeholder="Senha">
-                <div class="d-flex justify-content-center mt-1"
-                v-if="loginForm.password.length > 0">
-                    <div class="btn animate__pulse animate__infinite
-                    animate__slower" 
-                    :class="{'animate__animated': upper, 'btn-primary': upper}">
-                        A-Z
-                    </div>
-                    <div class="btn animate__pulse animate__infinite
-                    animate__slower" 
-                    :class="{'animate__animated': number, 'btn-primary': number}">
-                        0-9
-                    </div>
-                    <div class="btn animate__pulse animate__infinite white
-                    animate__slower" 
-                    :class="{'animate__animated': special, 'btn-primary': special}">
-                        @$!%*?&
+            <div v-if="!this.validateEmail">
+                <div class="form-group fs-5 mb-2">
+                    <input type="text" class="form-control fs-5" id="username" 
+                    @focus="changeText('username')"
+                    v-model="loginForm.username" placeholder="Usuário">
+                </div>
+                <div class="form-group fs-5 mb-2">
+                    <input type="text" class="form-control fs-5" 
+                    @focus="changeText('email')"
+                    v-model="loginForm.email" id="email" placeholder="Email">
+                </div>
+                <div class="form-group fs-5 mb-2">
+                    <input type="password" class="form-control fs-5" 
+                    @focus="changeText('password')"
+                    @input="passwordEnter"
+                    v-model="loginForm.password" id="password" placeholder="Senha">
+                    <div class="d-flex justify-content-center mt-1"
+                    v-if="loginForm.password.length > 0">
+                        <div class="btn animate__pulse animate__infinite
+                        animate__slower" 
+                        :class="{'animate__animated': upper, 'btn-primary': upper}">
+                            A-Z
+                        </div>
+                        <div class="btn animate__pulse animate__infinite
+                        animate__slower" 
+                        :class="{'animate__animated': number, 'btn-primary': number}">
+                            0-9
+                        </div>
+                        <div class="btn animate__pulse animate__infinite white
+                        animate__slower" 
+                        :class="{'animate__animated': special, 'btn-primary': special}">
+                            @$!%*?&
+                        </div>
                     </div>
                 </div>
             </div>
-            <button @click="updateUser" class="btn btn-primary gradient p-3 fs-5 w-100 shadow"
+            <div v-else>
+                <div class="form-group fs-5 mb-2">
+                    <input type="text" class="form-control fs-5" id="pin" v-model="pin" placeholder="PIN">
+                </div>
+            </div>
+            <button @click="buttonMega" class="btn btn-primary gradient p-3 fs-5 w-100 shadow"
             :disabled="blocked">
                 Continuar
                 <div v-if="blocked" class="spinner-border spinner-border-small" role="status">
@@ -107,7 +114,8 @@
             password: `Aqui nesse campo você pode digitar sua nova senha,
             escolha uma legal!`,
             email: `Aqui nesse campo você pode digitar seu novo email,
-            vamos validar logo logo.`
+            vamos validar logo logo.`,
+            validate: `Certo, agora verifique seu email.`,
         };
 
         const app = new Vue({
@@ -116,9 +124,9 @@
                 return {
                     message: '',
                     loginForm: {
-                        username: '',
-                        password: '',
-                        email: ''
+                        username: 'admin',
+                        password: 'Coxa18@1',
+                        email: 'gabrielcamargodepaiva@gmail.com'
                     },
                     warnings: [],
                     nextId: 0,
@@ -129,10 +137,19 @@
                     typingInterval: null,
                     upper: false,
                     number: false,
-                    special: false
+                    special: false,
+                    validateEmail: false,
+                    pin: '',
                 }
             },
             methods: {
+                async buttonMega() {
+                  if(this.validateEmail){
+                    return this.validatePin();
+                  }  
+
+                  return this.updateUser();
+                },
                 changeText(text) {
                     this.typedText = '';
                     this.fullText = robot[text];
@@ -200,11 +217,53 @@
                         this.warnings.splice(index, 1);
                     }
                 },
+                async validatePin() {
+                    this.blocked = true;
+
+                    try {
+                        const response = await fetch('/validateEmail', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                pin: this.pin
+                            })
+                        });
+
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+
+                        const json = await response.json();
+                        
+                        if(json['success'] === false) {
+                            this.throwWarning(
+                            json['message']+`
+                            <i class="fa-solid fa-circle-exclamation"></i>`);
+                        }else{
+                            this.throwWarning(
+                            json['message']+`
+                            <i class="fa-solid fa-check"></i>`,
+                            ['alert-success']);
+                        }
+
+                        this.blocked = false;
+
+                    } catch (error) {
+                        console.error('There was a problem with the fetch operation:', error);
+
+                        this.throwWarning(`Algo deu errado
+                        <i class="fa-solid fa-circle-exclamation"></i>`);
+
+                        this.blocked = false;
+                    }
+                },
                 async updateUser() {
                     this.blocked = true;
 
                     try {
-                        const response = await fetch('/login', {
+                        const response = await fetch('/newAdmin', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json'
@@ -217,21 +276,27 @@
                         }
 
                         const json = await response.json();
-
-                        if(!json.success) {
-                            throw new Error('Server response was not ok');
-                        }
                         
-                        this.throwWarning(
-                            `Login realizado com sucesso
-                            <i class="fa-solid fa-check"></i>`, 
+                        if(json['success'] === false) {
+                            this.throwWarning(
+                            json['message']+`
+                            <i class="fa-solid fa-circle-exclamation"></i>`);
+                        }else{
+                            this.throwWarning(
+                            json['message']+`
+                            <i class="fa-solid fa-check"></i>`,
                             ['alert-success']);
+                        }
 
-                        window.location.href = json['redirect'];
+                        this.blocked = false;
+
+                        this.validateEmail = true;
+                        this.changeText('validate');
+
                     } catch (error) {
                         console.error('There was a problem with the fetch operation:', error);
 
-                        this.throwWarning(`Ocorreu um erro ao realizar o login 
+                        this.throwWarning(`Algo deu errado
                         <i class="fa-solid fa-circle-exclamation"></i>`);
 
                         this.blocked = false;
@@ -246,6 +311,10 @@
                 }
 
                 this.typeText();
+
+                if(this.validateEmail){
+                    this.changeText('validate');
+                }
             },
             beforeDestroy() {
                 if (this.intervalId) {
