@@ -25,6 +25,18 @@
     --bs-btn-disabled-bg: rgba(0, 19, 48, 0.7) !important;
 }
 
+/* .gradient{
+    background: linear-gradient(to right, rgb(0, 19, 48) 30%, rgba(31, 82, 159, 0.573) 30%);
+} */
+
+/* .gradient{
+    background: linear-gradient(to right, rgb(0, 19, 48) 60%, rgba(31, 82, 159, 0.573) 30%);
+} */
+
+/* .gradient{
+    background: linear-gradient(to right, rgb(0, 19, 48) 90%, rgba(31, 82, 159, 0.573) 10%);
+} */
+
 .primary-color{
     color: var(--primary-color) !important;
 }
@@ -68,6 +80,6 @@
      z-index: -1;
 }
 
-#app{
-
+#checkInputs{
+    z-index: 2;
 }

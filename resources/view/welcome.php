@@ -7,14 +7,10 @@
     </div>
     <div class="container-fluid vertical-center position-absolute top-0 start-0" id="app">
         <div class="login-form p-4 rounded-lot bg-primary shadow-lg primary-border z-2">
-            <div class="position-absolute ">
-                123
-            </div>
             <div class="bg-primary p-2 rounded text-center
                     user-select-none mb-1">
                 <h1 class="primary-color fs-5">
-                    <i class="fa-solid fa-robot"></i>
-                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    <i class="fa-solid fa-robot fs-1"></i>
                     <br>
                     {{ typedText }}
                 </h1>
@@ -32,11 +28,30 @@
             <div class="form-group fs-5 mb-2">
                 <input type="password" class="form-control fs-5" 
                 @focus="changeText('password')"
+                @input="passwordEnter"
                 v-model="loginForm.password" id="password" placeholder="Senha">
+                <div class="d-flex justify-content-center mt-1"
+                v-if="loginForm.password.length > 0">
+                    <div class="btn animate__pulse animate__infinite
+                    animate__slower" 
+                    :class="{'animate__animated': upper, 'btn-primary': upper}">
+                        A-Z
+                    </div>
+                    <div class="btn animate__pulse animate__infinite
+                    animate__slower" 
+                    :class="{'animate__animated': number, 'btn-primary': number}">
+                        0-9
+                    </div>
+                    <div class="btn animate__pulse animate__infinite white
+                    animate__slower" 
+                    :class="{'animate__animated': special, 'btn-primary': special}">
+                        @$!%*?&
+                    </div>
+                </div>
             </div>
-            <button @click="login" class="btn btn-primary p-3 fs-5 w-100 shadow"
+            <button @click="updateUser" class="btn btn-primary gradient p-3 fs-5 w-100 shadow"
             :disabled="blocked">
-                Login
+                Continuar
                 <div v-if="blocked" class="spinner-border spinner-border-small" role="status">
                 </div>
             </button>
@@ -111,7 +126,10 @@
                     typedText: '',
                     fullText: robot['initial'],
                     currentIndex: 0,
-                    typingInterval: null
+                    typingInterval: null,
+                    upper: false,
+                    number: false,
+                    special: false
                 }
             },
             methods: {
@@ -136,8 +154,30 @@
                         }
                     }, 50);
                 },
-                passwordTest() {
-                    
+                passwordEnter() {
+                    let upperRegex = /[A-Z]/g;
+
+                    if(upperRegex.test(this.loginForm.password)) {
+                        this.upper = true;
+                    }else{
+                        this.upper = false;
+                    }
+
+                    let numberRegex = /[\d]/g;
+
+                    if(numberRegex.test(this.loginForm.password)) {
+                        this.number = true;
+                    }else{
+                        this.number = false;
+                    }
+
+                    let specialRegex = /[@$!%*?&]/g;
+
+                    if(specialRegex.test(this.loginForm.password)) {
+                        this.special = true;
+                    }else{
+                        this.special = false;
+                    }
                 },
                 throwWarning(textMessage, classObject = {
                     'alert-danger': true
@@ -160,7 +200,7 @@
                         this.warnings.splice(index, 1);
                     }
                 },
-                async login() {
+                async updateUser() {
                     this.blocked = true;
 
                     try {
