@@ -7,20 +7,31 @@
     </div>
     <div class="container-fluid vertical-center position-absolute top-0 start-0" id="app">
         <div class="login-form p-4 rounded-lot bg-primary shadow-lg primary-border z-2">
-            <div class="bg-primary p-2 rounded fs-1 text-center animate__infinite
-                    user-select-none mb-1
-                    animate__animated animate__pulse">
-                <h1 class="primary-color">
-                    iSecurity
-                    <i class="fa-solid fa-shield-halved"></i>
+            <div class="position-absolute ">
+                123
+            </div>
+            <div class="bg-primary p-2 rounded text-center
+                    user-select-none mb-1">
+                <h1 class="primary-color fs-5">
+                    <i class="fa-solid fa-robot"></i>
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    <br>
+                    {{ typedText }}
                 </h1>
             </div>
             <div class="form-group fs-5 mb-2">
                 <input type="text" class="form-control fs-5" id="username" 
-                v-model="loginForm.username" placeholder="Usuário/Email">
+                @focus="changeText('username')"
+                v-model="loginForm.username" placeholder="Usuário">
+            </div>
+            <div class="form-group fs-5 mb-2">
+                <input type="text" class="form-control fs-5" 
+                @focus="changeText('email')"
+                v-model="loginForm.email" id="email" placeholder="Email">
             </div>
             <div class="form-group fs-5 mb-2">
                 <input type="password" class="form-control fs-5" 
+                @focus="changeText('password')"
                 v-model="loginForm.password" id="password" placeholder="Senha">
             </div>
             <button @click="login" class="btn btn-primary p-3 fs-5 w-100 shadow"
@@ -73,21 +84,61 @@
             return cookieValue;
         }
 
+        const robot = {
+            initial: `Olá, parece que você é o primeiro por aqui!
+                    Por favor configure a conta do admin.`,
+            username: `Aqui nesse campo você pode digitar seu novo usuário,
+            mas se quiser deixar assim mesmo, não precisa mexer, tá?`,
+            password: `Aqui nesse campo você pode digitar sua nova senha,
+            escolha uma legal!`,
+            email: `Aqui nesse campo você pode digitar seu novo email,
+            vamos validar logo logo.`
+        };
+
         const app = new Vue({
             el: '#app',
             data() {
                 return {
                     message: '',
                     loginForm: {
-                        username: 'admin',
-                        password: 'Padrao@123'
+                        username: '',
+                        password: '',
+                        email: ''
                     },
                     warnings: [],
                     nextId: 0,
-                    blocked: false
+                    blocked: false,
+                    typedText: '',
+                    fullText: robot['initial'],
+                    currentIndex: 0,
+                    typingInterval: null
                 }
             },
             methods: {
+                changeText(text) {
+                    this.typedText = '';
+                    this.fullText = robot[text];
+                    this.currentIndex = 0;
+
+                    this.typeText();
+                },
+                typeText() {
+                    if (this.typingInterval) {
+                        clearInterval(this.typingInterval);
+                    }
+
+                    this.typingInterval = setInterval(() => {
+                        this.typedText += this.fullText[this.currentIndex];
+                        this.currentIndex++;
+
+                        if (this.currentIndex >= this.fullText.length) {
+                            clearInterval(this.typingInterval);
+                        }
+                    }, 50);
+                },
+                passwordTest() {
+                    
+                },
                 throwWarning(textMessage, classObject = {
                     'alert-danger': true
                 }) {
@@ -152,6 +203,13 @@
                     this.throwWarning(
                     `Algo deu errado <i class="fa-solid fa-circle-exclamation"></i>`, 
                     ['alert-danger']);
+                }
+
+                this.typeText();
+            },
+            beforeDestroy() {
+                if (this.intervalId) {
+                    clearInterval(this.intervalId);
                 }
             }
         });

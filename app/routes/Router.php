@@ -23,7 +23,7 @@ final class Router
         } catch (\Throwable $th) {
             //$th->getMessage();
 
-            setcookie('premature', true, time() + 3600, '/');
+            $_SESSION['premature'] = true;
             header('Location: /');
         }
     }
@@ -63,8 +63,8 @@ final class Router
 
         } catch (\Throwable $th) {
             // $th->getMessage();
-            
-            setcookie('premature', true, time() + 3600, '/');
+
+            $_SESSION['premature'] = true;
             header('Location: /');
         }
     }

@@ -22,6 +22,7 @@ class HomeController extends Controller
     public function indexAction()
     {
         View::render('login');
+        unset($_SESSION['premature']);
     }
 
     public function dashboardAction()
@@ -31,7 +32,11 @@ class HomeController extends Controller
 
     public function welcomeAction()
     {
-        View::render('welcome');
+        if($_SESSION['welcome']){
+            View::render('welcome');
+        }
+
+        header('Location: /');
     }
 
     public function loginApi()
