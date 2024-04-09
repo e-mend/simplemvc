@@ -6,6 +6,7 @@ use App\Helpers\Secure;
 use App\Helpers\View;
 use App\Models\User;
 use App\Requests\Json;
+use App\Requests\Req;
 use Exception;
 use Carbon\Carbon;
 use App\Helpers\Mailer;
@@ -28,6 +29,54 @@ class DashboardController extends Controller
         }
 
         View::render('dashboard');
+    }
+
+    public function logoutApi()
+    {
+        try {
+            if(!$this->secure->isLoggedIn()){
+                throw new Exception("Não autorizado");
+            }
+
+            $this->secure->logout();
+
+            Json::send([
+                'success' => true,
+                'message' => 'Logout efetuado com sucesso'
+            ]);
+        } catch (\Throwable $th) {
+            Json::send([
+                'success' => false,
+                'message' => $th->getMessage()
+            ]);
+        }
+    }
+
+    public function getUsersApi()
+    {
+        try {
+            if(!$this->secure->isLoggedIn()){
+                throw new Exception("Não autorizado");
+            }
+
+            $params = Req::getParams();
+
+            if($_SESSION['user']['permission'] != 'admin'){
+                throw new Exception("Não autorizado");
+            }
+
+            Json::send([
+                'success' => true,
+                'users' => $this->user->getUsers($params),
+                'message' => 'Pesquisa concluída'
+            ]);
+            
+        } catch (\Throwable $th) {
+            Json::send([
+                'success' => false,
+                'message' => $th->getMessage()
+            ]);
+        }
     }
 
     public function userDataApi()

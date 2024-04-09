@@ -8,6 +8,8 @@ class Secure
 {
     private static ?Secure $instance = null;
     private $pin;
+    public const ADMIN = 'admin';
+    public const DEFAULT_PASSWORD = 'Padrao@123';
     private const REGEX = [
         'email' => "/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,64}$/",
         'password' => "/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,64}$/",
@@ -58,6 +60,12 @@ class Secure
         return $_SESSION['csrfToken'] === $_COOKIE['csrfToken'];
     }
 
+    public function logout(): void
+    {
+        session_destroy();
+        setcookie('csrfToken', '', time() - 3600, '/');
+    }
+
     public function isValid(string $type, string $toValidate): bool
     {
         return preg_match(self::REGEX[$type], $toValidate);
@@ -82,6 +90,11 @@ class Secure
 
     public function isLoggedIn(): bool
     {
-        return (bool) $_SESSION['user'] && $_SESSION['login'];
+        return (bool) $_SESSION['logged'];
+    }
+
+    public function hasEmailToken(): bool
+    {
+        return $_SESSION['token'];
     }
 }

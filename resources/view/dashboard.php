@@ -23,29 +23,29 @@
                                     Menu
                                 </div>
                             </li>
-                            <li>
+                            <li v-if="this.blocked || this.permissions['can_read_inventory']">
                                 <div @click="loadOptions('inventory')" class="dropdown-item btn">
                                     Inventário
                                 </div>
                             </li>
-                            <li>
+                            <li v-if="this.blocked || this.permissions['can_read_post']">
                                 <div @click="loadOptions('safe')" class="dropdown-item btn">
                                     Cofre
                                 </div>
                             </li>
-                            <li>
+                            <li class="this.blocked || !this.permissions['admin']">
                                 <div @click="loadOptions('users')" class="dropdown-item btn">
                                     Usuários
                                 </div>
                             </li>
-                            <li>
+                            <li class=" this.blocked || !this.permissions['admin']">
                                 <div @click="loadOptions('settings')" class="dropdown-item btn">
                                     Configurações
                                 </div>
                             </li>
                         </ul>
                     </div>
-                    <div class="btn btn-primary col-6 col-md-1">
+                    <div class="btn btn-primary col-6 col-md-1" @click="logout">
                         Sair
                         <i class="fa-solid fa-right-to-bracket"></i>
                     </div>
@@ -75,23 +75,23 @@
                     </div>
                 </div>
                 <div class="row d-flex justify-content-between py-3 py-md-3 rounded
-                    z-3" :class="{disabled: this.blocked}">
-                    <div @click="loadOptions('inventory')" :class="{disabled: this.blocked}"
+                    z-3">
+                    <div @click="loadOptions('inventory')" :class="{disabled: this.blocked || !this.permissions['can_read_inventory']}"
                     class="btn btn-primary col-12 col-md-6 text-white text-center py-3 fs-5">
                         Inventário
                         <i class="fa-solid fa-laptop"></i>
                     </div>
-                    <div @click="loadOptions('safe')" :class="{disabled: this.blocked}"
+                    <div @click="loadOptions('safe')" :class="{disabled: this.blocked || !this.permissions['can_read_post']}"
                     class="btn btn-primary col-12 col-md-6 text-white text-center py-3 fs-5">
                         Cofre
                         <i class="fa-solid fa-lock"></i>
                     </div>
-                    <div @click="loadOptions('users')" :class="{disabled: this.blocked}"
+                    <div @click="loadOptions('users')" :class="{disabled: this.blocked || !this.permissions['admin']}"
                     class="btn btn-primary col-12 col-md-6 text-white text-center py-3 fs-5">
                         Usuários
                         <i class="fa-solid fa-users"></i>
                     </div>
-                    <div @click="loadOptions('settings')" :class="{disabled: this.blocked}"
+                    <div @click="loadOptions('settings')" :class="{disabled: this.blocked || !this.permissions['admin']}"
                     class="btn btn-primary col-12 col-md-6 text-white text-center py-3 fs-5">
                         Configurações
                         <i class="fa-solid fa-wrench"></i>
@@ -118,9 +118,53 @@
             </div>
             <!-- Users -->
             <div class="" v-if="option === 'users'">
-                <div class="row d-flex justify-content-between bg-primary py-3 py-md-3 rounded
-                    z-3">
-                    Usuários Aqui
+                <div class="row d-flex justify-content-between py-3 py-md-3 rounded
+                    border z-3 text-center">
+                    <div class="col-12 fs-5">
+                        Lista de Usuários
+                    </div>
+                </div>
+                <div class="row d-flex justify-content-between rounded z-3 text-center">
+                    <div class="btn btn-primary col-12 col-md-6 text-center py-3 fs-5"
+                    @click="searchModalOpen = !searchModalOpen">
+                        Procurar Usuário
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </div>
+                    <div class="btn btn-secondary col-12 col-md-6 border-white text-center py-3 fs-5">
+                        Convidar Usuário
+                        <i class="fa-solid fa-share-nodes"></i>
+                    </div>
+                </div>
+                <div class="row d-flex justify-content-between rounded z-3 text-center" v-if="searchModalOpen">
+                    <div class="btn btn-primary col-6 col-md-3 text-center py-3 fs-5" 
+                    @click="getUsers('all')"
+                    :class="{'opacity-25': this.userSearch.all}" v-if="this.permissions['admin']">
+                        Todos
+                        <i class="fa-solid fa-xmark"></i>
+                    </div>
+                    <div class="btn btn-primary col-6 col-md-3 text-center py-3 fs-5" 
+                    @click="getUsers('new')"
+                    :class="{'opacity-25': this.userSearch.new}" v-if="this.permissions['admin']">
+                        Novos
+                        <i class="fa-solid fa-fire"></i>
+                    </div>
+                    <div class="btn btn-danger col-6 col-md-3 text-center py-3 fs-5" 
+                    @click="getUsers('deleted')"
+                    :class="{'opacity-25': this.userSearch.deleted}" v-if="this.permissions['admin']">
+                        Desabilitados
+                        <i class="fa-solid fa-circle-minus"></i>
+                    </div>
+                    <div class="btn btn-dark col-6 col-md-3 text-center py-3 fs-5"
+                    @click="getUsers('favorites')"
+                    :class="{'opacity-25': this.userSearch.favorites}" v-if="this.permissions['admin']">
+                        Favoritos
+                        <i class="fa-solid fa-star"></i>
+                    </div>
+                </div>
+                <div class="row d-flex justify-content-between rounded z-3 text-center">
+                    <div v-for="user in users" :key="user.id" class="btn btn-primary col-12 col-md-6 text-center py-3 fs-5">
+
+                    </div>
                 </div>
             </div>
             <!-- Settings -->
@@ -177,7 +221,17 @@
                     intervalId: null,
                     option: '',
                     user: {},
-                    blocked: false
+                    blocked: false,
+                    permissions: {},
+                    searchModalOpen: false,
+                    users: {},
+                    userSearch: {
+                        deleted: false,
+                        new: false,
+                        favorites: false,
+                        all: true
+                    },
+                    loadingUsers: false
                 }
             },
             methods: {
@@ -195,6 +249,79 @@
                     setTimeout(() => {
                         this.removeMessage(newMessage.id);
                     }, 5000);
+                },
+                async logout() {
+                    try {
+                        const response = await fetch('/logout');
+
+                        if(!response.ok) {
+                            throw new Error('Algo deu errado');
+                        }
+
+                        const json = await response.json();
+
+                        if(!json.success) {
+                            throw new Error('Erro no servidor');
+                        }
+
+                        this.throwWarning(json['message'], ['alert-success']);
+
+                        window.location.href = '/';
+                    } catch (error) {
+                        this.throwWarning(error.message, ['alert-danger']);
+                        this.blocked = true;
+                    }
+                },
+                async getUsers(type = 'none') {
+                    this.loadingUsers = true;
+                    this.loadingR();
+
+                    let url = '/getusers';
+                    let first = true;
+                    this.userSearch[type] = !this.userSearch[type];
+
+                    if(this.userSearch['deleted']) {
+                        url += (first ? '?' : '&') + 'deleted=true';
+                        first = false;
+                    }
+
+                    if(this.userSearch['new']) {
+                        url += (first ? '?' : '&') + 'new=true';
+                        first = false;
+                    }
+
+                    if(this.userSearch['favorites']) {
+                        url += (first ? '?' : '&') +  'favorites=true';
+                        first = false;
+                    }
+
+                    if(this.userSearch['all']) {
+                        url = '/getusers?all=true';
+                        this.userSearch['all'] = false;
+                    }
+
+                    try {
+                        const response = await fetch(url);
+
+                        if(!response.ok) {
+                            throw new Error('Algo deu errado');
+                        }
+
+                        const json = await response.json();
+
+                        if(!json.success) {
+                            this.throwWarning(json['message']);
+                            return;
+                        }
+
+                        this.throwWarning(json['message'], ['alert-success']);
+                        this.users = json['users'];
+
+                    } catch (error) {
+                        this.throwWarning(error.message, ['alert-danger']);
+                    }
+
+                    this.loadingUsers = false;
                 },
                 removeMessage(id) {
                     const index = this.warnings.findIndex(message => message.id === id);
@@ -227,6 +354,7 @@
                     }, 100);
                 },
                 async getUserData() {
+                    this.blocked = true;
                     try {
                         const response = await fetch('/userdata');
 
@@ -242,14 +370,22 @@
 
                         this.throwWarning(json['message'], ['alert-success']);
 
-                        console.log(json['user']);
                         this.user = json['user'];
 
-                        this.blocked = true;
+                        const perm = json['user']['permission'].reduce((obj, item, index) => {
+                            obj[item] = true;
+                            return obj;
+                        }, {});
+
+                        this.permissions = perm;
+                        console.log(this.permissions);
+
                     } catch (error) {
                         this.throwWarning(error.message, ['alert-danger']);
                         this.blocked = true;
                     }
+
+                    this.blocked = false;
                 }
             },
             beforeMounted() {
@@ -259,8 +395,7 @@
                 this.loadingR();
                 this.getUserData();
                 this.option = 'main';
-                
-                console.log(this.user);
+            
             }
         });
     </script>

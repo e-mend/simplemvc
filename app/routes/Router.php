@@ -37,6 +37,8 @@ final class Router
                 '/inventario' => fn() => self::load('DashboardController', 'dashboardAction'),
                 '/sendcode' => fn() => self::load('HomeController', 'sendCodeApi'),
                 '/userdata' => fn() => self::load('DashboardController', 'userDataApi'),
+                '/logout' => fn() => self::load('DashboardController', 'logoutApi'),
+                '/getusers' => fn() => self::load('DashboardController', 'getUsersApi'),
           ],
           'post' => [
                 '/login' => fn() => self::load('HomeController', 'loginApi'),

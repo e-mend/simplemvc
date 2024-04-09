@@ -28,19 +28,14 @@
     z-index: -1;
 }
 
-#dashboard{
-    margin-top: 100px;
-}
-
 .btn-primary{
     --bs-btn-bg: rgb(0, 19, 48) !important;
-    --bs-btn-hover-bg: rgba(56, 174, 204, 0.7) !important;
+    --bs-btn-hover-bg: rgba(4, 110, 143, 0.7) !important;
     --bs-btn-disabled-bg: rgba(0, 19, 48, 0.7) !important;
     --bs-btn-border-color: white !important;
     --bs-btn-hover-border-color: white !important;
     --bs-btn-active-bg: rgba(4, 110, 143, 0.7) !important;
     --bs-btn-active-border-color: white !important;
-    --bs-btn-disabled-border-color: white !important;
 }
 
 .bg-primary{

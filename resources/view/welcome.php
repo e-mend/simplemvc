@@ -9,7 +9,7 @@
         <div class="login-form p-4 rounded-lot bg-primary shadow-lg primary-border z-2">
             <div class="bg-primary p-2 rounded text-center
                     user-select-none mb-1">
-                <h1 class="primary-color fs-5">
+                <h1 class="text-white fs-5">
                     <i class="fa-solid fa-robot fs-1"></i>
                     <br>
                     {{ typedText }}
@@ -35,17 +35,17 @@
                     v-if="loginForm.password.length > 0">
                         <div class="btn animate__pulse animate__infinite
                         animate__slower" 
-                        :class="{'animate__animated': upper, 'btn-primary': upper}">
+                        :class="{'animate__animated': upper, 'text-white': upper}">
                             A-Z
                         </div>
                         <div class="btn animate__pulse animate__infinite
                         animate__slower" 
-                        :class="{'animate__animated': number, 'btn-primary': number}">
+                        :class="{'animate__animated': number, 'text-white': number}">
                             0-9
                         </div>
                         <div class="btn animate__pulse animate__infinite white
                         animate__slower" 
-                        :class="{'animate__animated': special, 'btn-primary': special}">
+                        :class="{'animate__animated': special, 'text-white': special}">
                             @$!%*?&
                         </div>
                     </div>
@@ -63,7 +63,7 @@
                 </div>
             </button>
             <div class="bg-primary rounded text-center mt-1 user-select-none">
-                <div class="primary-color fs-3">
+                <div class="text-white fs-3">
                     Um app
                     <a href="http://crm.sjpinfo.com.br/authentication/login" target="_blank">
                         <img src="img/logo2.png" id="logo" >

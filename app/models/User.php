@@ -76,9 +76,7 @@ class User
         PredicateSet::OP_OR);
 
         $select = $this->sql->buildSqlString($select);    
-        $query = $this->adapter->query($select, Adapter::QUERY_MODE_EXECUTE)->toArray();
-
-        return count($query) > 0;
+        return $this->adapter->query($select, Adapter::QUERY_MODE_EXECUTE)->toArray();
     }
 
 }

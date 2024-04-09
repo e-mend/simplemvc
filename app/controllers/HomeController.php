@@ -60,17 +60,19 @@ class HomeController extends Controller
                 throw new Exception("Invalid Username");
             }
 
+            $user = $this->user->getUsers([
+                'username' => $json['username'],
+                'email' => $json['email']
+            ]);
+
             if( 
                 !$json['password'] ||
-                !$this->secure->isValid('password', $json['password'])
+                !$this->secure->isValid('password', $json['password']) ||
+                (!$this->secure->verify($json['password'], $user[0]['password'])
+                && $user[0]['password'] !== Secure::DEFAULT_PASSWORD)
             ){
                 throw new Exception("Invalid Password");
             }
-
-            $user = $this->user->getUsers([
-                'username' => $json['username'],
-                'password' => $json['password']
-            ]);
 
             if(!$user){
                 throw new Exception("There is no user with this username and password");
@@ -79,11 +81,12 @@ class HomeController extends Controller
             $redirect = false;
 
             $_SESSION['user'] = $user[0];
-            $_SESSION['user']['permission'] = json_decode($_SESSION['user']['permission'], true)['permissions'];
+            $_SESSION['user']['permission'] = 
+            json_decode($_SESSION['user']['permission'], true)['permissions'];
+            $_SESSION['token'] = true;
 
-            if(count($user) === 1){
-                $redirect = '/bemvindo';
-                
+            if(count($user) === 1 && $user[0]['password'] === Secure::DEFAULT_PASSWORD){
+                $redirect = '/bemvindo'; 
                 $_SESSION['welcome'] = true;
             }
 
@@ -92,14 +95,18 @@ class HomeController extends Controller
                 'redirect' => $redirect
             ]);
         } catch (\Throwable $th) {
-            Json::sendError('Something went wrong', 400);
+            Json::send([
+                'success' => false,
+                'redirect' => false,
+                'message' => $th->getMessage()
+            ]);
         }
     }
 
     public function sendCodeApi()
     {
         try {
-            if(!$this->secure->isLoggedIn()){
+            if(!$this->secure->hasEmailToken()){
                 throw new Exception("Not Authorized");
             }
 
@@ -109,14 +116,20 @@ class HomeController extends Controller
             ]);
 
             if(!$isSent){
+                unset($_SESSION['token']);
                 throw new Exception("Algo deu errado");
             }
 
             Json::send([
-                'success' => true
+                'success' => true,
+                'redirect' => false
             ]);
+
         } catch (\Throwable $th) {
-            Json::sendError('Something went wrong', 400);
+            Json::send([
+                'success' => false,
+                'message' => $this->secure->isLoggedIn()
+            ]);
         }
     }
 
@@ -184,20 +197,33 @@ class HomeController extends Controller
                 throw new Exception("Pin invalido");
             }
 
-            $user = $this->user->get()[0];
+            $redirect = false;
 
-            if($this->user->update($_SESSION, $user['id'])){
-                throw new Exception("Erro ao atualizar os dados");
+            if($_SESSION['welcome']){
+                $toUpdate = $this->user->update([
+                    'email' => $_SESSION['toUpdate']['email'],
+                    'username' => $_SESSION['toUpdate']['username'],
+                    'password' => $this->secure->hash($_SESSION['toUpdate']['password'])
+                ], $_SESSION['user']['id']);
+    
+                $user = $this->user->get()[0];
+                $_SESSION['user'] = $user;
+                $_SESSION['user']['permission'] = json_decode($_SESSION['user']['permission'], true)['permissions'];
+    
+                if(!$toUpdate){
+                    throw new Exception($toUpdate);
+                }
+
+                $redirect = '/inventario';
+                unset($_SESSION['welcome']);
             }
 
-            unset($_SESSION['welcome']);
-            $_SESSION['login'] = true;
-            $_SESSION['user'] = $user;
+            $_SESSION['logged'] = true;
 
             Json::send([
                 'success' => true,
                 'message' => 'Validado com sucesso',
-                'redirect' => '/inventario'
+                'redirect' => $redirect
             ]);
 
         } catch (\Throwable $th) {
@@ -246,7 +272,10 @@ class HomeController extends Controller
                 $json['username']
             );
 
-            if($user && !$_SESSION['welcome']){
+            if(!$_SESSION['welcome'] 
+            || $user[0]['username'] != Secure::ADMIN
+            || count($user) > 1
+           ){
                 throw new Exception("Usuario já existe");
             }
 

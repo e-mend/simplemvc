@@ -6,11 +6,11 @@
             </video>
     </div>
     <div class="container-fluid vertical-center position-absolute top-0 start-0" id="app">
-        <div class="login-form p-4 rounded-lot bg-primary shadow-lg primary-border z-2">
+        <div class="login-form p-4 rounded-lot bg-primary shadow-lg z-2">
             <div class="bg-primary p-2 rounded fs-1 text-center animate__infinite
                     user-select-none mb-1
                     animate__animated animate__pulse">
-                <h1 class="primary-color">
+                <h1 class="text-white">
                     iSecurity
                     <i class="fa-solid fa-shield-halved"></i>
                 </h1>
@@ -43,7 +43,7 @@
                 </button>
             </div>
             <div class="bg-primary rounded text-center mt-1 user-select-none">
-                <div class="primary-color fs-3">
+                <div class="text-white fs-3">
                     Um app
                     <a href="http://crm.sjpinfo.com.br/authentication/login" target="_blank">
                         <img src="img/logo2.png" id="logo" >
@@ -93,7 +93,7 @@
                     message: '',
                     loginForm: {
                         username: 'admin',
-                        password: 'Padrao@123'
+                        password: 'Coxa18@1'
                     },
                     warnings: [],
                     nextId: 0,
@@ -189,36 +189,45 @@
                         if(!json.success) {
                             throw new Error('Server response was not ok');
                         }
-                        
-                        this.throwWarning(
-                            `Login realizado com sucesso
+
+                        if(json['redirect'] !== false){
+                            this.throwWarning(
+                            `Redirecionando...
                             <i class="fa-solid fa-check"></i>`, 
                             ['alert-success']);
 
-                        if(json['redirect'] !== false){
                             window.location.href = json['redirect'];
                             return;
                         }
+                        
+                        this.validateEmail = true;
 
-                        const pinSend = await fetch('/sendpin');
+                        const pinSend = await fetch('/sendcode');
 
                         if (!response.ok) {
                             throw new Error('Network response was not ok');
                         }
 
-                        const json2 = await response.json();
+                        const json2 = await pinSend.json();
 
                         if(!json2.success) {
                             throw new Error('Server response was not ok');
                         }
 
-                        this.validateEmail = true;
+                        this.throwWarning(
+                            `Código enviado
+                            <i class="fa-solid fa-check"></i>`, 
+                        ['alert-success']);
+
+                        this.blocked = false;
+
                     } catch (error) {
                         console.error('There was a problem with the fetch operation:', error);
 
                         this.throwWarning(`Ocorreu um erro ao realizar o login 
                         <i class="fa-solid fa-circle-exclamation"></i>`);
 
+                        this.validateEmail = false;
                         this.blocked = false;
                     }
                 }
