@@ -22,13 +22,12 @@ class HomeController extends Controller
 
     public function indexAction()
     {
+        if($this->secure->isLoggedIn()){
+            header('Location: /inventario');
+        }
+
         View::render('login');
         unset($_SESSION['premature']);
-    }
-
-    public function dashboardAction()
-    {
-        View::render('dashboard');
     }
 
     public function welcomeAction()
@@ -43,6 +42,10 @@ class HomeController extends Controller
     public function loginApi()
     {
         try {
+            if($this->secure->isLoggedIn()){
+                throw new Exception("Not Authorized");
+            }
+
             $json = Json::getJson();
 
             if(!$json){
@@ -73,16 +76,15 @@ class HomeController extends Controller
                 throw new Exception("There is no user with this username and password");
             }
 
-            $redirect = '/inventario';
+            $redirect = false;
+
+            $_SESSION['user'] = $user[0];
+            $_SESSION['user']['permission'] = json_decode($_SESSION['user']['permission'], true)['permissions'];
 
             if(count($user) === 1){
                 $redirect = '/bemvindo';
-
+                
                 $_SESSION['welcome'] = true;
-                $_SESSION['fname'] = $user[0]['first_name'];
-                $_SESSION['lname'] = $user[0]['last_name'];
-
-                setcookie('welcome', true, time() + 3600, '/');
             }
 
             Json::send([
@@ -94,9 +96,37 @@ class HomeController extends Controller
         }
     }
 
+    public function sendCodeApi()
+    {
+        try {
+            if(!$this->secure->isLoggedIn()){
+                throw new Exception("Not Authorized");
+            }
+
+            $isSent = Mailer::sendCode([
+                'email' =>  $_SESSION['user']['email'],
+                'name' => $_SESSION['user']['first_name'],
+            ]);
+
+            if(!$isSent){
+                throw new Exception("Algo deu errado");
+            }
+
+            Json::send([
+                'success' => true
+            ]);
+        } catch (\Throwable $th) {
+            Json::sendError('Something went wrong', 400);
+        }
+    }
+
     public function userExistsApi()
     {
         try {
+            if(!$this->secure->isLoggedIn()){
+                throw new Exception("Not Authorized");
+            }
+
             $json = Json::getJson();
 
             if(!$json){
@@ -137,6 +167,10 @@ class HomeController extends Controller
     public function validateEmailApi()
     {
         try {
+            if($this->secure->isLoggedIn()){
+                throw new Exception("Not Authorized");
+            }
+
             $json = Json::getJson();
 
             if(!$json){
@@ -150,15 +184,22 @@ class HomeController extends Controller
                 throw new Exception("Pin invalido");
             }
 
-            $_SESSION['toUpdate'] = $json;
+            $user = $this->user->get()[0];
 
-            $user = $this->user->get();
+            if($this->user->update($_SESSION, $user['id'])){
+                throw new Exception("Erro ao atualizar os dados");
+            }
+
+            unset($_SESSION['welcome']);
+            $_SESSION['login'] = true;
+            $_SESSION['user'] = $user;
 
             Json::send([
                 'success' => true,
                 'message' => 'Validado com sucesso',
                 'redirect' => '/inventario'
             ]);
+
         } catch (\Throwable $th) {
             Json::send([
                 'success' => false,
@@ -170,6 +211,10 @@ class HomeController extends Controller
     public function newAdminApi()
     {
         try {
+            if($this->secure->isLoggedIn()){
+                throw new Exception("Not Authorized");
+            }
+
             $json = Json::getJson();
 
             if(!$json){
@@ -209,7 +254,7 @@ class HomeController extends Controller
 
             $isSent = Mailer::sendCode([
                 'email' => $json['email'],
-                'name' => $_SESSION['fname'],
+                'name' => $_SESSION['user']['first_name'],
             ]);
 
             if(!$isSent){

@@ -21,7 +21,7 @@ final class Router
             $controller = new $controllerNamespace();
             $controller->$method();
         } catch (\Throwable $th) {
-            //echo $th->getMessage();
+            // echo $th->getMessage();
 
             $_SESSION['premature'] = true;
             header('Location: /');
@@ -34,13 +34,15 @@ final class Router
           'get' => [
                 '/' => fn() => self::load('HomeController', 'indexAction'),
                 '/bemvindo' => fn() => self::load('HomeController', 'welcomeAction'),
-                '/inventario' => fn() => self::load('HomeController', 'dashboardAction'),
+                '/inventario' => fn() => self::load('DashboardController', 'dashboardAction'),
+                '/sendcode' => fn() => self::load('HomeController', 'sendCodeApi'),
+                '/userdata' => fn() => self::load('DashboardController', 'userDataApi'),
           ],
           'post' => [
                 '/login' => fn() => self::load('HomeController', 'loginApi'),
-                '/newAdmin' => fn() => self::load('HomeController', 'newAdminApi'),
-                '/userExists' => fn() => self::load('HomeController', 'userExistsApi'),
-                '/validateEmail' => fn() => self::load('HomeController', 'validateEmailApi'),
+                '/newadmin' => fn() => self::load('HomeController', 'newAdminApi'),
+                '/userexists' => fn() => self::load('HomeController', 'userExistsApi'),
+                '/validateemail' => fn() => self::load('HomeController', 'validateEmailApi'),
           ]
         ];
     }
@@ -65,7 +67,7 @@ final class Router
             $router();
 
         } catch (\Throwable $th) {
-            // $th->getMessage();
+            //echo $th->getMessage();
 
             $_SESSION['premature'] = true;
             header('Location: /');

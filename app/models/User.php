@@ -21,6 +21,20 @@ class User
         $this->sql = new Sql($this->adapter);
     }
 
+    public function update(array $data, string $id)
+    {
+        try {
+            $update = $this->sql->update('user');
+            $update->set($data);
+            $update->where(['id' => $id]);
+            $update = $this->sql->buildSqlString($update);
+            $this->adapter->query($update, Adapter::QUERY_MODE_EXECUTE);
+            return true;
+        } catch (\Throwable $th) {
+            return false;
+        }
+    }
+
     public function get(array $search = null)
     {
         $select = $this->sql->select('user');
@@ -42,6 +56,10 @@ class User
             'username' => $where['username']
         ], 
         PredicateSet::OP_OR);
+
+        $select->where([
+            'is_deleted' => false
+        ]);
 
         $select = $this->sql->buildSqlString($select);        
         return $this->adapter->query($select, Adapter::QUERY_MODE_EXECUTE)->toArray();

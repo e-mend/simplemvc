@@ -2,8 +2,8 @@
 
 <body>
     <div id="bgVideo">
-            <video src="video/sky.mp4" autoplay loop muted class="w-100" type="video/mp4">
-            </video>
+        <video src="video/sky.mp4" autoplay loop muted class="w-100" type="video/mp4">
+        </video>
     </div>
     <div class="container-fluid vertical-center position-absolute top-0 start-0" id="app">
         <div class="login-form p-4 rounded-lot bg-primary shadow-lg primary-border z-2">
@@ -221,7 +221,7 @@
                     this.blocked = true;
 
                     try {
-                        const response = await fetch('/validateEmail', {
+                        const response = await fetch('/validateemail', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json'
@@ -246,6 +246,8 @@
                             json['message']+`
                             <i class="fa-solid fa-check"></i>`,
                             ['alert-success']);
+
+                            window.location.href = json['redirect'];
                         }
 
                         this.blocked = false;
@@ -263,7 +265,7 @@
                     this.blocked = true;
 
                     try {
-                        const response = await fetch('/newAdmin', {
+                        const response = await fetch('/newadmin', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json'
@@ -286,13 +288,12 @@
                             json['message']+`
                             <i class="fa-solid fa-check"></i>`,
                             ['alert-success']);
+
+                            this.validateEmail = true;
+                            this.changeText('validate');
                         }
 
                         this.blocked = false;
-
-                        this.validateEmail = true;
-                        this.changeText('validate');
-
                     } catch (error) {
                         console.error('There was a problem with the fetch operation:', error);
 

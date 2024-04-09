@@ -15,20 +15,33 @@
                     <i class="fa-solid fa-shield-halved"></i>
                 </h1>
             </div>
-            <div class="form-group fs-5 mb-2">
-                <input type="text" class="form-control fs-5" id="username" 
-                v-model="loginForm.username" placeholder="Usuário/Email">
-            </div>
-            <div class="form-group fs-5 mb-2">
-                <input type="password" class="form-control fs-5" 
-                v-model="loginForm.password" id="password" placeholder="Senha">
-            </div>
-            <button @click="login" class="btn btn-primary p-3 fs-5 w-100 shadow"
-            :disabled="blocked">
-                Login
-                <div v-if="blocked" class="spinner-border spinner-border-small" role="status">
+            <div v-if="!this.validateEmail">
+                <div class="form-group fs-5 mb-2">
+                    <input type="text" class="form-control fs-5" id="username" 
+                    v-model="loginForm.username" placeholder="Usuário/Email">
                 </div>
-            </button>
+                <div class="form-group fs-5 mb-2">
+                    <input type="password" class="form-control fs-5" 
+                    v-model="loginForm.password" id="password" placeholder="Senha">
+                </div>
+                <button @click="login" class="btn btn-primary p-3 fs-5 w-100 shadow"
+                :disabled="blocked">
+                    Login
+                    <div v-if="blocked" class="spinner-border spinner-border-small" role="status">
+                    </div>
+                </button>
+            </div>
+            <div v-else>
+                <div class="form-group fs-5 mb-2">
+                    <input type="text" class="form-control fs-5" id="pin" v-model="pin" placeholder="PIN">
+                </div>
+                <button @click="validatePin" class="btn btn-primary p-3 fs-5 w-100 shadow"
+                :disabled="blocked">
+                    Continuar
+                    <div v-if="blocked" class="spinner-border spinner-border-small" role="status">
+                    </div>
+                </button>
+            </div>
             <div class="bg-primary rounded text-center mt-1 user-select-none">
                 <div class="primary-color fs-3">
                     Um app
@@ -84,7 +97,9 @@
                     },
                     warnings: [],
                     nextId: 0,
-                    blocked: false
+                    blocked: false,
+                    validateEmail: false,
+                    pin: '',
                 }
             },
             methods: {
@@ -107,6 +122,50 @@
                     const index = this.warnings.findIndex(message => message.id === id);
                     if (index !== -1) {
                         this.warnings.splice(index, 1);
+                    }
+                },
+                async validatePin() {
+                    this.blocked = true;
+
+                    try {
+                        const response = await fetch('/validateemail', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                pin: this.pin
+                            })
+                        });
+
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+
+                        const json = await response.json();
+                        
+                        if(json['success'] === false) {
+                            this.throwWarning(
+                            json['message']+`
+                            <i class="fa-solid fa-circle-exclamation"></i>`);
+                        }else{
+                            this.throwWarning(
+                            json['message']+`
+                            <i class="fa-solid fa-check"></i>`,
+                            ['alert-success']);
+
+                            window.location.href = json['redirect'];
+                        }
+
+                        this.blocked = false;
+
+                    } catch (error) {
+                        console.error('There was a problem with the fetch operation:', error);
+
+                        this.throwWarning(`Algo deu errado
+                        <i class="fa-solid fa-circle-exclamation"></i>`);
+
+                        this.blocked = false;
                     }
                 },
                 async login() {
@@ -136,7 +195,24 @@
                             <i class="fa-solid fa-check"></i>`, 
                             ['alert-success']);
 
-                        window.location.href = json['redirect'];
+                        if(json['redirect'] !== false){
+                            window.location.href = json['redirect'];
+                            return;
+                        }
+
+                        const pinSend = await fetch('/sendpin');
+
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+
+                        const json2 = await response.json();
+
+                        if(!json2.success) {
+                            throw new Error('Server response was not ok');
+                        }
+
+                        this.validateEmail = true;
                     } catch (error) {
                         console.error('There was a problem with the fetch operation:', error);
 

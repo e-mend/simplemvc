@@ -79,4 +79,9 @@ class Secure
     {
         return $this->pin;
     }
+
+    public function isLoggedIn(): bool
+    {
+        return (bool) $_SESSION['user'] && $_SESSION['login'];
+    }
 }
