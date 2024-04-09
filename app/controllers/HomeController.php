@@ -73,8 +73,10 @@ class HomeController extends Controller
                 throw new Exception("There is no user with this username and password");
             }
 
+            $redirect = '/inventario';
+
             if(count($user) === 1){
-                $redirect = '/welcome';
+                $redirect = '/bemvindo';
 
                 $_SESSION['welcome'] = true;
                 $_SESSION['fname'] = $user[0]['first_name'];
@@ -155,6 +157,7 @@ class HomeController extends Controller
             Json::send([
                 'success' => true,
                 'message' => 'Validado com sucesso',
+                'redirect' => '/inventario'
             ]);
         } catch (\Throwable $th) {
             Json::send([

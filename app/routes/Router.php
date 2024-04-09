@@ -33,7 +33,7 @@ final class Router
         return [
           'get' => [
                 '/' => fn() => self::load('HomeController', 'indexAction'),
-                '/welcome' => fn() => self::load('HomeController', 'welcomeAction'),
+                '/bemvindo' => fn() => self::load('HomeController', 'welcomeAction'),
                 '/inventario' => fn() => self::load('HomeController', 'dashboardAction'),
           ],
           'post' => [
