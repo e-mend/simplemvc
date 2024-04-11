@@ -77,7 +77,7 @@ class Secure
         $_SESSION['pin'] = $this->hash((string) $this->pin);
     }
 
-    public function verifyPin(string $pin): bool
+    public function verifyPin(string $pin)
     {
         return preg_match(self::REGEX['pin'], $pin) &&
         $this->verify((string) $pin, $_SESSION['pin']);

@@ -298,6 +298,9 @@
                     if(this.userSearch['all']) {
                         url = '/getusers?all=true';
                         this.userSearch['all'] = false;
+                        this.userSearch['deleted'] = false;
+                        this.userSearch['new'] = false;
+                        this.userSearch['favorites'] = false;
                     }
 
                     try {

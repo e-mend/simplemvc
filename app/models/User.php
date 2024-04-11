@@ -7,6 +7,7 @@ use Laminas\Db\Sql\Predicate\PredicateSet;
 use Laminas\Db\Sql\Select;
 use Laminas\Db\Adapter\Adapter;
 use Laminas\Db\Sql\Sql;
+use Laminas\Db\Sql\Insert;
 
 class User
 {
@@ -19,6 +20,45 @@ class User
         $this->db = Database::getInstance();
         $this->adapter = $this->db->getConnection();
         $this->sql = new Sql($this->adapter);
+    }
+
+    public static function isWaitingDeath()
+    {
+        if($_SESSION['user']){
+            $db = Database::getInstance();
+            $adapter = $db->getConnection();
+            $sql = new Sql($adapter);
+
+            $select = $sql->select('kill_switch');
+            $select->where(['user_id' => $_SESSION['user']['id']]);
+
+            $select = $sql->buildSqlString($select);
+            $count = $adapter->query($select, Adapter::QUERY_MODE_EXECUTE);
+
+            if(count($count) > 0){
+                session_destroy();
+                header('Location: /');
+            }
+        }
+    }
+
+    public static function foresightDeath()
+    {
+        if($_SESSION['user']){
+            $db = Database::getInstance();
+            $adapter = $db->getConnection();
+            $sql = new Sql($adapter);
+
+            $insert = new Insert();
+            $insert->into('kill_switch');
+
+            $insert->values([
+                'user_id' => $_SESSION['user']['id']
+            ]);
+
+            $insert = $sql->buildSqlString($insert);
+            $adapter->query($insert, Adapter::QUERY_MODE_EXECUTE);
+        }
     }
 
     public function update(array $data, string $id)
@@ -38,12 +78,26 @@ class User
     public function get(array $search = null)
     {
         $select = $this->sql->select('user');
+        $select->columns($search['columns'] ?? ['*']);
 
-        if($search['where']){
+        if(!empty($search['where'])){
             $select->where($search['where']);
         }
 
-        $select = $this->sql->buildSqlString($select);        
+        if($search['days']){
+            $select->where([
+                'created_at >= ?' => $search['days']
+            ]);
+        }
+
+        if($search['favorite']){
+            $select->where(['favorite' => $search['favorite']]);
+        }
+
+        $select->where(['is_deleted' => $search['is_deleted']]);
+        $select->order($search['order'] ?? 'id DESC');
+
+        $select = $this->sql->buildSqlString($select);       
         return $this->adapter->query($select, Adapter::QUERY_MODE_EXECUTE)->toArray();
     }
 

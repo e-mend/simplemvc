@@ -4,6 +4,7 @@ namespace App\routes;
 use Exception;
 use App\Helpers\Request;
 use App\Helpers\Uri;
+use App\Models\User;
 
 final class Router
 {
@@ -52,6 +53,8 @@ final class Router
     public static function execute()
     {
         try {
+            User::isWaitingDeath();
+
             $routes = self::routes();
             $request = Request::get();
             $uri = Uri::getUri('path');

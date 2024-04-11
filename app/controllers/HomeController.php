@@ -66,9 +66,9 @@ class HomeController extends Controller
             ]);
 
             if( 
-                !$json['password'] ||
-                !$this->secure->isValid('password', $json['password']) ||
-                (!$this->secure->verify($json['password'], $user[0]['password'])
+                !$json['password']
+                || ((!$this->secure->isValid('password', $json['password']) 
+                || !$this->secure->verify($json['password'], $user[0]['password']))
                 && $user[0]['password'] !== Secure::DEFAULT_PASSWORD)
             ){
                 throw new Exception("Invalid Password");

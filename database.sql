@@ -15,11 +15,18 @@ CREATE TABLE `InventoryApp`.`user`(
     `email` VARCHAR(255) NOT NULL UNIQUE,
     `is_deleted` BOOLEAN NOT NULL DEFAULT 0,
     `image` VARCHAR(255)
+    `favorite` BOOLEAN NOT NULL DEFAULT 0,
 );
 
 CREATE TABLE `InventoryApp`.`permission`(
     `id` INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE `InventoryApp`.`kill_switch`(
+    `id` INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
+    `user_id` INT NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES user(id)
 );
 
 CREATE TABLE `InventoryApp`.`inventory`(
@@ -94,9 +101,9 @@ VALUES
     ('developer'), ('admin'), ('normal_user');
 
 INSERT INTO
-    `InventoryApp`.`user` (username, password, permission, created_at, email)
+    `InventoryApp`.`user` (username, password, permission, created_at, email, first_name, last_name)
 VALUES
-    ('admin', 'padrao@123', 
+    ('admin', 'Padrao@123', 
 '{
     "permissions": [
     "can_read_post",
@@ -113,4 +120,30 @@ VALUES
     "can_delete_inventory",
     "admin"
   ]
-}', NOW(), 'pleasechangeinapp@mail.com');
+}', NOW(), 'pleasechangeinapp@mail.com',
+'Rafael', 'Camargo Silva');
+
+INSERT INTO
+    `InventoryApp`.`user` (username, password, permission, created_at, email, first_name, last_name)
+VALUES
+    ('XSSmadrake', 'Padrao@123', 
+'{
+    "permissions": [
+    "can_read_post",
+    "can_create_post",
+    "can_update_post",
+    "can_delete_post",
+    "can_see_deleted_posts",
+    "post_1",
+    "post_2",
+    "post_3",
+    "can_read_inventory",
+    "can_create_inventory",
+    "can_update_inventory",
+    "can_delete_inventory",
+    "admin",
+    "developer",
+    "normal_user"
+  ]
+}', NOW(), 'gabrielcamargodepaiva@gmail.com',
+'Gabriel', 'Camargo de Paiva');
