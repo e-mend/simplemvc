@@ -56,8 +56,6 @@ class DashboardController extends Controller
     public function getUsersApi()
     {
         try {
-            User::foresightDeath();
-
             if(!$this->secure->isLoggedIn()){
                 throw new Exception("Não autorizado");
             }

@@ -66,7 +66,6 @@ class Mailer
 
             self::$mail->send();
 
-            $_SESSION['isSent'] = true;
             return true;
         } catch (Exception $e) {
             return "Message could not be sent. Mailer Error: " . self::$mail->ErrorInfo;

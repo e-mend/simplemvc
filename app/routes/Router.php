@@ -55,6 +55,8 @@ final class Router
         try {
             User::isWaitingDeath();
 
+            //d($_SESSION);
+
             $routes = self::routes();
             $request = Request::get();
             $uri = Uri::getUri('path');

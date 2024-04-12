@@ -122,7 +122,8 @@ class HomeController extends Controller
 
             Json::send([
                 'success' => true,
-                'redirect' => false
+                'redirect' => false,
+                'session' => $_SESSION
             ]);
 
         } catch (\Throwable $th) {

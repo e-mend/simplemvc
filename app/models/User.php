@@ -8,6 +8,7 @@ use Laminas\Db\Sql\Select;
 use Laminas\Db\Adapter\Adapter;
 use Laminas\Db\Sql\Sql;
 use Laminas\Db\Sql\Insert;
+use Laminas\Db\Sql\Delete;
 
 class User
 {
@@ -37,6 +38,14 @@ class User
 
             if(count($count) > 0){
                 session_destroy();
+
+                $delete = new Delete();
+                $delete->from('kill_switch')
+                    ->where(['id' => $_SESSION['user']['id']]);
+
+                $statement = $sql->prepareStatementForSqlObject($delete);
+                $result = $statement->execute();
+
                 header('Location: /');
             }
         }
