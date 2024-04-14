@@ -57,20 +57,22 @@
 }
 
 .image-container {
-    width: 150px; /* Largura do contêiner quadrado */
-    height: 150px; /* Altura do contêiner quadrado */
-    border-radius: 50%; /* Isso torna o contêiner circular */
-    overflow: hidden; /* Esconde qualquer parte da imagem que exceda o círculo */
-    display: flex; /* Centraliza a imagem dentro do contêiner */
-    justify-content: center; /* Centraliza horizontalmente */
-    align-items: center; /* Centraliza verticalmente */
+    max-width: 150px;
+    max-height: 150px;
+    border-radius: 50%;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
+
+
 .image-container img {
-    width: auto; /* Mantém a largura original da imagem */
-    height: 100%; /* Altura máxima da imagem para garantir que cubra a altura do contêiner */
-    min-width: 100%; /* Garante que a imagem cubra a largura do contêiner */
-    object-fit: cover; /* Garante que a imagem cubra todo o contêiner sem distorções */
+    width: auto;
+    height: 100%;
+    min-width: 100%;
+    object-fit: cover;
 }
 
 /* .gradient{

@@ -46,6 +46,7 @@ final class Router
                 '/newadmin' => fn() => self::load('HomeController', 'newAdminApi'),
                 '/userexists' => fn() => self::load('HomeController', 'userExistsApi'),
                 '/validateemail' => fn() => self::load('HomeController', 'validateEmailApi'),
+                '/togglefavorite' => fn() => self::load('DashboardController', 'toggleFavoriteApi'),
           ]
         ];
     }
@@ -54,8 +55,6 @@ final class Router
     {
         try {
             User::isWaitingDeath();
-
-            //d($_SESSION);
 
             $routes = self::routes();
             $request = Request::get();

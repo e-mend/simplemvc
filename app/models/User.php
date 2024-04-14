@@ -53,7 +53,7 @@ class User
         }
     }
 
-    public static function foresightDeath()
+    public static function foresightDeath(int $id)
     {
         if($_SESSION['user']){
             $db = Database::getInstance();
@@ -64,7 +64,7 @@ class User
             $insert->into('kill_switch');
 
             $insert->values([
-                'user_id' => $_SESSION['user']['id']
+                'user_id' => $id
             ]);
 
             $insert = $sql->buildSqlString($insert);
@@ -105,10 +105,10 @@ class User
             $select->where(['favorite' => $search['favorite']]);
         }
 
-        $select->where(['is_deleted' => $search['is_deleted']]);
-        $select->order($search['order'] ?? 'id DESC');
+        $select->where(['is_deleted' => $search['is_deleted'] ?? false]);
+        $select->order($search['order'] ?? 'id DESC, created_at DESC');
 
-        $select = $this->sql->buildSqlString($select);       
+        $select = $this->sql->buildSqlString($select);     
         return $this->adapter->query($select, Adapter::QUERY_MODE_EXECUTE)->toArray();
     }
 

@@ -21,6 +21,9 @@
             crossorigin="anonymous">
         </script>
 
+        <!-- jquery -->
+        <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+
         <!-- Favicon -->
         <link rel="apple-touch-icon" sizes="180x180" href="img/apple-touch-icon.png">
         <link rel="icon" type="image/png" sizes="32x32" href="img/favicon-32x32.png">

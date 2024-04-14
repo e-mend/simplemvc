@@ -162,48 +162,259 @@
                     </div>
                 </div>
                 <div class="row d-flex justify-content-between rounded z-3 text-center">
-                    <div v-for="user in users" :key="user.id" class="bg-primary rounded text-white col-12 col-md-12 text-center py-3 fs-5">
-                        <div class="d-flex col-12 justify-content-between">
-                            <div class="col-2 col-md-3">
+                    <div v-for="user in users" :key="user.id" class="bg-primary rounded text-white
+                    text-center py-3 fs-5">
+                        <div class="row d-flex col-12 justify-content-between">
+                            <!-- <div class="col-12 col-md-12">
                                 <div class="image-container mx-auto">
                                     <img class="" src="https://w.wallhaven.cc/full/p9/wallhaven-p9x6ep.jpg" alt="">
                                 </div>
-                            </div>
-                            <div class="col-1 col-md-1 text-start">
-                                Nome:
-                                <br>
-                                Usuário:
-                                <br>
-                                Email:
-                                <br>
-                                Criado:
-                            </div>
-                            <div class="col-5 col-md-5 text-start">
+                            </div> -->
+                            <div class="col-12 col-md-12 text-start d-flex text-break">
                                 {{ user.first_name }} {{ user.last_name }}
-                                <br>
+                            </div>
+                            <div class="col-12 col-md-12 text-start d-flex text-break">
                                 {{ user.username }}
-                                <br>
+                            </div>
+                            <div class="col-12 col-md-12 text-start d-flex text-break">
                                 {{ user.email }}
-                                <br>
-                                {{ user.created_at_formatted }} 
-                                <br>
+                            </div>
+                            <div class="col-12 col-md-12 text-start d-flex text-break">
                                 <div class="btn btn-primary disabled text-center" v-if="user.isNew">
                                     <i class="fa-solid fa-fire"></i>
                                 </div>
                                 <div class="btn btn-danger disabled text-center" v-if="user.is_deleted">
                                     <i class="fa-solid fa-circle-minus"></i>
-                                </div>
+                                </div> 
                             </div>
-                            <div class="col-2 col-md-3">
+                            <div class="col-6 col-md-12 mt-1">
                                 <div class="col-12">
-                                    <div class="btn btn-primary text-center p-3 fs-5" v-if="user.favorite">
+                                    <div class="btn btn-primary text-center p-3 fs-5" 
+                                    @click="toggleFavorite(user.id)" v-if="user.favorite">
                                         <i class="fa-solid fa-star"></i>
                                     </div>
-                                    <div class="btn btn-primary text-center p-3 fs-5" v-if="!user.favorite">
+                                    <div class="btn btn-primary text-center p-3 fs-5" 
+                                    @click="toggleFavorite(user.id)" v-if="!user.favorite">
                                         <i class="fa-regular fa-star"></i>
+                                    </div>
+                                    <div class="btn btn-primary text-center p-3 fs-5" 
+                                    @click="userModal(user.id)">
+                                        <i class="fa-solid fa-pencil"></i>
                                     </div>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="userModal" class="modal fade" id="staticBackdrop"
+                data-bs-backdrop="static" data-bs-keyboard="false" 
+                tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                        <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="staticBackdropLabel">Editar Usuário</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="row d-flex justify-content-center mb-2">
+                                <div class="col-md-6 col-12 form-group fs-5 mb-2">
+                                    <label for="last_name">Usuário</label>
+                                    <input type="text" class="form-control disabled fs-5" 
+                                    id="username" v-model="userToEdit.username">
+                                </div>
+                                <div class="col-md-3 col-12 form-group fs-5 mb-2">
+                                    <label for="first_name">Nome</label>
+                                    <input type="text" class="form-control fs-5" 
+                                    id="first_name" v-model="userToEdit.first_name">
+                                </div>
+                                <div class="col-md-3 col-12 form-group fs-5 mb-2">
+                                    <label for="last_name">Sobrenome</label>
+                                    <input type="text" class="form-control fs-5" 
+                                    id="last_name" v-model="userToEdit.last_name">
+                                </div>
+                                <div class="col-md-12 col-12 form-group fs-5 mb-2">
+                                    <label for="email">Email</label>
+                                    <input type="text" class="form-control disabled fs-5" 
+                                    id="email" v-model="userToEdit.email">
+                                </div>
+                            </div>
+                            <div class="row d-flex justify-content-between mb-2">
+                                <div class="col-md-6 col-12 form-group fs-5 mb-2">
+                                    <label for="password">
+                                        Nova Senha
+                                        <i class="fa-solid fa-circle-info"></i>
+                                    </label>
+                                    <input type="text" class="form-control disabled fs-5" 
+                                    id="password" v-model="userToEdit.password">
+                                </div>
+                                <div class="text-start fs-5 col-md-6 col-12 mt-auto">
+                                    Mude a senha deste usuário ou mande email para que ele mude.
+                                </div>
+                            </div>
+                            <div class="row d-flex justify-content-between mb-3">
+                                <div class="btn btn-primary text-center fs-5 col-md-6 col-12">
+                                    Mudar senha
+                                    <i class="fa-solid fa-shield-halved"></i>
+                                </div>
+                                <div class="btn btn-primary text-center fs-5 col-md-6 col-12">
+                                    Mandar email
+                                    <i class="fa-regular fa-paper-plane"></i>
+                                </div>
+                            </div>
+                            <div class="row d-flex justify-content-between mb-4 fs-5">
+                                <div class="text-center fs-2 col-md-12 col-12">
+                                    Cofre
+                                    <i class="fa-solid fa-lock"></i>
+                                </div>
+                                <div class="text-center fs-5 col-md-6 col-12">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDefault">
+                                        <label class="form-check-label" for="flexSwitchCheckDefault">
+                                            Ler item
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="text-center fs-5 col-md-6 col-12">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDefault">
+                                        <label class="form-check-label" for="flexSwitchCheckDefault">
+                                            Modificar item
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="text-center fs-5 col-md-6 col-12">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDefault">
+                                        <label class="form-check-label" for="flexSwitchCheckDefault">
+                                            Apagar item
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="text-center fs-5 col-md-6 col-12">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDefault">
+                                        <label class="form-check-label" for="flexSwitchCheckDefault">
+                                            Ver item apagado
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="text-center fs-5 col-md-6 col-12">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDefault">
+                                        <label class="form-check-label" for="flexSwitchCheckDefault">
+                                            Cofre nível 1
+                                        </label>
+                                    </div>
+                                </div> 
+                                <div class="text-center fs-5 col-md-6 col-12">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDefault">
+                                        <label class="form-check-label" for="flexSwitchCheckDefault">
+                                            Cofre nível 2
+                                        </label>
+                                    </div>
+                                </div> 
+                                <div class="text-center fs-5 col-md-6 col-12">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDefault">
+                                        <label class="form-check-label" for="flexSwitchCheckDefault">
+                                            Cofre nível 3
+                                        </label>
+                                    </div>
+                                </div> 
+                                <div class="text-center fs-2 col-md-12 col-12">
+                                    Inventário
+                                    <i class="fa-solid fa-laptop"></i>
+                                </div>
+                                <div class="text-center fs-5 col-md-6 col-12">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDefault">
+                                        <label class="form-check-label" for="flexSwitchCheckDefault">
+                                            Ver item
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="text-center fs-5 col-md-6 col-12">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDefault">
+                                        <label class="form-check-label" for="flexSwitchCheckDefault">
+                                            Criar item
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="text-center fs-5 col-md-6 col-12">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDefault">
+                                        <label class="form-check-label" for="flexSwitchCheckDefault">
+                                            Apagar item
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="text-center fs-5 col-md-6 col-12">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDefault">
+                                        <label class="form-check-label" for="flexSwitchCheckDefault">
+                                            Modificar item
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="text-center fs-2 col-md-12 col-12">
+                                    Geral
+                                    <i class="fa-solid fa-gears"></i>
+                                </div>
+                                <div class="text-center fs-5 col-md-6 col-12">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" disabled 
+                                        type="checkbox" role="switch" id="flexSwitchCheckDefault">
+                                        <label class="form-check-label" for="flexSwitchCheckDefault">
+                                            Dev
+                                        </label>
+                                    </div>
+                                </div> 
+                                <div class="text-center fs-5 col-md-6 col-12">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" disabled type="checkbox" 
+                                        :checked="this.permissions['admin']"
+                                        role="switch" id="flexSwitchCheckDefault">
+                                        <label class="form-check-label" for="flexSwitchCheckDefault">
+                                            Admin
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="text-center fs-5 col-md-6 col-12">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" 
+                                        disabled checked
+                                        type="checkbox" role="switch" id="flexSwitchCheckDefault">
+                                        <label class="form-check-label" for="flexSwitchCheckDefault">
+                                            Usuário comum
+                                        </label>
+                                    </div>
+                                </div> 
+                            </div>
+                            <div class="row d-flex justify-content-between mb-2">
+                                <div class="btn btn-danger text-center fs-5 col-md-6 col-12 h-25">
+                                    Desativar usuário
+                                    <i class="fa-solid fa-xmark"></i>
+                                </div>
+                                <div class="text-center fs-5 col-md-6 col-12">
+                                    O usuário não terá mais acesso a plataforma.
+                                </div>
+                            </div>
+                            <div class="row d-flex justify-content-between mb-2">
+                                <div class="btn btn-danger text-center fs-5 col-md-6 col-12 h-25">
+                                    Deslogar usuário
+                                    <i class="fa-solid fa-bolt"></i>
+                                </div>
+                                <div class="text-center fs-5 col-md-6 col-12">
+                                    Se o usuário estiver logado, será deslogado automaticamente.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                            <button type="button" class="btn btn-primary">Concluir</button>
+                        </div>
                         </div>
                     </div>
                 </div>
@@ -274,6 +485,7 @@
                     blocked: false,
                     permissions: {},
                     searchModalOpen: false,
+                    showModal: false,
                     users: {},
                     userSearch: {
                         deleted: false,
@@ -281,6 +493,7 @@
                         favorites: false,
                         all: true
                     },
+                    userToEdit: {},
                     loadingUsers: false
                 }
             },
@@ -299,6 +512,71 @@
                     setTimeout(() => {
                         this.removeMessage(newMessage.id);
                     }, 5000);
+                },
+                async userModal(id) {
+                    $('#userModal').modal('show');
+
+                    try {
+                        const response = await fetch('/getusers?id='+id);
+
+                        if(!response.ok) {
+                            throw new Error('Algo deu errado');
+                        }
+
+                        const json = await response.json();
+
+                        if(!json.success) {
+                            this.throwWarning(json['message']);
+                            return;
+                        }
+
+                        this.throwWarning(json['message'], ['alert-success']);
+                        this.userToEdit = json['users'][0];
+
+                        console.log(this.userToEdit);
+
+                    } catch (error) {
+                        this.throwWarning(error.message, ['alert-danger']);
+                    }
+                },
+                async toggleFavorite(id) {
+                    try {
+                        const index = this.users.findIndex(user => user.id === id);
+
+                        if (index === -1) {
+                            this.throwWarning('Algo deu errado', ['alert-danger']);
+                            return;
+                        }
+
+                        this.users[index].favorite = !this.users[index].favorite;
+
+                        const response = await fetch('/togglefavorite', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                id: id,
+                                favorite: this.users[index].favorite
+                            })
+                        })
+
+                        if(!response.ok) {
+                            throw new Error('Algo deu errado');
+                        }
+
+                        const json = await response.json();
+
+                        if(!json.success) {
+                            throw new Error('Algo deu errado');
+                        }
+
+                        this.throwWarning(json['message'], ['alert-success']);
+
+                    } catch (error) {
+                        this.throwWarning(error.message, ['alert-danger']);
+                        this.users[index].favorite = !this.users[index].favorite;
+                    }
                 },
                 async logout() {
                     try {

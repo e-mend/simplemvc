@@ -32,6 +32,40 @@ class DashboardController extends Controller
         View::render('dashboard');
     }
 
+    public function toggleFavoriteApi()
+    {
+        try {
+            if(!$this->secure->isLoggedIn()){
+                throw new Exception("Não autorizado");
+            }
+
+            $json = Json::getJson();
+
+            if (!$json){
+                throw new Exception("Erro ao processar a requisição");
+            }
+
+            if (!$json['id']){
+                throw new Exception("Id invalido");
+            }
+
+            $toUpdate = $this->user->update([
+                'favorite' => $json['favorite'],
+            ], $json['id']);
+
+            Json::send([
+                'success' => true,
+                'message' => $json['favorite'] ? 'Favorito adicionado com sucesso' : 'Favorito removido com sucesso',
+            ]);
+
+        } catch (\Throwable $th) {
+            Json::send([
+                'success' => false,
+                'message' => $th->getMessage()
+            ]);
+        }
+    }
+
     public function logoutApi()
     {
         try {
@@ -68,26 +102,32 @@ class DashboardController extends Controller
 
             $query = [];
 
-            if($params['new']){
-                $query = array_merge($query, [
-                    'days' => Carbon::now()->subDays(self::NEW_USER_DAYS)->format('Y-m-d H:i:s')
-                ]);
-            }
-
-            if($params['deleted']){
-                $query = array_merge($query, [
-                    'is_deleted' => 1
-                ]); 
+            if(!$params['id']){
+                if($params['new']){
+                    $query = array_merge($query, [
+                        'days' => Carbon::now()->subDays(self::NEW_USER_DAYS)->format('Y-m-d H:i:s')
+                    ]);
+                }
+    
+                if($params['deleted']){
+                    $query = array_merge($query, [
+                        'is_deleted' => 1
+                    ]); 
+                }else{
+                    $query = array_merge($query, [
+                        'is_deleted' => 0
+                    ]); 
+                }
+    
+                if($params['favorites']){
+                    $query = array_merge($query, [
+                        'favorite' => 1
+                    ]);
+                }
             }else{
-                $query = array_merge($query, [
-                    'is_deleted' => 0
-                ]); 
-            }
-
-            if($params['favorites']){
-                $query = array_merge($query, [
-                    'favorite' => 1
-                ]);
+                $query['where'] = [
+                    'id' => $params['id']
+                ];
             }
 
             $query['columns'] = [
@@ -98,7 +138,8 @@ class DashboardController extends Controller
                 'email',
                 'created_at',
                 'is_deleted',
-                'favorite'
+                'favorite',
+                'permission'
             ];
 
             $users = $this->user->get($query);
@@ -107,6 +148,10 @@ class DashboardController extends Controller
             foreach ($users as &$user) {
                 $user['created_at_formatted'] = Carbon::createFromFormat('Y-m-d H:i:s', $user['created_at'])->format('d/m/Y H:i:s');
                 $user['isNew'] = Carbon::createFromFormat('Y-m-d H:i:s', $user['created_at'])->diffInDays(Carbon::now()) <= User::NEW_USER_DAYS;
+            }
+
+            if($params['id']){
+                $users[0]['permission'] = json_decode($users[0]['permission'], true)['permissions'];
             }
 
             Json::send([
