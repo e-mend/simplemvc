@@ -124,6 +124,12 @@ class DashboardController extends Controller
                         'favorite' => 1
                     ]);
                 }
+
+                if($params['pagination']){
+                    $query = array_merge($query, [
+                        'offset' => ($params['pagination'] - 1) * User::OFFSET
+                    ]);
+                }
             }else{
                 $query['where'] = [
                     'id' => $params['id']
@@ -143,11 +149,13 @@ class DashboardController extends Controller
             ];
 
             $users = $this->user->get($query);
-            $count = count($users);
+            $count = $this->user->get($query, true);
 
             foreach ($users as &$user) {
-                $user['created_at_formatted'] = Carbon::createFromFormat('Y-m-d H:i:s', $user['created_at'])->format('d/m/Y H:i:s');
-                $user['isNew'] = Carbon::createFromFormat('Y-m-d H:i:s', $user['created_at'])->diffInDays(Carbon::now()) <= User::NEW_USER_DAYS;
+                $user['created_at_formatted'] = Carbon::createFromFormat('Y-m-d H:i:s', $user['created_at'])
+                                                ->format('d/m/Y H:i:s');
+                $user['isNew'] = Carbon::createFromFormat('Y-m-d H:i:s', $user['created_at'])
+                                ->diffInDays(Carbon::now()) <= User::NEW_USER_DAYS;
             }
 
             if($params['id']){
@@ -158,7 +166,7 @@ class DashboardController extends Controller
                 'success' => true,
                 'users' => $users,
                 'message' => 'Pesquisa concluída',
-                'count' => $count
+                'count' => ceil($count / User::OFFSET)
             ]);
             
         } catch (\Throwable $th) {

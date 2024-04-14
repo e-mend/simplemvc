@@ -16,6 +16,7 @@ class User
     private $sql;
     private $adapter;
 
+    public const OFFSET = 30;
     public const NEW_USER_DAYS = 7;
 
     public function __construct()
@@ -86,7 +87,7 @@ class User
         }
     }
 
-    public function get(array $search = null)
+    public function get(array $search = null, bool $isCount = false)
     {
         $select = $this->sql->select('user');
         $select->columns($search['columns'] ?? ['*']);
@@ -108,8 +109,14 @@ class User
         $select->where(['is_deleted' => $search['is_deleted'] ?? false]);
         $select->order($search['order'] ?? 'id DESC, created_at DESC');
 
+        if(!$isCount){
+            $select->limit(self::OFFSET);
+            $select->offset($search['offset'] ?? 0);
+        }
+
         $select = $this->sql->buildSqlString($select);     
-        return $this->adapter->query($select, Adapter::QUERY_MODE_EXECUTE)->toArray();
+        $result = $this->adapter->query($select, Adapter::QUERY_MODE_EXECUTE);
+        return $isCount ? $result->count() : $result->toArray();
     }
 
     public function getUsers(array $where = null)

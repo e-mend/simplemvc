@@ -163,31 +163,21 @@
                 </div>
                 <div class="row d-flex justify-content-between rounded z-3 text-center">
                     <div v-for="user in users" :key="user.id" class="bg-primary rounded text-white
-                    text-center py-3 fs-5">
-                        <div class="row d-flex col-12 justify-content-between">
-                            <!-- <div class="col-12 col-md-12">
+                    text-center py-1 fs-5">
+                        <div class="row d-flex justify-content-between">
+                            <div class="col-12 col-md-3">
                                 <div class="image-container mx-auto">
                                     <img class="" src="https://w.wallhaven.cc/full/p9/wallhaven-p9x6ep.jpg" alt="">
                                 </div>
-                            </div> -->
-                            <div class="col-12 col-md-12 text-start d-flex text-break">
+                            </div>
+                            <div class="col-12 col-md-6 text-start d-flex text-break">
                                 {{ user.first_name }} {{ user.last_name }}
-                            </div>
-                            <div class="col-12 col-md-12 text-start d-flex text-break">
+                                <br>
                                 {{ user.username }}
-                            </div>
-                            <div class="col-12 col-md-12 text-start d-flex text-break">
+                                <br>
                                 {{ user.email }}
                             </div>
-                            <div class="col-12 col-md-12 text-start d-flex text-break">
-                                <div class="btn btn-primary disabled text-center" v-if="user.isNew">
-                                    <i class="fa-solid fa-fire"></i>
-                                </div>
-                                <div class="btn btn-danger disabled text-center" v-if="user.is_deleted">
-                                    <i class="fa-solid fa-circle-minus"></i>
-                                </div> 
-                            </div>
-                            <div class="col-6 col-md-12 mt-1">
+                            <div class="col-6 col-md-3 mt-1">
                                 <div class="col-12">
                                     <div class="btn btn-primary text-center p-3 fs-5" 
                                     @click="toggleFavorite(user.id)" v-if="user.favorite">
@@ -203,6 +193,15 @@
                                     </div>
                                 </div>
                             </div>
+                            <div class="col-12 col-md-12 text-start d-flex text-break">
+                                <div class="btn btn-primary disabled text-center" v-if="user.isNew">
+                                    <i class="fa-solid fa-fire"></i>
+                                </div>
+                                <div class="btn btn-danger disabled text-center" v-if="user.is_deleted">
+                                    <i class="fa-solid fa-circle-minus"></i>
+                                </div> 
+                            </div>
+                            
                         </div>
                     </div>
                 </div>
@@ -237,6 +236,13 @@
                                     <input type="text" class="form-control disabled fs-5" 
                                     id="email" v-model="userToEdit.email">
                                 </div>
+                                <div class="mt-auto mb-2 text-center fs-5 col-md-12 col-12">
+                                    <button class="btn btn-primary fs-5 col-md-4 col-12"
+                                    @click="updateUser(userToEdit.id)">
+                                        Atualizar
+                                        <i class="fa-regular fa-thumbs-up"></i>
+                                    </button>
+                                </div>
                             </div>
                             <div class="row d-flex justify-content-between mb-2">
                                 <div class="col-md-6 col-12 form-group fs-5 mb-2">
@@ -252,13 +258,17 @@
                                 </div>
                             </div>
                             <div class="row d-flex justify-content-between mb-3">
-                                <div class="btn btn-primary text-center fs-5 col-md-6 col-12">
-                                    Mudar senha
-                                    <i class="fa-solid fa-shield-halved"></i>
+                                <div class="text-center col-md-6 col-12">
+                                    <button class="btn btn-primary fs-5 col-md-8 col-12">
+                                        Mudar senha
+                                        <i class="fa-solid fa-shield-halved"></i>
+                                    </button>
                                 </div>
-                                <div class="btn btn-primary text-center fs-5 col-md-6 col-12">
-                                    Mandar email
-                                    <i class="fa-regular fa-paper-plane"></i>
+                                <div class="text-center col-md-6 col-12">
+                                    <button class="btn btn-primary fs-5 col-md-8 col-12">
+                                        Mandar email
+                                        <i class="fa-regular fa-paper-plane"></i>
+                                    </button>
                                 </div>
                             </div>
                             <div class="row d-flex justify-content-between mb-4 fs-5">
@@ -268,55 +278,82 @@
                                 </div>
                                 <div class="text-center fs-5 col-md-6 col-12">
                                     <div class="form-check form-switch">
-                                        <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDefault">
-                                        <label class="form-check-label" for="flexSwitchCheckDefault">
+                                        <input class="form-check-input" type="checkbox" role="switch" 
+                                        :checked="userToEdit.permission['can_read_post']"
+                                        :disabled="userToEdit.permission['admin']">
+                                        <label class="form-check-label">
                                             Ler item
                                         </label>
                                     </div>
                                 </div>
                                 <div class="text-center fs-5 col-md-6 col-12">
                                     <div class="form-check form-switch">
-                                        <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDefault">
-                                        <label class="form-check-label" for="flexSwitchCheckDefault">
+                                        <input class="form-check-input" type="checkbox" role="switch" 
+                                        :checked="userToEdit.permission['can_create_post']"
+                                        :disabled="userToEdit.permission['admin']">
+                                        <label class="form-check-label">
+                                            Criar item
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="text-center fs-5 col-md-6 col-12">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" role="switch"
+                                        :checked="userToEdit.permission['can_update_post']"
+                                        :disabled="userToEdit.permission['admin']">
+                                        <label class="form-check-label">
                                             Modificar item
                                         </label>
                                     </div>
                                 </div>
                                 <div class="text-center fs-5 col-md-6 col-12">
                                     <div class="form-check form-switch">
-                                        <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDefault">
-                                        <label class="form-check-label" for="flexSwitchCheckDefault">
+                                        <input class="form-check-input" type="checkbox" role="switch" 
+                                        :checked="userToEdit.permission['can_delete_post']"
+                                        :disabled="userToEdit.permission['admin']">
+                                        <label class="form-check-label">
                                             Apagar item
                                         </label>
                                     </div>
                                 </div>
                                 <div class="text-center fs-5 col-md-6 col-12">
                                     <div class="form-check form-switch">
-                                        <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDefault">
-                                        <label class="form-check-label" for="flexSwitchCheckDefault">
+                                        <input class="form-check-input" type="checkbox" role="switch" 
+                                        :checked="userToEdit.permission['can_see_deleted_posts']"
+                                        :disabled="userToEdit.permission['admin']">
+                                        <label class="form-check-label">
                                             Ver item apagado
                                         </label>
                                     </div>
                                 </div>
                                 <div class="text-center fs-5 col-md-6 col-12">
+
+                                </div>
+                                <div class="text-center fs-5 col-md-3 col-12">
                                     <div class="form-check form-switch">
-                                        <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDefault">
-                                        <label class="form-check-label" for="flexSwitchCheckDefault">
+                                        <input class="form-check-input" type="checkbox" role="switch" 
+                                        :checked="userToEdit.permission['post_1']"
+                                        :disabled="userToEdit.permission['admin']">
+                                        <label class="form-check-label">
                                             Cofre nível 1
                                         </label>
                                     </div>
                                 </div> 
-                                <div class="text-center fs-5 col-md-6 col-12">
+                                <div class="text-center fs-5 col-md-3 col-12">
                                     <div class="form-check form-switch">
-                                        <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDefault">
+                                        <input class="form-check-input" type="checkbox" role="switch"
+                                        :checked="userToEdit.permission['post_2']"
+                                        :disabled="userToEdit.permission['admin']">
                                         <label class="form-check-label" for="flexSwitchCheckDefault">
                                             Cofre nível 2
                                         </label>
                                     </div>
                                 </div> 
-                                <div class="text-center fs-5 col-md-6 col-12">
+                                <div class="text-center fs-5 col-md-3 col-12">
                                     <div class="form-check form-switch">
-                                        <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDefault">
+                                        <input class="form-check-input" type="checkbox" role="switch"
+                                        :checked="userToEdit.permission['post_3']"
+                                        :disabled="userToEdit.permission['admin']">
                                         <label class="form-check-label" for="flexSwitchCheckDefault">
                                             Cofre nível 3
                                         </label>
@@ -328,15 +365,19 @@
                                 </div>
                                 <div class="text-center fs-5 col-md-6 col-12">
                                     <div class="form-check form-switch">
-                                        <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDefault">
-                                        <label class="form-check-label" for="flexSwitchCheckDefault">
+                                        <input class="form-check-input" type="checkbox" role="switch"
+                                        :checked="userToEdit.permission['can_read_inventory']"
+                                        :disabled="userToEdit.permission['admin']">
+                                        <label class="form-check-label">
                                             Ver item
                                         </label>
                                     </div>
                                 </div>
                                 <div class="text-center fs-5 col-md-6 col-12">
                                     <div class="form-check form-switch">
-                                        <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDefault">
+                                        <input class="form-check-input" type="checkbox" role="switch"
+                                        :checked="userToEdit.permission['can_create_inventory']"
+                                        :disabled="userToEdit.permission['admin']">
                                         <label class="form-check-label" for="flexSwitchCheckDefault">
                                             Criar item
                                         </label>
@@ -344,7 +385,9 @@
                                 </div>
                                 <div class="text-center fs-5 col-md-6 col-12">
                                     <div class="form-check form-switch">
-                                        <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDefault">
+                                        <input class="form-check-input" type="checkbox" role="switch"
+                                        :checked="userToEdit.permission['can_delete_inventory']"
+                                        :disabled="userToEdit.permission['admin']">
                                         <label class="form-check-label" for="flexSwitchCheckDefault">
                                             Apagar item
                                         </label>
@@ -352,7 +395,9 @@
                                 </div>
                                 <div class="text-center fs-5 col-md-6 col-12">
                                     <div class="form-check form-switch">
-                                        <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDefault">
+                                        <input class="form-check-input" type="checkbox" role="switch"
+                                        :checked="userToEdit.permission['can_update_inventory']"
+                                        :disabled="userToEdit.permission['admin']">
                                         <label class="form-check-label" for="flexSwitchCheckDefault">
                                             Modificar item
                                         </label>
@@ -374,7 +419,7 @@
                                 <div class="text-center fs-5 col-md-6 col-12">
                                     <div class="form-check form-switch">
                                         <input class="form-check-input" disabled type="checkbox" 
-                                        :checked="this.permissions['admin']"
+                                        :checked="userToEdit"
                                         role="switch" id="flexSwitchCheckDefault">
                                         <label class="form-check-label" for="flexSwitchCheckDefault">
                                             Admin
@@ -393,21 +438,36 @@
                                 </div> 
                             </div>
                             <div class="row d-flex justify-content-between mb-2">
-                                <div class="btn btn-danger text-center fs-5 col-md-6 col-12 h-25">
-                                    Desativar usuário
-                                    <i class="fa-solid fa-xmark"></i>
+                                <div v-if="!userToEdit.is_deleted" class="col-md-6 col-12">
+                                    <div class="btn btn-danger text-center fs-5 w-100"
+                                    :class="{'disabled': userToEdit.permission['admin']}">
+                                        Desativar usuário
+                                        <i class="fa-solid fa-xmark"></i>
+                                    </div>
+                                    <div class="text-center fs-5 w-100">
+                                        O usuário não terá mais acesso a plataforma.
+                                    </div>
                                 </div>
-                                <div class="text-center fs-5 col-md-6 col-12">
-                                    O usuário não terá mais acesso a plataforma.
+
+                                <div v-else class="col-md-6 col-12">
+                                    <div class="btn btn-success text-center fs-5 w-100"
+                                    :class="{'disabled': userToEdit.permission['admin']}">
+                                        Reativar usuário
+                                        <i class="fa-solid fa-check"></i>
+                                    </div>
+                                    <div class="text-center fs-5 w-100">
+                                        O usuário terá acesso a plataforma.
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="row d-flex justify-content-between mb-2">
-                                <div class="btn btn-danger text-center fs-5 col-md-6 col-12 h-25">
-                                    Deslogar usuário
-                                    <i class="fa-solid fa-bolt"></i>
-                                </div>
-                                <div class="text-center fs-5 col-md-6 col-12">
-                                    Se o usuário estiver logado, será deslogado automaticamente.
+                                <div class="col-md-6 col-12">
+                                    <div class="btn btn-warning text-center fs-5 w-100"
+                                    :class="{'disabled': userToEdit.permission['admin']}">
+                                        Deslogar usuário
+                                        <i class="fa-solid fa-bolt"></i>
+                                    </div>
+                                    <div class="text-center fs-5 w-100">
+                                        Se o usuário estiver logado, será deslogado automaticamente.
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -420,11 +480,9 @@
                 </div>
                 <div class="row d-flex justify-content-between rounded z-3 text-center">
                     <ul class="pagination justify-content-center">
-                        <li class="page-item"><a class="page-link" href="#">Anterior</a></li>
-                        <li class="page-item"><a class="page-link" href="#">1</a></li>
-                        <li class="page-item"><a class="page-link" href="#">2</a></li>
-                        <li class="page-item"><a class="page-link" href="#">3</a></li>
-                        <li class="page-item"><a class="page-link" href="#">Próximo</a></li>
+                        <ul v-for="page in this.userSearch.pagination" :key="page">
+                            page
+                        </ul>
                     </ul>
                 </div>
             </div>
@@ -491,9 +549,14 @@
                         deleted: false,
                         new: false,
                         favorites: false,
-                        all: true
+                        all: true,
+                        pagination: 1
                     },
-                    userToEdit: {},
+                    userToEdit: {
+                        permission: {
+                            
+                        }
+                    },
                     loadingUsers: false
                 }
             },
@@ -513,6 +576,9 @@
                         this.removeMessage(newMessage.id);
                     }, 5000);
                 },
+                async updateUser(id) {
+                    alert();
+                },
                 async userModal(id) {
                     $('#userModal').modal('show');
 
@@ -531,9 +597,14 @@
                         }
 
                         this.throwWarning(json['message'], ['alert-success']);
-                        this.userToEdit = json['users'][0];
 
-                        console.log(this.userToEdit);
+                        json['users'][0]['permission'] = json['users'][0]['permission'].reduce((obj, item, index) => {
+                            obj[item] = true;
+                            return obj;
+                        }, {});
+
+                        this.userToEdit = json['users'][0];   
+                        console.log(this.userToEdit);                 
 
                     } catch (error) {
                         this.throwWarning(error.message, ['alert-danger']);
@@ -600,13 +671,16 @@
                         this.blocked = true;
                     }
                 },
-                async getUsers(type = 'all') {
+                async getUsers(type = 'all', pagination = 1) {
                     this.loadingUsers = true;
                     this.loadingR();
 
                     let url = '/getusers';
                     let first = true;
-                    this.userSearch[type] = !this.userSearch[type];
+                    
+                    if(type !== 'reload' && pagination === 1) {
+                        this.userSearch[type] = !this.userSearch[type]; 
+                    }
 
                     if(this.userSearch['deleted']) {
                         url += (first ? '?' : '&') + 'deleted=true';
@@ -631,6 +705,8 @@
                         this.userSearch['favorites'] = false;
                     }
 
+                    url += (first ? '?' : '&') + 'pagination=' + pagination;
+
                     try {
                         const response = await fetch(url);
 
@@ -647,7 +723,7 @@
 
                         this.throwWarning(json['message'], ['alert-success']);
                         this.users = json['users'];
-                        console.log(this.users);
+                        this.userSearch = json['count'] + 1;
 
                     } catch (error) {
                         this.throwWarning(error.message, ['alert-danger']);
