@@ -90,7 +90,7 @@ class DashboardController extends Controller
                 ]);
             }
 
-            $params['columns'] = [
+            $query['columns'] = [
                 'id',
                 'first_name',
                 'last_name',
@@ -101,10 +101,19 @@ class DashboardController extends Controller
                 'favorite'
             ];
 
+            $users = $this->user->get($query);
+            $count = count($users);
+
+            foreach ($users as &$user) {
+                $user['created_at_formatted'] = Carbon::createFromFormat('Y-m-d H:i:s', $user['created_at'])->format('d/m/Y H:i:s');
+                $user['isNew'] = Carbon::createFromFormat('Y-m-d H:i:s', $user['created_at'])->diffInDays(Carbon::now()) <= User::NEW_USER_DAYS;
+            }
+
             Json::send([
                 'success' => true,
-                'users' => $this->user->get($query),
-                'message' => 'Pesquisa concluída'
+                'users' => $users,
+                'message' => 'Pesquisa concluída',
+                'count' => $count
             ]);
             
         } catch (\Throwable $th) {

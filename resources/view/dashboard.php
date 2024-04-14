@@ -162,9 +162,59 @@
                     </div>
                 </div>
                 <div class="row d-flex justify-content-between rounded z-3 text-center">
-                    <div v-for="user in users" :key="user.id" class="btn btn-primary col-12 col-md-6 text-center py-3 fs-5">
-
+                    <div v-for="user in users" :key="user.id" class="bg-primary rounded text-white col-12 col-md-12 text-center py-3 fs-5">
+                        <div class="d-flex col-12 justify-content-between">
+                            <div class="col-2 col-md-3">
+                                <div class="image-container mx-auto">
+                                    <img class="" src="https://w.wallhaven.cc/full/p9/wallhaven-p9x6ep.jpg" alt="">
+                                </div>
+                            </div>
+                            <div class="col-1 col-md-1 text-start">
+                                Nome:
+                                <br>
+                                Usuário:
+                                <br>
+                                Email:
+                                <br>
+                                Criado:
+                            </div>
+                            <div class="col-5 col-md-5 text-start">
+                                {{ user.first_name }} {{ user.last_name }}
+                                <br>
+                                {{ user.username }}
+                                <br>
+                                {{ user.email }}
+                                <br>
+                                {{ user.created_at_formatted }} 
+                                <br>
+                                <div class="btn btn-primary disabled text-center" v-if="user.isNew">
+                                    <i class="fa-solid fa-fire"></i>
+                                </div>
+                                <div class="btn btn-danger disabled text-center" v-if="user.is_deleted">
+                                    <i class="fa-solid fa-circle-minus"></i>
+                                </div>
+                            </div>
+                            <div class="col-2 col-md-3">
+                                <div class="col-12">
+                                    <div class="btn btn-primary text-center p-3 fs-5" v-if="user.favorite">
+                                        <i class="fa-solid fa-star"></i>
+                                    </div>
+                                    <div class="btn btn-primary text-center p-3 fs-5" v-if="!user.favorite">
+                                        <i class="fa-regular fa-star"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
+                </div>
+                <div class="row d-flex justify-content-between rounded z-3 text-center">
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item"><a class="page-link" href="#">Anterior</a></li>
+                        <li class="page-item"><a class="page-link" href="#">1</a></li>
+                        <li class="page-item"><a class="page-link" href="#">2</a></li>
+                        <li class="page-item"><a class="page-link" href="#">3</a></li>
+                        <li class="page-item"><a class="page-link" href="#">Próximo</a></li>
+                    </ul>
                 </div>
             </div>
             <!-- Settings -->
@@ -272,7 +322,7 @@
                         this.blocked = true;
                     }
                 },
-                async getUsers(type = 'none') {
+                async getUsers(type = 'all') {
                     this.loadingUsers = true;
                     this.loadingR();
 
@@ -319,6 +369,7 @@
 
                         this.throwWarning(json['message'], ['alert-success']);
                         this.users = json['users'];
+                        console.log(this.users);
 
                     } catch (error) {
                         this.throwWarning(error.message, ['alert-danger']);
@@ -335,6 +386,10 @@
                 loadOptions(option) {
                     this.loadingR(true);
                     this.option = option;  
+
+                    if(this.option === 'users') {
+                        this.getUsers();
+                    }
                 },
                 loadingR(force = false) {
                     if(force) {

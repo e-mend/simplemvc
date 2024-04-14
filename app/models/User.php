@@ -16,6 +16,8 @@ class User
     private $sql;
     private $adapter;
 
+    public const NEW_USER_DAYS = 7;
+
     public function __construct()
     {
         $this->db = Database::getInstance();

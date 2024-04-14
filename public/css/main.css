@@ -28,6 +28,20 @@
     z-index: -1;
 }
 
+.btn-danger{
+    --bs-btn-border-color: white !important;
+    --bs-btn-hover-border-color: white !important;
+    --bs-btn-active-border-color: white !important;
+    --bs-btn-hover-border-color: white;
+}
+
+.btn-dark{
+    --bs-btn-border-color: white !important;
+    --bs-btn-hover-border-color: white !important;
+    --bs-btn-active-border-color: white !important;
+    --bs-btn-hover-border-color: white;
+}
+
 .btn-primary{
     --bs-btn-bg: rgb(0, 19, 48) !important;
     --bs-btn-hover-bg: rgba(4, 110, 143, 0.7) !important;
@@ -40,6 +54,23 @@
 
 .bg-primary{
     --bs-primary-rgb: 0, 19, 48 !important;
+}
+
+.image-container {
+    width: 150px; /* Largura do contêiner quadrado */
+    height: 150px; /* Altura do contêiner quadrado */
+    border-radius: 50%; /* Isso torna o contêiner circular */
+    overflow: hidden; /* Esconde qualquer parte da imagem que exceda o círculo */
+    display: flex; /* Centraliza a imagem dentro do contêiner */
+    justify-content: center; /* Centraliza horizontalmente */
+    align-items: center; /* Centraliza verticalmente */
+}
+
+.image-container img {
+    width: auto; /* Mantém a largura original da imagem */
+    height: 100%; /* Altura máxima da imagem para garantir que cubra a altura do contêiner */
+    min-width: 100%; /* Garante que a imagem cubra a largura do contêiner */
+    object-fit: cover; /* Garante que a imagem cubra todo o contêiner sem distorções */
 }
 
 /* .gradient{
