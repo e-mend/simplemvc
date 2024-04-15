@@ -47,6 +47,8 @@ final class Router
                 '/userexists' => fn() => self::load('HomeController', 'userExistsApi'),
                 '/validateemail' => fn() => self::load('HomeController', 'validateEmailApi'),
                 '/togglefavorite' => fn() => self::load('DashboardController', 'toggleFavoriteApi'),
+                '/updatepassword' => fn() => self::load('DashboardController', 'updatePasswordApi'),
+                '/updateuser' => fn() => self::load('DashboardController', 'updateUserApi'),
           ]
         ];
     }

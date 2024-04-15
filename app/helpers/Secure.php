@@ -15,6 +15,7 @@ class Secure
         'password' => "/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,64}$/",
         'username' => "/^[A-Za-z\d]{4,32}$/",
         'pin' => "/^[0-9]{6}$/",
+        'text' => "/^[a-zA-Z]{1,32}$/",
     ];
 
     private function __construct()

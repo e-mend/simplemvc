@@ -178,6 +178,49 @@ class DashboardController extends Controller
         }
     }
 
+    public function updateUserApi()
+    {
+        try {
+            if(!$this->secure->isLoggedIn()){
+                throw new Exception("Não autorizado");
+            }
+
+            $json = Json::getJson();
+
+            if (!$json){
+                throw new Exception("Erro ao processar a requisição");
+            }
+
+            if (
+            !$json['username'] || !$this->secure->isValid('username', $json['username'])
+            || !$json['email'] || !$this->secure->isValid('email', $json['email'])
+            || !$json['first_name'] || !$this->secure->isValid('text', $json['first_name'])
+            || !$json['last_name'] || !$this->secure->isValid('text', $json['last_name'])
+            ){
+                throw new Exception("Preencha todos os campos corretamente!");
+            }
+
+            $this->user->update([
+                'username' => $json['username'],
+                'email' => $json['email'],
+                'first_name' => $json['first_name'],
+                'last_name' => $json['last_name']
+            ], $json['id']);
+                
+            Json::send([
+                'success' => true,
+                'message' => 'Dados atualizados com sucesso',
+                'json' => $json
+            ]);
+            
+        } catch (\Throwable $th) {
+            Json::send([
+                'success' => false,
+                'message' => $th->getMessage()
+            ]);
+        }
+    }
+
     public function userDataApi()
     {
         try {

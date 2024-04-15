@@ -66,6 +66,10 @@
     align-items: center;
 }
 
+.warn{
+    z-index: 2000 !important;
+}
+
 .image-container img {
     width: auto;
     height: 100%;
