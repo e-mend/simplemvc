@@ -36,11 +36,16 @@ const app = new Vue({
                 pagination: 1
             },
             userToEdit: {
+                password: '',
                 permission: {
                     
                 }
             },
-            loadingUsers: false
+            upper: false,
+            number: false,
+            special: false,
+            loadingUsers: false,
+            passwordFieldType: 'password'
         }
     },
     methods: {
@@ -58,6 +63,71 @@ const app = new Vue({
             setTimeout(() => {
                 this.removeMessage(newMessage.id);
             }, 5000);
+        },
+        togglePasswordVisibility() {
+            this.passwordFieldType = this.passwordFieldType === 'password' ? 'text' : 'password';
+        },
+        passwordEnter() {
+            let upperRegex = /[A-Z]/g;
+
+            if(upperRegex.test(this.userToEdit.password)) {
+                this.upper = true;
+            }else{
+                this.upper = false;
+            }
+
+            let numberRegex = /[\d]/g;
+
+            if(numberRegex.test(this.userToEdit.password)) {
+                this.number = true;
+            }else{
+                this.number = false;
+            }
+
+            let specialRegex = /[@$!%*?&]/g;
+
+            if(specialRegex.test(this.userToEdit.password)) {
+                this.special = true;
+            }else{
+                this.special = false;
+            }
+        },
+        async changePassword(id) {
+            try {
+                const index = this.users.findIndex(user => user.id === id);
+
+                if (index === -1) {
+                    this.throwWarning('Algo deu errado', ['alert-danger']);
+                    return;
+                }
+
+                const response = await fetch('/updatepassword', {
+                    method: 'POST',
+                    headers: {
+                        'Content-type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        id: id,
+                        password: this.userToEdit.password
+                    })
+                });
+
+                if(!response.ok) {
+                    throw new Error('Algo deu errado');
+                }
+                
+                const json = await response.json();
+
+                if(!json.success) {
+                    throw new Error(json['message']);
+                }
+
+                this.throwWarning(json['message'], ['alert-success']);
+
+            } catch (error) {
+                this.throwWarning(error.message, ['alert-danger']);
+            }
+            
         },
         async updateUser(id) {
             try {
@@ -314,7 +384,13 @@ const app = new Vue({
             this.blocked = false;
         }
     },
+    computed: {
+        iconClass() {
+            return this.passwordFieldType === 'password' ? 'fa fa-eye-slash' : 'fa fa-eye';
+        }
+    },
     beforeMounted() {
+
 
     },
     mounted() {

@@ -250,8 +250,37 @@
                                         Nova Senha
                                         <i class="fa-solid fa-circle-info"></i>
                                     </label>
-                                    <input type="text" class="form-control disabled fs-5" 
-                                    id="password" v-model="userToEdit.password">
+                                    <div class="input-group d-flex">
+                                        <input 
+                                            :type="passwordFieldType" 
+                                            class="form-control rounded fs-5" 
+                                            id="password"
+                                            @input="passwordEnter"
+                                            v-model="userToEdit.password">
+                                        <span 
+                                            class="toggle-password my-auto rounded mx-2" 
+                                            @click="togglePasswordVisibility">
+                                            <i :class="iconClass"></i>
+                                        </span>
+                                    </div>
+                                    <div class="d-flex justify-content-center mt-2"
+                                    v-if="userToEdit.password.length > 0">
+                                        <div class="btn animate__pulse animate__infinite
+                                        animate__slower" 
+                                        :class="{'animate__animated': upper, 'btn-primary': upper}">
+                                            A-Z
+                                        </div>
+                                        <div class="btn animate__pulse animate__infinite
+                                        animate__slower" 
+                                        :class="{'animate__animated': number, 'btn-primary': number}">
+                                            0-9
+                                        </div>
+                                        <div class="btn animate__pulse animate__infinite white
+                                        animate__slower" 
+                                        :class="{'animate__animated': special, 'btn-primary': special}">
+                                            @$!%*?&
+                                        </div>
+                                    </div>
                                 </div>
                                 <div class="text-start fs-5 col-md-6 col-12 mt-auto">
                                     Mude a senha deste usuário ou mande email para que ele mude.
@@ -259,7 +288,9 @@
                             </div>
                             <div class="row d-flex justify-content-between mb-3">
                                 <div class="text-center col-md-6 col-12">
-                                    <button class="btn btn-primary fs-5 col-md-8 col-12">
+                                    <button 
+                                        class="btn btn-primary fs-5 col-md-8 col-12"
+                                        @click="changePassword(userToEdit.id)">
                                         Mudar senha
                                         <i class="fa-solid fa-shield-halved"></i>
                                     </button>

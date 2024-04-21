@@ -178,6 +178,42 @@ class DashboardController extends Controller
         }
     }
 
+    public function updatePasswordApi()
+    {
+        try {
+            if(!$this->secure->isLoggedIn()){
+                throw new Exception("Não autorizado");
+            }
+
+            $json = Json::getJson();
+
+            if (!$json){
+                throw new Exception("Erro ao processar a requisição");
+            }
+
+            if (
+                !$json['password'] || !$this->secure->isValid('password', $json['password'])
+            ){
+                throw new Exception("Utilize todos os caracteres!");
+            }
+            
+            $this->user->update([
+                'password' => $this->secure->hash($json['new_password'])
+            ], $json['id']);
+            
+            Json::send([
+                'success' => true,
+                'message' => 'Senha alterada com sucesso'
+            ]);
+
+        } catch (\Throwable $th) {
+            Json::send([
+                'success' => false,
+                'message' => $th->getMessage()
+            ]);
+        }
+    }
+
     public function updateUserApi()
     {
         try {
@@ -209,8 +245,7 @@ class DashboardController extends Controller
                 
             Json::send([
                 'success' => true,
-                'message' => 'Dados atualizados com sucesso',
-                'json' => $json
+                'message' => 'Dados atualizados com sucesso'
             ]);
             
         } catch (\Throwable $th) {
