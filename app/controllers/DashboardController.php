@@ -178,6 +178,54 @@ class DashboardController extends Controller
         }
     }
 
+    public function sendPasswordApi()
+    {
+        try {
+            if(!$this->secure->isLoggedIn()){
+                throw new Exception("Não autorizado");
+            }
+
+            $json = Json::getJson();
+
+            if (!$json){
+                throw new Exception("Erro ao processar a requisição");
+            }
+
+            if (
+                !$json['id']
+            ){
+                throw new Exception("Id invalido");
+            }
+
+            $user = $this->user->get([
+                'where' => [
+                    'id' => $json['id']
+                ]
+            ]);
+
+            if (!$user){
+                throw new Exception("Id invalido");
+            }
+
+            Mailer::sendPassword([
+                'email' => $user['email'],
+                'name' => $user['first_name'],
+            ]);
+
+            Json::send([
+                'success' => true,
+                'message' => 'Email enviado com sucesso'
+            ]);
+
+        } catch (\Throwable $th) {
+            Json::send([
+                'success' => false,
+                'message' => $th->getMessage()
+            ]);
+        }
+            
+    }
+
     public function updatePasswordApi()
     {
         try {

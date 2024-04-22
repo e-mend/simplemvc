@@ -296,7 +296,7 @@
                                     </button>
                                 </div>
                                 <div class="text-center col-md-6 col-12">
-                                    <button class="btn btn-primary fs-5 col-md-8 col-12">
+                                    <button class="btn btn-primary fs-5 col-md-8 col-12 disabled">
                                         Mandar email
                                         <i class="fa-regular fa-paper-plane"></i>
                                     </button>
@@ -504,9 +504,6 @@
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
-                            <button type="button" class="btn btn-primary">
-                                Concluir
-                            </button>
                         </div>
                         </div>
                     </div>

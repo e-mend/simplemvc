@@ -156,8 +156,6 @@ const app = new Vue({
                     throw new Error(json['message']);
                 }
 
-                console.log(json);
-
                 this.throwWarning(json['message'], ['alert-success']);
             } catch (error) {
                 this.throwWarning(error.message, ['alert-danger']); 
@@ -187,8 +185,43 @@ const app = new Vue({
                     return obj;
                 }, {});
 
-                this.userToEdit = json['users'][0];   
-                console.log(this.userToEdit);                 
+                json['users'][0]['password'] = '';
+                this.userToEdit = json['users'][0];                
+
+            } catch (error) {
+                this.throwWarning(error.message, ['alert-danger']);
+            }
+        },
+        async sendEmail(id) {
+            try {
+                const index = this.users.findIndex(user => user.id === id);
+
+                if (index === -1) {
+                    this.throwWarning('Algo deu errado', ['alert-danger']);
+                    return;
+                }
+
+                const response = await fetch('/sendpasswordemail', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        id: id
+                    })
+                })
+
+                if(!response.ok) {
+                    throw new Error('Algo deu errado');
+                }
+
+                const json = await response.json();
+
+                if(!json.success) {
+                    throw new Error(json['message']);
+                }
+
+                this.throwWarning(json['message'], ['alert-success']);
 
             } catch (error) {
                 this.throwWarning(error.message, ['alert-danger']);
