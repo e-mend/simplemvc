@@ -90,16 +90,11 @@ class DashboardController extends Controller
     public function getUsersApi()
     {
         try {
-            if(!$this->secure->isLoggedIn()){
+            if(!$this->secure->isLoggedIn() || !in_array('admin', $_SESSION['user']['permission'])){
                 throw new Exception("Não autorizado");
             }
 
             $params = Req::getParams();
-
-            if(!in_array('admin', $_SESSION['user']['permission'])){
-                throw new Exception("Não autorizadoo");
-            }
-
             $query = [];
 
             if(!$params['id']){
@@ -181,7 +176,7 @@ class DashboardController extends Controller
     public function sendPasswordApi()
     {
         try {
-            if(!$this->secure->isLoggedIn()){
+            if(!$this->secure->isLoggedIn() || !in_array('admin', $_SESSION['user']['permission'])){
                 throw new Exception("Não autorizado");
             }
 
@@ -201,7 +196,7 @@ class DashboardController extends Controller
                 'where' => [
                     'id' => $json['id']
                 ]
-            ]);
+            ])[0];
 
             if (!$user){
                 throw new Exception("Id invalido");

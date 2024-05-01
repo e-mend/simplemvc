@@ -50,7 +50,7 @@ final class Router
                 '/updatepassword' => fn() => self::load('DashboardController', 'updatePasswordApi'),
                 '/updateuser' => fn() => self::load('DashboardController', 'updateUserApi'),
                 '/disableuser' => fn() => self::load('DashboardController', 'disableUserApi'),
-                '/sendpasswordemail' => fn() => self::load('HomeController', 'sendPasswordApi'),
+                '/sendpasswordemail' => fn() => self::load('DashboardController', 'sendPasswordApi'),
           ]
         ];
     }
