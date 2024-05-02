@@ -2,12 +2,15 @@
 
 namespace App\Helpers;
 
+use Carbon\Carbon;
 use Exception;
+use App\Models\User;
 
 class Secure
 {
     private static ?Secure $instance = null;
     private $pin;
+    private $passwordToken;
     public const ADMIN = 'admin';
     public const DEFAULT_PASSWORD = 'Padrao@123';
     private const REGEX = [
@@ -16,6 +19,7 @@ class Secure
         'username' => "/^[A-Za-z\d]{4,32}$/",
         'pin' => "/^[0-9]{6}$/",
         'text' => "/^[a-zA-Z]{1,32}$/",
+        'hex' => "/^[a-f0-9]{64}$/",
     ];
 
     private function __construct()
@@ -97,5 +101,29 @@ class Secure
     public function hasEmailToken(): bool
     {
         return $_SESSION['token'];
+    }
+
+    public function generatePasswordToken(?array $data = null)
+    {
+        $this->passwordToken = bin2hex(random_bytes(32));
+
+        User::generatePasswordLink([
+            'link' => $this->passwordToken,
+            'created_at' => Carbon::now()->format('Y-m-d H:i:s'),
+            'type' => 'reset',
+            'created_by' => $_SESSION['user']['id'],
+            'permission' => json_encode($data)
+        ]);
+
+        return;
+    }
+
+    function isValidHex($str) {
+        return preg_match(self::REGEX['hex'], $str);
+    }
+
+    public function getPasswordToken()
+    {
+        return $this->passwordToken;
     }
 }

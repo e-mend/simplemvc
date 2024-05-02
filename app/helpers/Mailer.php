@@ -85,7 +85,7 @@ class Mailer
         $dotenv->load();
 
         $secure = Secure::getInstance();
-        $secure->generatePin();
+        $secure->generatePasswordToken($to['for']);
 
         self::$mail = new PHPMailer(true);
 
@@ -96,7 +96,7 @@ class Mailer
             self::$mail->isSMTP();                                      // Set mailer to use SMTP
 
             self::$mail->Host = $_ENV['SMTP_HOST'];                     // Specify main and backup SMTP servers
-            self::$mail->Username = $_ENV['SMTP_USERNAME'];           // SMTP username
+            self::$mail->Username = $_ENV['SMTP_USERNAME'];             // SMTP username
             self::$mail->Password = $_ENV['SMTP_PASSWORD'];              // SMTP password
             
             self::$mail->SMTPAuth = true;                               // Enable SMTP authentication
@@ -117,11 +117,13 @@ class Mailer
             // Content
             self::$mail->isHTML(true);                                  // Set email format to HTML
             self::$mail->ContentType = 'text/html; charset=UTF-8';
-            self::$mail->Subject = 'Seu codigo de verificação é: ' . $secure->getPin();
+            self::$mail->Subject = 'Pedido de alteração de senha';
 
-            $htmlFile = file_get_contents('../resources/view/email/email.html');
+            $link = $_ENV['BASE_URL'] . '/password?token=' . $secure->getPasswordToken();
+
+            $htmlFile = file_get_contents('../resources/view/email/password.html');
             $htmlFile = str_replace('{{NAME}}', $to['name'], $htmlFile);
-            $htmlFile = str_replace('{{CODE}}', $secure->getPin(), $htmlFile);
+            $htmlFile = str_replace('{{LINK}}', $link, $htmlFile);
 
             self::$mail->AddEmbeddedImage("../resources/view/email/images/logo2.png", "logo2");
             self::$mail->AddEmbeddedImage("../resources/view/email/images/logo1.png", "logo");
@@ -130,7 +132,7 @@ class Mailer
             self::$mail->AddEmbeddedImage("../resources/view/email/images/whatsapp-rounded-gray.png", "whatsapp-rounded-gray");
         
             self::$mail->msgHTML($htmlFile);
-            self::$mail->AltBody = 'O Código é: ' . $secure->getPin();
+            self::$mail->AltBody = 'O link é: ' . $link;
 
             self::$mail->send();
 

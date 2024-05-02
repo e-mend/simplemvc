@@ -205,6 +205,9 @@ class DashboardController extends Controller
             Mailer::sendPassword([
                 'email' => $user['email'],
                 'name' => $user['first_name'],
+                'for' => [
+                    'user' => $user['id']
+                ]
             ]);
 
             Json::send([

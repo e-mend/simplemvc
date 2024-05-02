@@ -40,6 +40,7 @@ final class Router
                 '/userdata' => fn() => self::load('DashboardController', 'userDataApi'),
                 '/logout' => fn() => self::load('DashboardController', 'logoutApi'),
                 '/getusers' => fn() => self::load('DashboardController', 'getUsersApi'),
+                '/password' => fn() => self::load('NewUserController', 'changePasswordAction'),
           ],
           'post' => [
                 '/login' => fn() => self::load('HomeController', 'loginApi'),
@@ -51,6 +52,7 @@ final class Router
                 '/updateuser' => fn() => self::load('DashboardController', 'updateUserApi'),
                 '/disableuser' => fn() => self::load('DashboardController', 'disableUserApi'),
                 '/sendpasswordemail' => fn() => self::load('DashboardController', 'sendPasswordApi'),
+                '/changepassword' => fn() => self::load('NewUserController', 'changePasswordApi'),
           ]
         ];
     }

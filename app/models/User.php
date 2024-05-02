@@ -9,6 +9,7 @@ use Laminas\Db\Adapter\Adapter;
 use Laminas\Db\Sql\Sql;
 use Laminas\Db\Sql\Insert;
 use Laminas\Db\Sql\Delete;
+use Carbon\Carbon;
 
 class User
 {
@@ -151,4 +152,58 @@ class User
         return $this->adapter->query($select, Adapter::QUERY_MODE_EXECUTE)->toArray();
     }
 
+    public function getLinks(array $where)
+    {
+        $select = $this->sql->select('temp');
+        $select->where($where);
+        $select = $this->sql->buildSqlString($select);    
+        return $this->adapter->query($select, Adapter::QUERY_MODE_EXECUTE)->toArray();
+    }
+
+    public static function generatePasswordLink(array $data)
+    {
+        $db = Database::getInstance();
+        $adapter = $db->getConnection();
+        $sql = new Sql($adapter);
+
+        $insert = new Insert();
+        $insert->into('temp');
+        $insert->values($data);
+
+        $statement = $sql->prepareStatementForSqlObject($insert);
+        $results = $statement->execute();
+        return $results;
+    }
+
+    public function getPasswordLink(string $link)
+    {
+        $update = $this->sql->update('temp');
+
+        $update->set([
+            'is_deleted' => true,
+            'deleted_at' => Carbon::now()->format('Y-m-d H:i:s')
+        ]);
+
+        $update->where([
+            'type' => 'reset',
+            'link' => $link,
+            'is_deleted' => false
+        ]);
+
+        $statement = $this->sql->prepareStatementForSqlObject($update);
+        $results = $statement->execute();
+        return $results->getAffectedRows() > 0;
+    }
+
+    public function deletePasswordLink(string $id)
+    {
+        $delete = $this->sql->delete('temp');
+        $delete->where([
+            'type' => 'reset',
+            'id' => $id
+        ]);
+        $statement = $this->sql->prepareStatementForSqlObject($delete);
+        $results = $statement->execute();
+        return $results->getAffectedRows() > 0;
+    }
 }

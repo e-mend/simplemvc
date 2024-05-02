@@ -11,16 +11,96 @@ use Exception;
 use Carbon\Carbon;
 use App\Helpers\Mailer;
 
-class DashboardController extends Controller
+class NewUserController extends Controller
 {
     private User $user;
     private Secure $secure;
     private const NEW_USER_DAYS = 7;
+    private const PASSWORD_LINK_EXPIRE_MINUTES = 60;
 
     public function __construct()
     {
         $this->user = new User();
         $this->secure = Secure::getInstance();
+    }
+
+    public function changePasswordAction()
+    {
+        try {
+            if($this->secure->isLoggedIn()){
+                throw new Exception("Não autorizado");
+            }
+
+            $request = Req::getParams();
+
+            if(!$request['token'] || !$this->secure->isValidHex($request['token'])){
+                throw new Exception("Token invalido");
+            }
+
+            //$token = $this->user->getPasswordLink($request['token']);
+
+            if(false){
+                throw new Exception("Token expirado");
+            }
+
+            View::render('resetPassword');
+
+        } catch (\Throwable $th) {
+            header("Location: /");
+        }
+    }
+
+    public function changePasswordApi()
+    {
+        try {
+            if($this->secure->isLoggedIn()){
+                throw new Exception("Não autorizado");
+            }
+
+            $json = Json::getJson();
+
+            if (!$json['password'] || !$json['confirmPassword'] || 
+            $json['password'] !== $json['confirmPassword'] ||
+            !$this->secure->isValid('password', $json['password']) ||
+            !$this->secure->isValid('password', $json['confirmPassword'])){
+                throw new Exception("Revise os campos");
+            }
+
+            if(!$json['token'] || !$this->secure->isValidHex($json['token'])){
+                throw new Exception("Token invalido");
+            }
+
+            $token = $this->user->getLinks([
+                'token' => $json['token'],
+                'type' => 'reset',
+            ])[0];
+
+            if(!$token ||
+            Carbon::parse($token['deleted_at'])
+            ->diffInHours(Carbon::now()) > self::PASSWORD_LINK_EXPIRE_MINUTES){  
+                throw new Exception("Token expirado");
+            }
+
+            $userId = json_decode($token['permissions'], true)['user'];
+
+            $this->user->update([
+                'password' => $this->secure->hash($json['password']),
+            ], $userId);
+
+            $this->user->deletePasswordLink($token['id']);
+
+            Json::send([
+                'success' => true,
+                'message' => 'Senha alterada com sucesso'
+            ]);
+
+        } catch (\Throwable $th) {
+            Json::send([
+                'success' => false,
+                'message' => $th->getMessage(),
+                'redirect' => '/'
+            ]);
+        }
     }
 
     public function newLinkApi()
