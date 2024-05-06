@@ -376,14 +376,16 @@
                                         v-model="createNewUser.email"
                                         placeholder="E-mail"
                                         type="text">
-                                    <button type="submit" class="btn btn-primary col-3 fs-5"
+                                    <button type="submit" class="btn btn-primary col-4 fs-5"
                                     :disabled="blocked || createNewUser.email.length === 0" 
                                     @click="createLink(true)">
                                         Mandar E-mail
                                     </button>
                                 </div>
                                 <div class="text-center col-md-12 col-12 d-flex mx-1 my-2">
-                                    <button type="submit" class="btn btn-primary col-6 fs-5"
+                                    <div class="col-8">
+                                    </div>
+                                    <button type="submit" class="btn btn-primary col-4 fs-5"
                                     :disabled="blocked" @click="createLink()">
                                         Criar link
                                     </button>

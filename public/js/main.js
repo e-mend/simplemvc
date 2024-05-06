@@ -55,7 +55,7 @@ const app = new Vue({
                     'can_create_inventory': false,
                     'can_update_inventory': false,
                     'can_delete_inventory': false,
-                    'user': false,
+                    'user': true,
                     'admin': false
                 },
                 email: '',
@@ -88,11 +88,6 @@ const app = new Vue({
         },
         async createLink(hasEmail = false) {
             try {
-                if (index === -1) {
-                    this.throwWarning('Algo deu errado', ['alert-danger']);
-                    return;
-                }
-
                 const response = await fetch('/updatepassword', {
                     method: 'POST',
                     headers: {
