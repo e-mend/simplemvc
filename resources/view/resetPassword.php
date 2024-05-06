@@ -14,20 +14,41 @@
                 </h1>
             </div>
             <div>
-                <div class="form-group fs-5 mb-2">
-                    <input :type="type" class="form-control fs-5" 
-                    v-model="passForm.password" id="password" placeholder="Senha">
+                <div class="form-group fs-5 mb-2 d-flex align-items-center">
+                    <input :type="type" class="form-control fs-5 flex-grow-1" 
+                    v-model="passForm.password" id="password" placeholder="Senha"
+                    @input="passwordEnter">
                     <span 
-                        class="toggle-password my-auto rounded mx-2" 
+                        class="toggle-password my-auto 
+                         rounded col-1 mx-1" 
                         @click="togglePasswordVisibility">
                         <i :class="iconClass" class="text-white"></i>
                     </span>
                 </div>
-                <div class="form-group fs-5 mb-2">
-                    <input :type="type" class="form-control fs-5" 
+                <div class="d-flex justify-content-center my-2"
+                    v-if="passForm.password.length > 0">
+                    <div class="btn text-white animate__pulse animate__infinite
+                    animate__slower" 
+                    :class="{'animate__animated': upper, 'btn-primary': upper}">
+                        A-Z
+                    </div>
+                    <div class="btn text-white animate__pulse animate__infinite
+                    animate__slower" 
+                    :class="{'animate__animated': number, 'btn-primary': number}">
+                        0-9
+                    </div>
+                    <div class="btn text-white animate__pulse animate__infinite white
+                    animate__slower" 
+                    :class="{'animate__animated': special, 'btn-primary': special}">
+                        @$!%*?&
+                    </div>
+                </div>
+                <div class="form-group fs-5 mb-2 d-flex align-items-center">
+                    <input :type="type" class="form-control fs-5 flex-grow-1" 
                     v-model="passForm.confirmPassword" id="confirmPassword" placeholder="Confirme a Senha">
                     <span 
-                        class="toggle-password my-auto rounded mx-2" 
+                        class="toggle-password my-auto 
+                         rounded col-1 mx-1" 
                         @click="togglePasswordVisibility">
                         <i :class="iconClass" class="text-white"></i>
                     </span>
@@ -88,11 +109,39 @@
                     type: 'password',
                     nextId: 0,
                     blocked: false,
+                    special: false,
+                    number: false,
+                    upper: false
                 }
             },
             methods: {
                 togglePasswordVisibility() {
                     this.type = this.type === 'password' ? 'text' : 'password';
+                },
+                passwordEnter() {
+                    let upperRegex = /[A-Z]/g;
+
+                    if(upperRegex.test(this.passForm.password)) {
+                        this.upper = true;
+                    }else{
+                        this.upper = false;
+                    }
+
+                    let numberRegex = /[\d]/g;
+
+                    if(numberRegex.test(this.passForm.password)) {
+                        this.number = true;
+                    }else{
+                        this.number = false;
+                    }
+
+                    let specialRegex = /[@$!%*?&]/g;
+
+                    if(specialRegex.test(this.passForm.password)) {
+                        this.special = true;
+                    }else{
+                        this.special = false;
+                    }
                 },
                 throwWarning(textMessage, classObject = {
                     'alert-danger': true
@@ -123,7 +172,7 @@
                     const params = new URLSearchParams(url.search);
 
                     try {
-                        const response = await fetch('/login', {
+                        const response = await fetch('/changepassword', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json'
@@ -142,7 +191,7 @@
                         const json = await response.json();
 
                         if(!json.success) {
-                            throw new Error('Server response was not ok');
+                            throw new Error(json['message']);
                         }
 
                         this.throwWarning(
@@ -158,8 +207,8 @@
                     } catch (error) {
                         console.error('There was a problem with the fetch operation:', error);
 
-                        this.throwWarning(`Ocorreu um erro ao realizar a troca de senha
-                        <i class="fa-solid fa-circle-exclamation"></i>`);
+                        this.throwWarning(error.message +
+                        ` <i class="fa-solid fa-circle-exclamation"></i>`);
                         this.blocked = false;
                     }
                 }

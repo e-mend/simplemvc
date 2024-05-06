@@ -37,9 +37,9 @@ class NewUserController extends Controller
                 throw new Exception("Token invalido");
             }
 
-            //$token = $this->user->getPasswordLink($request['token']);
+            $token = $this->user->getPasswordLink($request['token']);
 
-            if(false){
+            if(!$token){
                 throw new Exception("Token expirado");
             }
 
@@ -61,8 +61,7 @@ class NewUserController extends Controller
 
             if (!$json['password'] || !$json['confirmPassword'] || 
             $json['password'] !== $json['confirmPassword'] ||
-            !$this->secure->isValid('password', $json['password']) ||
-            !$this->secure->isValid('password', $json['confirmPassword'])){
+            !$this->secure->isValid('password', $json['password'])){
                 throw new Exception("Revise os campos");
             }
 
@@ -71,7 +70,7 @@ class NewUserController extends Controller
             }
 
             $token = $this->user->getLinks([
-                'token' => $json['token'],
+                'link' => $json['token'],
                 'type' => 'reset',
             ])[0];
 
@@ -81,7 +80,7 @@ class NewUserController extends Controller
                 throw new Exception("Token expirado");
             }
 
-            $userId = json_decode($token['permissions'], true)['user'];
+            $userId = json_decode($token['permission'], true)['user'];
 
             $this->user->update([
                 'password' => $this->secure->hash($json['password']),

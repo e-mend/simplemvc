@@ -202,7 +202,7 @@ class DashboardController extends Controller
                 throw new Exception("Id invalido");
             }
 
-            Mailer::sendPassword([
+            $item = Mailer::sendPassword([
                 'email' => $user['email'],
                 'name' => $user['first_name'],
                 'for' => [
@@ -212,13 +212,13 @@ class DashboardController extends Controller
 
             Json::send([
                 'success' => true,
-                'message' => 'Email enviado com sucesso'
+                'message' => 'Email enviado com sucesso',
             ]);
 
         } catch (\Throwable $th) {
             Json::send([
                 'success' => false,
-                'message' => $th->getMessage()
+                'message' => $th->getMessage(),
             ]);
         }
             

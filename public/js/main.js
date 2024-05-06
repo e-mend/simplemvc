@@ -41,6 +41,25 @@ const app = new Vue({
                     
                 }
             },
+            createNewUser: {
+                permission: {
+                    'can_read_post': false,
+                    'can_create_post': false,
+                    'can_update_post': false,
+                    'can_delete_post': false,
+                    'can_see_deleted_posts': false,
+                    'post_1': false,
+                    'post_2': false,
+                    'post_3': false,
+                    'can_read_inventory': false,              
+                    'can_create_inventory': false,
+                    'can_update_inventory': false,
+                    'can_delete_inventory': false,
+                    'user': false,
+                    'admin': false
+                },
+                email: '',
+            },
             upper: false,
             number: false,
             special: false,
@@ -66,6 +85,40 @@ const app = new Vue({
         },
         togglePasswordVisibility() {
             this.passwordFieldType = this.passwordFieldType === 'password' ? 'text' : 'password';
+        },
+        async createLink(hasEmail = false) {
+            try {
+                if (index === -1) {
+                    this.throwWarning('Algo deu errado', ['alert-danger']);
+                    return;
+                }
+
+                const response = await fetch('/updatepassword', {
+                    method: 'POST',
+                    headers: {
+                        'Content-type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        id: id,
+                        password: this.userToEdit.password
+                    })
+                });
+
+                if(!response.ok) {
+                    throw new Error('Algo deu errado');
+                }
+                
+                const json = await response.json();
+
+                if(!json.success) {
+                    throw new Error(json['message']);
+                }
+
+                this.throwWarning(json['message'], ['alert-success']);
+
+            } catch (error) {
+                this.throwWarning(error.message, ['alert-danger']);
+            }
         },
         passwordEnter() {
             let upperRegex = /[A-Z]/g;
@@ -127,7 +180,6 @@ const app = new Vue({
             } catch (error) {
                 this.throwWarning(error.message, ['alert-danger']);
             }
-            
         },
         async updateUser(id) {
             try {
@@ -160,6 +212,11 @@ const app = new Vue({
             } catch (error) {
                 this.throwWarning(error.message, ['alert-danger']); 
             }
+        },
+        async inviteModal() {
+            $('#invite-modal').modal('show');
+
+
         },
         async userModal(id) {
             $('#userModal').modal('show');

@@ -130,7 +130,8 @@
                         Procurar Usuário
                         <i class="fa-solid fa-magnifying-glass"></i>
                     </div>
-                    <div class="btn btn-secondary col-12 col-md-6 border-white text-center py-3 fs-5">
+                    <div class="btn btn-secondary col-12 col-md-6 border-white text-center py-3 fs-5"
+                    @click="inviteModal">
                         Convidar Usuário
                         <i class="fa-solid fa-share-nodes"></i>
                     </div>
@@ -202,6 +203,196 @@
                                 </div> 
                             </div>
                             
+                        </div>
+                    </div>
+                </div>
+                <div id="invite-modal" class="modal fade" id="staticBackdrop"
+                data-bs-backdrop="static" data-bs-keyboard="false" 
+                tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                        <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="staticBackdropLabel">Convidar Usuário</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                        <div class="row d-flex justify-content-between mb-4 fs-5">
+                                <div class="text-center fs-2 col-md-12 col-12">
+                                    Cofre
+                                    <i class="fa-solid fa-lock"></i>
+                                </div>
+                                <div class="text-center fs-5 col-md-6 col-12">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" role="switch" 
+                                        v-model="createNewUser.permission['can_read_post']">
+                                        <label class="form-check-label">
+                                            Ler item
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="text-center fs-5 col-md-6 col-12">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" role="switch" 
+                                        v-model="createNewUser.permission['can_create_post']">
+                                        <label class="form-check-label">
+                                            Criar item
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="text-center fs-5 col-md-6 col-12">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" role="switch"
+                                        v-model="createNewUser.permission['can_update_post']">
+                                        <label class="form-check-label">
+                                            Modificar item
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="text-center fs-5 col-md-6 col-12">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" role="switch" 
+                                        v-model="createNewUser.permission['can_delete_post']">
+                                        <label class="form-check-label">
+                                            Apagar item
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="text-center fs-5 col-md-6 col-12">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" role="switch" 
+                                        v-model="createNewUser.permission['can_see_deleted_posts']">
+                                        <label class="form-check-label">
+                                            Ver item apagado
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="text-center fs-5 col-md-6 col-12">
+
+                                </div>
+                                <div class="text-center fs-5 col-md-3 col-12">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" role="switch" 
+                                        v-model="createNewUser.permission['post_1']">
+                                        <label class="form-check-label">
+                                            Cofre nível 1
+                                        </label>
+                                    </div>
+                                </div> 
+                                <div class="text-center fs-5 col-md-3 col-12">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" role="switch"
+                                        :checked="createNewUser.permission['post_2']">
+                                        <label class="form-check-label" for="flexSwitchCheckDefault">
+                                            Cofre nível 2
+                                        </label>
+                                    </div>
+                                </div> 
+                                <div class="text-center fs-5 col-md-3 col-12">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" role="switch"
+                                        v-model="createNewUser.permission['post_3']">
+                                        <label class="form-check-label" for="flexSwitchCheckDefault">
+                                            Cofre nível 3
+                                        </label>
+                                    </div>
+                                </div> 
+                                <div class="text-center fs-2 col-md-12 col-12">
+                                    Inventário
+                                    <i class="fa-solid fa-laptop"></i>
+                                </div>
+                                <div class="text-center fs-5 col-md-6 col-12">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" role="switch"
+                                        v-model="createNewUser.permission['can_read_inventory']">
+                                        <label class="form-check-label">
+                                            Ver item
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="text-center fs-5 col-md-6 col-12">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" role="switch"
+                                        v-model="createNewUser.permission['can_create_inventory']">
+                                        <label class="form-check-label" for="flexSwitchCheckDefault">
+                                            Criar item
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="text-center fs-5 col-md-6 col-12">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" role="switch"
+                                        v-model="createNewUser.permission['can_delete_inventory']">
+                                        <label class="form-check-label" for="flexSwitchCheckDefault">
+                                            Apagar item
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="text-center fs-5 col-md-6 col-12">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" role="switch"
+                                        v-model="createNewUser.permission['can_update_inventory']">
+                                        <label class="form-check-label" for="flexSwitchCheckDefault">
+                                            Modificar item
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="text-center fs-2 col-md-12 col-12">
+                                    Geral
+                                    <i class="fa-solid fa-gears"></i>
+                                </div>
+                                <div class="text-center fs-5 col-md-6 col-12">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" disabled 
+                                        type="checkbox" role="switch" id="flexSwitchCheckDefault">
+                                        <label class="form-check-label" for="flexSwitchCheckDefault">
+                                            Dev
+                                        </label>
+                                    </div>
+                                </div> 
+                                <div class="text-center fs-5 col-md-6 col-12">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" 
+                                        v-model="createNewUser.permission['admin']"
+                                        role="switch" id="flexSwitchCheckDefault">
+                                        <label class="form-check-label" for="flexSwitchCheckDefault">
+                                            Admin
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="text-center fs-5 col-md-6 col-12">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" 
+                                        v-model="createNewUser.permission['user']"
+                                        type="checkbox" role="switch" id="flexSwitchCheckDefault">
+                                        <label class="form-check-label" for="flexSwitchCheckDefault">
+                                            Usuário comum
+                                        </label>
+                                    </div>
+                                </div> 
+                            </div>
+                            <div class="row d-flex justify-content-center mb-4 fs-5">
+                                <div class="text-center col-md-12 col-12 d-flex">
+                                    <input type="text" class="form-control fs-5 mx-1" 
+                                        v-model="createNewUser.email"
+                                        placeholder="E-mail"
+                                        type="text">
+                                    <button type="submit" class="btn btn-primary col-3 fs-5"
+                                    :disabled="blocked || createNewUser.email.length === 0" 
+                                    @click="createLink(true)">
+                                        Mandar E-mail
+                                    </button>
+                                </div>
+                                <div class="text-center col-md-12 col-12 d-flex mx-1 my-2">
+                                    <button type="submit" class="btn btn-primary col-6 fs-5"
+                                    :disabled="blocked" @click="createLink()">
+                                        Criar link
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                        </div>
                         </div>
                     </div>
                 </div>
