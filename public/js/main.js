@@ -64,7 +64,8 @@ const app = new Vue({
             number: false,
             special: false,
             loadingUsers: false,
-            passwordFieldType: 'password'
+            passwordFieldType: 'password',
+            links: {},
         }
     },
     methods: {
@@ -88,7 +89,6 @@ const app = new Vue({
         },
         async createLink(hasEmail = false) {
             try {
-
                 if(!hasEmail) {
                     this.createNewUser.email = false;
                 }
@@ -213,6 +213,24 @@ const app = new Vue({
         async inviteModal() {
             $('#invite-modal').modal('show');
 
+            try {
+                const response = await fetch('/getlinks');
+
+                if(!response.ok) {
+                    throw new Error('Algo deu errado');
+                }
+
+                const json = await response.json();
+
+                if(!json.success) {
+                    this.throwWarning(json['message']);
+                    return;
+                }
+
+                this.links = json['links'];
+            } catch (error) {
+                this.throwWarning(error.message, ['alert-danger']);
+            }
 
         },
         async userModal(id) {

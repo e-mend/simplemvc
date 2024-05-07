@@ -41,6 +41,7 @@ final class Router
                 '/logout' => fn() => self::load('DashboardController', 'logoutApi'),
                 '/getusers' => fn() => self::load('DashboardController', 'getUsersApi'),
                 '/password' => fn() => self::load('NewUserController', 'changePasswordAction'),
+                '/getlinks' => fn() => self::load('DashboardController', 'getLinksApi'),
           ],
           'post' => [
                 '/login' => fn() => self::load('HomeController', 'loginApi'),

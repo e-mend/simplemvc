@@ -224,6 +224,31 @@ class DashboardController extends Controller
             
     }
 
+    public function getLinksApi()
+    {
+        try {
+            if(!$this->secure->isLoggedIn() || !in_array('admin', $_SESSION['user']['permission'])){
+                throw new Exception("Não autorizado");
+            }
+
+            $links = $this->user->getLinks([
+                'created_by' => $_SESSION['user']['id'],
+                'type' => 'user'
+            ]);
+
+            Json::send([
+                'success' => true,
+                'links' => $links
+            ]);
+            
+        } catch (\Throwable $th) {
+            Json::send([
+                'success' => false,
+                'message' => $th->getMessage()
+            ]);
+        }
+    }
+
     public function updatePasswordApi()
     {
         try {
