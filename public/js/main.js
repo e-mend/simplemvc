@@ -88,15 +88,17 @@ const app = new Vue({
         },
         async createLink(hasEmail = false) {
             try {
-                const response = await fetch('/updatepassword', {
+
+                if(!hasEmail) {
+                    this.createNewUser.email = false;
+                }
+
+                const response = await fetch('/createlink', {
                     method: 'POST',
                     headers: {
                         'Content-type': 'application/json'
                     },
-                    body: JSON.stringify({
-                        id: id,
-                        password: this.userToEdit.password
-                    })
+                    body: JSON.stringify(this.createNewUser)
                 });
 
                 if(!response.ok) {
