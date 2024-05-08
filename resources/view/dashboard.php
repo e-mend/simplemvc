@@ -391,6 +391,15 @@
                                     </button>
                                 </div>
                             </div>
+                            <div class="row d-flex justify-content-center mb-4 fs-5">
+                                <div class="text-center col-md-12 col-12 d-flex">
+                                    Ultimos 5 links criados
+                                </div>
+                                <div class="btn btn-primary text-center col-md-12 col-12 d-flex"
+                                v-for="link in links">
+                                    {{ link.created_at }}
+                                </div>
+                            </div>
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
@@ -456,7 +465,10 @@
                                             <i :class="iconClass"></i>
                                         </span>
                                     </div>
-                                    <div class="d-flex justify-content-center mt-2"
+                                <div class="text-start fs-5 col-md-6 col-12 mt-auto">
+                                    Mude a senha deste usuário ou mande email para que ele mude.
+                                </div>
+                                <div class="d-flex justify-content-center mt-2"
                                     v-if="userToEdit.password.length > 0">
                                         <div class="btn animate__pulse animate__infinite
                                         animate__slower" 
@@ -475,25 +487,22 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="text-start fs-5 col-md-6 col-12 mt-auto">
-                                    Mude a senha deste usuário ou mande email para que ele mude.
-                                </div>
                             </div>
                             <div class="row d-flex justify-content-between mb-3">
-                                <div class="text-center col-md-6 col-12">
-                                    <button 
-                                        class="btn btn-primary fs-5 col-md-8 col-12"
-                                        @click="changePassword(userToEdit.id)">
-                                        Mudar senha
-                                        <i class="fa-solid fa-shield-halved"></i>
-                                    </button>
-                                </div>
                                 <div class="text-center col-md-6 col-12">
                                     <button 
                                     class="btn btn-primary fs-5 col-md-8 col-12"
                                     @click="sendEmail(userToEdit.id)">
                                         Mandar email
                                         <i class="fa-regular fa-paper-plane"></i>
+                                    </button>
+                                </div>
+                                <div class="text-center col-md-6 col-12">
+                                    <button 
+                                        class="btn btn-primary fs-5 col-md-8 col-12"
+                                        @click="changePassword(userToEdit.id)">
+                                        Mudar senha
+                                        <i class="fa-solid fa-shield-halved"></i>
                                     </button>
                                 </div>
                             </div>

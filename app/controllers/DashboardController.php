@@ -232,8 +232,12 @@ class DashboardController extends Controller
             }
 
             $links = $this->user->getLinks([
-                'created_by' => $_SESSION['user']['id'],
-                'type' => 'user'
+                'eq' => [
+                    'created_by' => $_SESSION['user']['id'],
+                    'type' => 'user',
+                ],
+                'limit' => 5,
+                'order' => 'id DESC'
             ]);
 
             Json::send([

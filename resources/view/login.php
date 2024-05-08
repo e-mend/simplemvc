@@ -20,9 +20,16 @@
                     <input type="text" class="form-control fs-5" id="username" 
                     v-model="loginForm.username" placeholder="Usuário/Email">
                 </div>
-                <div class="form-group fs-5 mb-2">
-                    <input type="password" class="form-control fs-5" 
-                    v-model="loginForm.password" id="password" placeholder="Senha">
+                <div class="d-flex">
+                    <div class="form-group fs-5 mb-2 col-10">
+                        <input :type="passwordFieldType"  class="form-control fs-5" 
+                        v-model="loginForm.password" id="password" placeholder="Senha">
+                    </div>
+                    <span 
+                        class="toggle-password my-2 rounded mx-2" 
+                        @click="togglePasswordVisibility" role="button">
+                        <i :class="iconClass" class="text-white fs-4"></i>
+                    </span>
                 </div>
                 <button @click="login" class="btn btn-primary p-3 fs-5 w-100 shadow"
                 :disabled="blocked">
@@ -93,13 +100,14 @@
                     message: '',
                     loginForm: {
                         username: 'ADsense12',
-                        password: 'Coxa18@1'
+                        password: 'CocaG3lada@'
                     },
                     warnings: [],
                     nextId: 0,
                     blocked: false,
                     validateEmail: false,
                     pin: '',
+                    passwordFieldType: 'password',
                 }
             },
             methods: {
@@ -117,6 +125,9 @@
                     setTimeout(() => {
                         this.removeMessage(newMessage.id);
                     }, 4000);
+                },
+                togglePasswordVisibility() {
+                    this.passwordFieldType = this.passwordFieldType === 'password' ? 'text' : 'password';
                 },
                 removeMessage(id) {
                     const index = this.warnings.findIndex(message => message.id === id);
@@ -230,6 +241,11 @@
                         this.validateEmail = false;
                         this.blocked = false;
                     }
+                }
+            },
+            computed: {
+                iconClass() {
+                    return this.passwordFieldType === 'password' ? 'fa fa-eye-slash' : 'fa fa-eye';
                 }
             },
             mounted() {

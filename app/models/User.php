@@ -155,7 +155,16 @@ class User
     public function getLinks(array $where)
     {
         $select = $this->sql->select('temp');
-        $select->where($where);
+        $select->where($where['eq']);
+
+        if($where['limit']){
+            $select->limit($where['limit']);
+        }
+
+        if($where['order']){
+            $select->order($where['order']);
+        }
+
         $select = $this->sql->buildSqlString($select);    
         return $this->adapter->query($select, Adapter::QUERY_MODE_EXECUTE)->toArray();
     }
