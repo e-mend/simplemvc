@@ -103,9 +103,14 @@ class Secure
         return $_SESSION['token'];
     }
 
-    public function generatePasswordToken(?array $data = null)
+    public function generateLink()
     {
         $this->passwordToken = bin2hex(random_bytes(32));
+    }
+
+    public function generatePasswordToken(?array $data = null)
+    {
+        $this->generateLink();
 
         User::generatePasswordLink([
             'link' => $this->passwordToken,

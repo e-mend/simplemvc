@@ -169,6 +169,17 @@ class User
         return $this->adapter->query($select, Adapter::QUERY_MODE_EXECUTE)->toArray();
     }
 
+    public function insertLink(array $data)
+    {
+        $insert = new Insert();
+        $insert->into('temp');
+        $insert->values($data);
+        
+        $statement = $this->sql->prepareStatementForSqlObject($insert);
+        $results = $statement->execute();
+        return $results;
+    }
+
     public static function generatePasswordLink(array $data)
     {
         $db = Database::getInstance();

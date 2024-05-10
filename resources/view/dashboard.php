@@ -465,9 +465,6 @@
                                             <i :class="iconClass"></i>
                                         </span>
                                     </div>
-                                <div class="text-start fs-5 col-md-6 col-12 mt-auto">
-                                    Mude a senha deste usuário ou mande email para que ele mude.
-                                </div>
                                 <div class="d-flex justify-content-center mt-2"
                                     v-if="userToEdit.password.length > 0">
                                         <div class="btn animate__pulse animate__infinite
@@ -487,22 +484,25 @@
                                         </div>
                                     </div>
                                 </div>
+                                <div class="text-start fs-5 col-md-6 col-12 mt-auto">
+                                    Mude a senha deste usuário ou mande email para que ele mude.
+                                </div>
                             </div>
                             <div class="row d-flex justify-content-between mb-3">
-                                <div class="text-center col-md-6 col-12">
-                                    <button 
-                                    class="btn btn-primary fs-5 col-md-8 col-12"
-                                    @click="sendEmail(userToEdit.id)">
-                                        Mandar email
-                                        <i class="fa-regular fa-paper-plane"></i>
-                                    </button>
-                                </div>
                                 <div class="text-center col-md-6 col-12">
                                     <button 
                                         class="btn btn-primary fs-5 col-md-8 col-12"
                                         @click="changePassword(userToEdit.id)">
                                         Mudar senha
                                         <i class="fa-solid fa-shield-halved"></i>
+                                    </button>
+                                </div>
+                                <div class="text-center col-md-6 col-12">
+                                    <button 
+                                    class="btn btn-primary fs-5 col-md-8 col-12"
+                                    @click="sendEmail(userToEdit.id)">
+                                        Mandar email
+                                        <i class="fa-regular fa-paper-plane"></i>
                                     </button>
                                 </div>
                             </div>
@@ -517,7 +517,7 @@
                                         :checked="userToEdit.permission['can_read_post']"
                                         :disabled="userToEdit.permission['admin']">
                                         <label class="form-check-label">
-                                            Ler item
+                                            Ver item
                                         </label>
                                     </div>
                                 </div>

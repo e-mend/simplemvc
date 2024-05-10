@@ -54,6 +54,7 @@ final class Router
                 '/disableuser' => fn() => self::load('DashboardController', 'disableUserApi'),
                 '/sendpasswordemail' => fn() => self::load('DashboardController', 'sendPasswordApi'),
                 '/changepassword' => fn() => self::load('NewUserController', 'changePasswordApi'),
+                '/createlink' => fn() => self::load('NewUserController', 'createLinkApi'),
           ]
         ];
     }

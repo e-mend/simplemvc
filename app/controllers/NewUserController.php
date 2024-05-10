@@ -24,6 +24,23 @@ class NewUserController extends Controller
         $this->secure = Secure::getInstance();
     }
 
+    public function createLinkApi()
+    {
+        try {
+            if($this->secure->isLoggedIn() || !in_array('admin', $_SESSION['user']['permission'])){
+                throw new Exception("Não autorizado");
+            }
+
+            $json = Json::getJson();
+
+            if ($json['email'] === false){
+                $this->user->createLink([
+                    'type' => 'user',
+                    
+                ]);
+            }
+    }
+
     public function changePasswordAction()
     {
         try {
@@ -53,7 +70,7 @@ class NewUserController extends Controller
     public function changePasswordApi()
     {
         try {
-            if($this->secure->isLoggedIn()){
+            if($this->secure->isLoggedIn()){	
                 throw new Exception("Não autorizado");
             }
 
