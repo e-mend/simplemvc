@@ -21,7 +21,9 @@ return array(
     'Laminas\\Db\\' => array($vendorDir . '/laminas/laminas-db/src'),
     'GrahamCampbell\\ResultType\\' => array($vendorDir . '/graham-campbell/result-type/src'),
     'Dotenv\\' => array($vendorDir . '/vlucas/phpdotenv/src'),
+    'DASPRiD\\Enum\\' => array($vendorDir . '/dasprid/enum/src'),
     'Carbon\\Doctrine\\' => array($vendorDir . '/carbonphp/carbon-doctrine-types/src/Carbon/Doctrine'),
     'Carbon\\' => array($vendorDir . '/nesbot/carbon/src/Carbon'),
+    'BaconQrCode\\' => array($vendorDir . '/bacon/bacon-qr-code/src'),
     'App\\' => array($baseDir . '/app'),
 );

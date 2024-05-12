@@ -5,6 +5,7 @@ namespace App\Helpers;
 use Carbon\Carbon;
 use Exception;
 use App\Models\User;
+use Dotenv\Dotenv;
 
 class Secure
 {
@@ -20,6 +21,7 @@ class Secure
         'pin' => "/^[0-9]{6}$/",
         'text' => "/^[a-zA-Z]{1,32}$/",
         'hex' => "/^[a-f0-9]{64}$/",
+        'name' => "/^[a-zA-Z]{1,32}+\s?$/",
     ];
 
     private function __construct()
@@ -103,16 +105,31 @@ class Secure
         return $_SESSION['token'];
     }
 
-    public function generateLink()
+    public function generateUrl()
     {
         $this->passwordToken = bin2hex(random_bytes(32));
     }
 
+    public function generateNewUserLink(?array $data = null)
+    {
+        $this->generateUrl();
+
+        User::generateLink([
+            'link' => $this->passwordToken,
+            'created_at' => Carbon::now()->format('Y-m-d H:i:s'),
+            'type' => 'user',
+            'created_by' => $_SESSION['user']['id'],
+            'permission' => json_encode($data)
+        ]);
+
+        return;
+    }
+
     public function generatePasswordToken(?array $data = null)
     {
-        $this->generateLink();
+        $this->generateUrl();
 
-        User::generatePasswordLink([
+        User::generateLink([
             'link' => $this->passwordToken,
             'created_at' => Carbon::now()->format('Y-m-d H:i:s'),
             'type' => 'reset',
@@ -130,5 +147,20 @@ class Secure
     public function getPasswordToken()
     {
         return $this->passwordToken;
+    }
+
+    public function getFullLink(?array $data = null)
+    {
+        $dotenv = Dotenv::createImmutable(__DIR__ . '/../../');
+        $dotenv->load();
+
+        if ($data) {
+            foreach ($data as &$key) {
+                $key['link'] = 'www.' . $_ENV['BASE_URL'] . '/new?token=' . $key['link'];
+            }
+            return $data;
+        }
+
+        return 'www.' . $_ENV['BASE_URL'] . '/new?token=' . $this->passwordToken;
     }
 }

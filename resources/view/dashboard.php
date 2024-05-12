@@ -281,7 +281,7 @@
                                 <div class="text-center fs-5 col-md-3 col-12">
                                     <div class="form-check form-switch">
                                         <input class="form-check-input" type="checkbox" role="switch"
-                                        :checked="createNewUser.permission['post_2']">
+                                        v-model="createNewUser.permission['post_2']">
                                         <label class="form-check-label" for="flexSwitchCheckDefault">
                                             Cofre nível 2
                                         </label>
@@ -391,13 +391,25 @@
                                     </button>
                                 </div>
                             </div>
-                            <div class="row d-flex justify-content-center mb-4 fs-5">
-                                <div class="text-center col-md-12 col-12 d-flex">
-                                    Ultimos 5 links criados
+                            <div class="row d-flex justify-content-center mb-4 fs-5 text-center">
+                                <div class="text-center justify-content-center col-md-12 col-12 d-flex fs-3 mb-2">
+                                    Ultimos links criados <i class="fa-regular fa-clipboard mx-2 my-auto"></i>
                                 </div>
-                                <div class="btn btn-primary text-center col-md-12 col-12 d-flex"
-                                v-for="link in links">
-                                    {{ link.created_at }}
+                                <div class="btn text-center col-md-12 col-12 d-flex fs-5"
+                                v-for="link in links" @click="copyLink(link.id)"
+                                :class="link.deleted_at === null ? 'btn-primary' : 'btn-secondary'">
+                                    <div class="col-1 my-auto">
+                                        <i class="fa-solid fa-link fs-5"></i>
+                                    </div>
+                                    <div class="col-2 my-auto">
+                                        {{ link.fullname }}
+                                    </div>
+                                    <div class="col-2">
+                                        {{ link.created_at }}
+                                    </div>
+                                    <div class="col-6 overflow-hidden">
+                                        {{ link.link }}
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -733,7 +745,8 @@
         <!-- Warnings -->
         <div class="container position-fixed bottom-0 w-100 warn">
             <div class="row justify-content-center warnings-container">
-                <div v-for="warning in warnings" :key="warning.id" class="warning col-12 col-md-12">
+                <div v-for="warning in warnings" :key="warning.id" class="warning col-12 col-md-12" 
+                @click="isClicked(warning.id)">
                     <div class="alert text-center animate__animated animate__fadeInUp
                     animate__faster col-md-6 mx-auto
                     d-flex justify-content-between py-3 mb-1 fs-5"  

@@ -47,11 +47,16 @@ class ComposerStaticInit99028d73ec07c66fe987bb1bc67affba
         'D' => 
         array (
             'Dotenv\\' => 7,
+            'DASPRiD\\Enum\\' => 13,
         ),
         'C' => 
         array (
             'Carbon\\Doctrine\\' => 16,
             'Carbon\\' => 7,
+        ),
+        'B' => 
+        array (
+            'BaconQrCode\\' => 12,
         ),
         'A' => 
         array (
@@ -120,6 +125,10 @@ class ComposerStaticInit99028d73ec07c66fe987bb1bc67affba
         array (
             0 => __DIR__ . '/..' . '/vlucas/phpdotenv/src',
         ),
+        'DASPRiD\\Enum\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/dasprid/enum/src',
+        ),
         'Carbon\\Doctrine\\' => 
         array (
             0 => __DIR__ . '/..' . '/carbonphp/carbon-doctrine-types/src/Carbon/Doctrine',
@@ -127,6 +136,10 @@ class ComposerStaticInit99028d73ec07c66fe987bb1bc67affba
         'Carbon\\' => 
         array (
             0 => __DIR__ . '/..' . '/nesbot/carbon/src/Carbon',
+        ),
+        'BaconQrCode\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/bacon/bacon-qr-code/src',
         ),
         'App\\' => 
         array (

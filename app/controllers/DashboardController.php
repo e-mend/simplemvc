@@ -240,9 +240,16 @@ class DashboardController extends Controller
                 'order' => 'id DESC'
             ]);
 
+            if ($links){
+                foreach ($links as &$link) {
+                    $link['created_at'] = Carbon::createFromFormat('Y-m-d H:i:s', $link['created_at'])
+                                                    ->format('d/m/Y H:i:s');
+                }
+            }
+
             Json::send([
                 'success' => true,
-                'links' => $links
+                'links' => $links ? $this->secure->getFullLink($links) : [],
             ]);
             
         } catch (\Throwable $th) {

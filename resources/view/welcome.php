@@ -33,19 +33,19 @@
                     v-model="loginForm.password" id="password" placeholder="Senha">
                     <div class="d-flex justify-content-center mt-1"
                     v-if="loginForm.password.length > 0">
-                        <div class="btn animate__pulse animate__infinite
-                        animate__slower" 
-                        :class="{'animate__animated': upper, 'text-white': upper}">
+                        <div class="btn btn-primary animate__pulse animate__infinite
+                        animate__slower text-white" 
+                        :class="{'animate__animated': upper}">
                             A-Z
                         </div>
-                        <div class="btn animate__pulse animate__infinite
-                        animate__slower" 
-                        :class="{'animate__animated': number, 'text-white': number}">
+                        <div class="btn btn-primary animate__pulse animate__infinite
+                        animate__slower text-white" 
+                        :class="{'animate__animated': number}">
                             0-9
                         </div>
-                        <div class="btn animate__pulse animate__infinite white
-                        animate__slower" 
-                        :class="{'animate__animated': special, 'text-white': special}">
+                        <div class="btn btn-primary animate__pulse animate__infinite white
+                        animate__slower text-white" 
+                        :class="{'animate__animated': special}">
                             @$!%*?&
                         </div>
                     </div>

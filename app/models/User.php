@@ -10,6 +10,7 @@ use Laminas\Db\Sql\Sql;
 use Laminas\Db\Sql\Insert;
 use Laminas\Db\Sql\Delete;
 use Carbon\Carbon;
+use Laminas\Db\Sql\Expression;
 
 class User
 {
@@ -88,6 +89,18 @@ class User
         }
     }
 
+    public function userExists(string $email, string $username)
+    {
+        $select = $this->sql->select('user');
+        $select->where([
+            'email' => $email,
+            'username' => $username
+        ], 
+        PredicateSet::OP_OR);
+        $select = $this->sql->buildSqlString($select);    
+        return $this->adapter->query($select, Adapter::QUERY_MODE_EXECUTE)->toArray();
+    }
+
     public function get(array $search = null, bool $isCount = false)
     {
         $select = $this->sql->select('user');
@@ -138,20 +151,6 @@ class User
         return $this->adapter->query($select, Adapter::QUERY_MODE_EXECUTE)->toArray();
     }
 
-    public function userExists(string $email, string $username)
-    {
-        $select = $this->sql->select('user');
-
-        $select->where([
-            'email' => $email,
-            'username' => $username
-        ], 
-        PredicateSet::OP_OR);
-
-        $select = $this->sql->buildSqlString($select);    
-        return $this->adapter->query($select, Adapter::QUERY_MODE_EXECUTE)->toArray();
-    }
-
     public function getLinks(array $where)
     {
         $select = $this->sql->select('temp');
@@ -164,6 +163,10 @@ class User
         if($where['order']){
             $select->order($where['order']);
         }
+
+        $select->join(['u' => 'user'], 'u.id = temp.created_by', [
+            'fullname' => new Expression('CONCAT(u.first_name, " ", u.last_name)')
+        ]);
 
         $select = $this->sql->buildSqlString($select);    
         return $this->adapter->query($select, Adapter::QUERY_MODE_EXECUTE)->toArray();
@@ -180,7 +183,7 @@ class User
         return $results;
     }
 
-    public static function generatePasswordLink(array $data)
+    public static function generateLink(array $data)
     {
         $db = Database::getInstance();
         $adapter = $db->getConnection();
@@ -215,6 +218,26 @@ class User
         return $results->getAffectedRows() > 0;
     }
 
+    public function getNewUserLink(string $link)
+    {
+        $update = $this->sql->update('temp');
+
+        $update->set([
+            'is_deleted' => true,
+            'deleted_at' => Carbon::now()->format('Y-m-d H:i:s')
+        ]);
+
+        $update->where([
+            'type' => 'user',
+            'link' => $link,
+            'is_deleted' => false
+        ]);
+
+        $statement = $this->sql->prepareStatementForSqlObject($update);
+        $results = $statement->execute();
+        return $results->getAffectedRows() > 0;
+    }
+
     public function deletePasswordLink(string $id)
     {
         $delete = $this->sql->delete('temp');
@@ -223,6 +246,17 @@ class User
             'id' => $id
         ]);
         $statement = $this->sql->prepareStatementForSqlObject($delete);
+        $results = $statement->execute();
+        return $results->getAffectedRows() > 0;
+    }
+
+    public function createUser(array $data)
+    {
+        $insert = new Insert();
+        $insert->into('user');
+        $insert->values($data);
+        
+        $statement = $this->sql->prepareStatementForSqlObject($insert);
         $results = $statement->execute();
         return $results->getAffectedRows() > 0;
     }

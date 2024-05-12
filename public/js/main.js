@@ -70,12 +70,14 @@ const app = new Vue({
     },
     methods: {
         throwWarning(textMessage, classObject = {
-            'alert-danger': true
-        }) {
+            'alert-danger': true,
+            'clipboard-copy': true
+        }, config = {}) {
             const newMessage = {
                 id: this.nextId++,
                 text: textMessage,
-                class: classObject
+                class: classObject,
+                config: config
             };
 
             this.warnings.push(newMessage);
@@ -90,7 +92,7 @@ const app = new Vue({
         async createLink(hasEmail = false) {
             try {
                 if(!hasEmail) {
-                    this.createNewUser.email = false;
+                    this.createNewUser.email = '';
                 }
 
                 const response = await fetch('/createlink', {
@@ -111,8 +113,33 @@ const app = new Vue({
                     throw new Error(json['message']);
                 }
 
-                this.throwWarning(json['message'], ['alert-success']);
+                if(json['linkType'] === 'copy') {
+                    this.throwWarning(json['message'] + `<i class="fa-solid fa-clipboard"></i>`, 
+                    ['alert-success', 'clipboard-copy'], {
+                        'data-clipboard-text': json['link']
+                    });
+                }else{
+                    this.throwWarning(json['message'], ['alert-success']);
+                }
 
+                this.createNewUser.permission = {
+                    'can_read_post': false,
+                    'can_create_post': false,
+                    'can_update_post': false,
+                    'can_delete_post': false,
+                    'can_see_deleted_posts': false,
+                    'post_1': false,
+                    'post_2': false,
+                    'post_3': false,
+                    'can_read_inventory': false,              
+                    'can_create_inventory': false,
+                    'can_update_inventory': false,
+                    'can_delete_inventory': false,
+                    'user': true,
+                    'admin': false
+                };
+
+                this.inviteModal();
             } catch (error) {
                 this.throwWarning(error.message, ['alert-danger']);
             }
@@ -425,6 +452,28 @@ const app = new Vue({
             if (index !== -1) {
                 this.warnings.splice(index, 1);
             }
+        },
+        isClicked(id) {
+            const index = this.warnings.findIndex(message => message.id === id);
+            if (index === -1) {
+                return;
+            }
+
+            let obj = this.warnings[index].class;
+
+            if(Object.values(obj).includes('clipboard-copy')) {
+                navigator.clipboard.writeText(this.warnings[index]['config']['data-clipboard-text']);
+            }
+        },
+        copyLink(id) {
+            const index = this.links.findIndex(message => message.id === id);
+            if (index === -1) {
+                return;
+            }
+
+            navigator.clipboard.writeText(this.links[index]['link']);
+            this.throwWarning(`Link copiado para a área de transferência <i class="fa-solid fa-clipboard"></i>`, 
+            ['alert-secondary']);
         },
         loadOptions(option) {
             this.loadingR(true);

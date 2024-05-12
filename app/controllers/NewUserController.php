@@ -17,6 +17,7 @@ class NewUserController extends Controller
     private Secure $secure;
     private const NEW_USER_DAYS = 7;
     private const PASSWORD_LINK_EXPIRE_MINUTES = 60;
+    private const NEW_USER_LINK_EXPIRE_MINUTES = 120;
 
     public function __construct()
     {
@@ -27,19 +28,201 @@ class NewUserController extends Controller
     public function createLinkApi()
     {
         try {
-            if($this->secure->isLoggedIn() || !in_array('admin', $_SESSION['user']['permission'])){
+            if(!$this->secure->isLoggedIn() || !in_array('admin', $_SESSION['user']['permission'])){
                 throw new Exception("Não autorizado");
             }
 
             $json = Json::getJson();
 
-            if ($json['email'] === false){
-                $this->user->createLink([
-                    'type' => 'user',
-                    
+            $isValidEmail = $this->secure->isValid('email', $json['email']);
+            $isNullEmail = strlen($json['email']) === 0;
+
+            if (!$isValidEmail && !$isNullEmail) {
+                throw new Exception("Email invalido");
+            }
+
+            $this->secure->generateNewUserLink($json);
+
+            if($isValidEmail){
+                Mailer::sendLink([
+                    'email' => $json['email'],
+                    'link' => $this->secure->getFullLink(),
                 ]);
             }
+
+            Json::send([
+                'success' => true,
+                'message' => $isValidEmail ? 'Email enviado' : 'Link copiado para a área de transferência',
+                'link' => $this->secure->getFullLink(),
+                'linkType' => $isValidEmail ? 'email' : 'copy',
+            ]);
+
+        } catch (\Throwable $th) {
+            Json::send([
+                'success' => false,
+                'message' => $th->getMessage(),
+            ]);
+        }
     }
+
+    public function newUserApi()
+    {
+        try {
+            if($this->secure->isLoggedIn()){
+                throw new Exception("Não autorizado");
+            }
+
+            $json = Json::getJson();
+
+            if(!$json['token'] || !$this->secure->isValidHex($json['token'])){
+                throw new Exception("Token invalido");
+            }
+
+            $token = $this->user->getLinks([
+                'eq' => [
+                    'link' => $json['token'],
+                    'type' => 'user',
+                ]
+            ])[0];
+
+            if(!$token ||
+            Carbon::parse($token['deleted_at'])
+            ->diffInHours(Carbon::now()) > self::NEW_USER_LINK_EXPIRE_MINUTES){  
+                throw new Exception("Token expirado");
+            }
+            
+            if(!$json['email'] || !$this->secure->isValid('email', $json['email'])){
+                throw new Exception("Email invalido");
+            }
+
+            if(!$json['username'] || !$this->secure->isValid('username', $json['username'])){
+                throw new Exception("Usuário invalido");
+            }
+
+            if(!$json['password'] || !$this->secure->isValid('password', $json['password'])){
+                throw new Exception("Senha invalida");
+            }
+
+            if(!$json['firstName'] || !$this->secure->isValid('name', $json['firstName'])
+            || !$json['lastName'] || !$this->secure->isValid('name', $json['lastName'])){
+                throw new Exception("Nome invalido");
+            }
+
+            $user = $this->user->userExists($json['email'], $json['username'])[0];
+
+            if($user){
+                if($user['email'] === $json['email']){
+                    throw new Exception("Email ja existe");
+                }
+
+                if($user['username'] === $json['username']){
+                    throw new Exception("Usuário ja existe");
+                }
+            }
+
+
+            $_SESSION['userToCreate'] = $json;
+            $_SESSION['userToCreate']['permission'] = $token['permission'];
+
+            Mailer::sendCode([
+                'email' => $json['email'],
+                'name' => $json['firstName'],
+            ]);
+
+            Json::send([
+                'success' => true,
+            ]);
+
+        } catch (\Throwable $th) {
+            Json::send([
+                'success' => false,
+                'message' => $th->getMessage(),
+            ]);
+        }
+    }
+
+    public function validateNewUserEmailApi()
+    {
+        try {
+            if($this->secure->isLoggedIn()){
+                throw new Exception("Not Authorized");
+            }
+
+            $json = Json::getJson();
+
+            if(!$json){
+                throw new Exception("Erro ao processar a requisição");
+            }
+
+            if(
+                !$json['pin'] || 
+                !$this->secure->verifyPin($json['pin'])
+            ){
+                throw new Exception("Pin invalido");
+            }
+
+            $createUser = $this->user->createUser([
+                'username' => $_SESSION['userToCreate']['username'],
+                'password' => $this->secure->hash($_SESSION['userToCreate']['password']),
+                'first_name' => $_SESSION['userToCreate']['firstName'],
+                'last_name' => $_SESSION['userToCreate']['lastName'],
+                'email' => $_SESSION['userToCreate']['email'],
+                'created_at' => Carbon::now(),
+                'permission' => $_SESSION['userToCreate']['permission'],
+            ]);
+
+            if(!$createUser){
+                throw new Exception("Erro ao criar o usuário");
+            }
+
+            $_SESSION['user'] = $createUser;
+            $_SESSION['user']['permission'] = $_SESSION['userToCreate']['permissions'];
+
+            unset($_SESSION['userToCreate']);
+
+            $_SESSION['logged'] = true;
+
+            Json::send([
+                'success' => true,
+                'message' => 'Validado com sucesso',
+                'redirect' => '/inventario'
+            ]);
+
+        } catch (\Throwable $th) {
+            Json::send([
+                'success' => false,
+                'message' => $th->getMessage()
+            ]);
+        }
+    }
+
+    public function newUserAction()
+    {
+        try {
+            // if($this->secure->isLoggedIn()){
+            //     throw new Exception("Não autorizado");
+            // }
+
+            $request = Req::getParams();
+
+            // if(!$request['token'] || !$this->secure->isValidHex($request['token'])){
+            //     throw new Exception("Token invalido");
+            // }
+
+            //$token = $this->user->getNewUserLink($request['token']);
+
+            // if(!$token){
+            //     throw new Exception("Token expirado");
+            // }
+
+            View::render('newUser');
+
+        } catch (\Throwable $th) {
+            echo $th->getMessage();
+            //header("Location: /");
+        }
+    }
+
 
     public function changePasswordAction()
     {

@@ -6,6 +6,10 @@ use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 use Dotenv\Dotenv;
 use App\Helpers\Secure;
+use BaconQrCode\Renderer\ImageRenderer;
+use BaconQrCode\Renderer\Image\ImagickImageBackEnd;
+use BaconQrCode\Renderer\RendererStyle\RendererStyle;
+use BaconQrCode\Writer;
 
 class Mailer
 {
@@ -74,8 +78,8 @@ class Mailer
 
             return true;
         } catch (Exception $e) {
-            return "Message could not be sent. Mailer Error: " . self::$mail->ErrorInfo;
-            //return false;
+            //return "Message could not be sent. Mailer Error: " . self::$mail->ErrorInfo;
+            return false;
         }
     }
 
@@ -148,9 +152,6 @@ class Mailer
         $dotenv = Dotenv::createImmutable(__DIR__ . '/../../');
         $dotenv->load();
 
-        $secure = Secure::getInstance();
-        $secure->generatePasswordToken($to['for']);
-
         self::$mail = new PHPMailer(true);
 
         try {
@@ -169,7 +170,7 @@ class Mailer
 
             //Recipients
             self::$mail->setFrom($_ENV['SMTP_USER_MAIL'], $_ENV['SMTP_USER_NICKNAME']);
-            self::$mail->addAddress($to['email'], $to['name']);     // Add a recipient
+            self::$mail->addAddress($to['email']);     // Add a recipient
         
             self::$mail->SMTPOptions = [
                 'ssl' => [
@@ -181,22 +182,26 @@ class Mailer
             // Content
             self::$mail->isHTML(true);                                  // Set email format to HTML
             self::$mail->ContentType = 'text/html; charset=UTF-8';
-            self::$mail->Subject = 'Pedido de alteração de senha';
+            self::$mail->Subject = 'Convite para cadastro';
 
-            $link = $_ENV['BASE_URL'] . '/password?token=' . $secure->getPasswordToken();
+            $renderer = new ImageRenderer(
+                new RendererStyle(400),
+                new ImagickImageBackEnd()
+            );
+            $writer = new Writer($renderer);
+            $qrImage = base64_encode($writer->writeString($to['link']));
 
-            $htmlFile = file_get_contents('../resources/view/email/password.html');
-            $htmlFile = str_replace('{{NAME}}', $to['name'], $htmlFile);
-            $htmlFile = str_replace('{{LINK}}', $link, $htmlFile);
+            $htmlFile = file_get_contents('../resources/view/email/newuser.html');
+            $htmlFile = str_replace('{{IMAGE}}', $qrImage, $htmlFile);
+            $htmlFile = str_replace('{{LINK}}', $to['link'], $htmlFile);
 
             self::$mail->AddEmbeddedImage("../resources/view/email/images/logo2.png", "logo2");
             self::$mail->AddEmbeddedImage("../resources/view/email/images/logo1.png", "logo");
-            self::$mail->AddEmbeddedImage("../resources/view/email/images/lock.png", "lock");
             self::$mail->AddEmbeddedImage("../resources/view/email/images/instagram-rounded-gray.png", "instagram-rounded-gray");
             self::$mail->AddEmbeddedImage("../resources/view/email/images/whatsapp-rounded-gray.png", "whatsapp-rounded-gray");
         
             self::$mail->msgHTML($htmlFile);
-            self::$mail->AltBody = 'O link é: ' . $link;
+            self::$mail->AltBody = 'O link para cadastro é: ' . $to['link'];
 
             self::$mail->send();
 
