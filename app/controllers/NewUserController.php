@@ -25,47 +25,34 @@ class NewUserController extends Controller
         $this->secure = Secure::getInstance();
     }
 
-    public function createLinkApi()
+    public function newUserAction()
     {
         try {
-            if(!$this->secure->isLoggedIn() || !in_array('admin', $_SESSION['user']['permission'])){
-                throw new Exception("Não autorizado");
-            }
+            // if($this->secure->isLoggedIn()){
+            //     throw new Exception("Não autorizado");
+            // }
 
-            $json = Json::getJson();
+            $request = Req::getParams();
 
-            $isValidEmail = $this->secure->isValid('email', $json['email']);
-            $isNullEmail = strlen($json['email']) === 0;
+            // if(!$request['token'] || !$this->secure->isValidHex($request['token'])){
+            //     throw new Exception("Token invalido");
+            // }
 
-            if (!$isValidEmail && !$isNullEmail) {
-                throw new Exception("Email invalido");
-            }
+            //$token = $this->user->getNewUserLink($request['token']);
 
-            $this->secure->generateNewUserLink($json);
+            // if(!$token){
+            //     throw new Exception("Token expirado");
+            // }
 
-            if($isValidEmail){
-                Mailer::sendLink([
-                    'email' => $json['email'],
-                    'link' => $this->secure->getFullLink(),
-                ]);
-            }
-
-            Json::send([
-                'success' => true,
-                'message' => $isValidEmail ? 'Email enviado' : 'Link copiado para a área de transferência',
-                'link' => $this->secure->getFullLink(),
-                'linkType' => $isValidEmail ? 'email' : 'copy',
-            ]);
+            View::render('newUser');
 
         } catch (\Throwable $th) {
-            Json::send([
-                'success' => false,
-                'message' => $th->getMessage(),
-            ]);
+            echo $th->getMessage();
+            //header("Location: /");
         }
     }
 
-    public function newUserApi()
+    public function validateNewUserApi()
     {
         try {
             if($this->secure->isLoggedIn()){
@@ -161,22 +148,24 @@ class NewUserController extends Controller
                 throw new Exception("Pin invalido");
             }
 
-            $createUser = $this->user->createUser([
+            $toCreate = [
                 'username' => $_SESSION['userToCreate']['username'],
                 'password' => $this->secure->hash($_SESSION['userToCreate']['password']),
                 'first_name' => $_SESSION['userToCreate']['firstName'],
                 'last_name' => $_SESSION['userToCreate']['lastName'],
                 'email' => $_SESSION['userToCreate']['email'],
-                'created_at' => Carbon::now(),
+                'created_at' => Carbon::now()->format('Y-m-d H:i:s'),
                 'permission' => $_SESSION['userToCreate']['permission'],
-            ]);
+            ];
+
+            $createUser = $this->user->createUser($toCreate);
 
             if(!$createUser){
                 throw new Exception("Erro ao criar o usuário");
             }
 
-            $_SESSION['user'] = $createUser;
-            $_SESSION['user']['permission'] = $_SESSION['userToCreate']['permissions'];
+            $toCreate['permission'] = json_decode($toCreate['permission'], true)['permission'];
+            $_SESSION['user'] = $toCreate;
 
             unset($_SESSION['userToCreate']);
 
@@ -196,33 +185,45 @@ class NewUserController extends Controller
         }
     }
 
-    public function newUserAction()
+    public function createNewUserLinkApi()
     {
         try {
-            // if($this->secure->isLoggedIn()){
-            //     throw new Exception("Não autorizado");
-            // }
+            if(!$this->secure->isLoggedIn() || !$this->secure->hasPermission('admin')){
+                throw new Exception("Não autorizado");
+            }
 
-            $request = Req::getParams();
+            $json = Json::getJson();
 
-            // if(!$request['token'] || !$this->secure->isValidHex($request['token'])){
-            //     throw new Exception("Token invalido");
-            // }
+            $isValidEmail = $this->secure->isValid('email', $json['email']);
+            $isNullEmail = strlen($json['email']) === 0;
 
-            //$token = $this->user->getNewUserLink($request['token']);
+            if (!$isValidEmail && !$isNullEmail) {
+                throw new Exception("Email invalido");
+            }
 
-            // if(!$token){
-            //     throw new Exception("Token expirado");
-            // }
+            $this->secure->generateNewUserLink($json);
 
-            View::render('newUser');
+            if($isValidEmail){
+                Mailer::sendLink([
+                    'email' => $json['email'],
+                    'link' => $this->secure->getFullLink(),
+                ]);
+            }
+
+            Json::send([
+                'success' => true,
+                'message' => $isValidEmail ? 'Email enviado' : 'Link copiado para a área de transferência',
+                'link' => $this->secure->getFullLink(),
+                'linkType' => $isValidEmail ? 'email' : 'copy',
+            ]);
 
         } catch (\Throwable $th) {
-            echo $th->getMessage();
-            //header("Location: /");
+            Json::send([
+                'success' => false,
+                'message' => $th->getMessage(),
+            ]);
         }
     }
-
 
     public function changePasswordAction()
     {
@@ -302,7 +303,7 @@ class NewUserController extends Controller
         }
     }
 
-    public function newLinkApi()
+    public function resetPasswordLinkApi()
     {
         try {
             if(!$this->secure->isLoggedIn()){
@@ -349,5 +350,5 @@ class NewUserController extends Controller
         }
             
     }
-
 }
+

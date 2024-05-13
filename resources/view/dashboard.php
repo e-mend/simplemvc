@@ -23,22 +23,22 @@
                                     Menu
                                 </div>
                             </li>
-                            <li v-if="this.blocked || this.permissions['can_read_inventory']">
+                            <li v-if="this.blocked || this.permission['can_read_inventory']">
                                 <div @click="loadOptions('inventory')" class="dropdown-item btn">
                                     Inventário
                                 </div>
                             </li>
-                            <li v-if="this.blocked || this.permissions['can_read_post']">
+                            <li v-if="this.blocked || this.permission['can_read_post']">
                                 <div @click="loadOptions('safe')" class="dropdown-item btn">
                                     Cofre
                                 </div>
                             </li>
-                            <li class="this.blocked || !this.permissions['admin']">
+                            <li class="this.blocked || !this.permission['admin']">
                                 <div @click="loadOptions('users')" class="dropdown-item btn">
                                     Usuários
                                 </div>
                             </li>
-                            <li class=" this.blocked || !this.permissions['admin']">
+                            <li class=" this.blocked || !this.permission['admin']">
                                 <div @click="loadOptions('settings')" class="dropdown-item btn">
                                     Configurações
                                 </div>
@@ -76,22 +76,22 @@
                 </div>
                 <div class="row d-flex justify-content-between py-3 py-md-3 rounded
                     z-3">
-                    <div @click="loadOptions('inventory')" :class="{disabled: this.blocked || !this.permissions['can_read_inventory']}"
+                    <div @click="loadOptions('inventory')" :class="{disabled: this.blocked || !this.permission['can_read_inventory']}"
                     class="btn btn-primary col-12 col-md-6 text-white text-center py-3 fs-5">
                         Inventário
                         <i class="fa-solid fa-laptop"></i>
                     </div>
-                    <div @click="loadOptions('safe')" :class="{disabled: this.blocked || !this.permissions['can_read_post']}"
+                    <div @click="loadOptions('safe')" :class="{disabled: this.blocked || !this.permission['can_read_post']}"
                     class="btn btn-primary col-12 col-md-6 text-white text-center py-3 fs-5">
                         Cofre
                         <i class="fa-solid fa-lock"></i>
                     </div>
-                    <div @click="loadOptions('users')" :class="{disabled: this.blocked || !this.permissions['admin']}"
+                    <div @click="loadOptions('users')" :class="{disabled: this.blocked || !this.permission['admin']}"
                     class="btn btn-primary col-12 col-md-6 text-white text-center py-3 fs-5">
                         Usuários
                         <i class="fa-solid fa-users"></i>
                     </div>
-                    <div @click="loadOptions('settings')" :class="{disabled: this.blocked || !this.permissions['admin']}"
+                    <div @click="loadOptions('settings')" :class="{disabled: this.blocked || !this.permission['admin']}"
                     class="btn btn-primary col-12 col-md-6 text-white text-center py-3 fs-5">
                         Configurações
                         <i class="fa-solid fa-wrench"></i>
@@ -139,25 +139,25 @@
                 <div class="row d-flex justify-content-between rounded z-3 text-center" v-if="searchModalOpen">
                     <div class="btn btn-primary col-6 col-md-3 text-center py-3 fs-5" 
                     @click="getUsers('all')"
-                    :class="{'opacity-25': this.userSearch.all}" v-if="this.permissions['admin']">
+                    :class="{'opacity-25': this.userSearch.all}" v-if="this.permission['admin']">
                         Todos
                         <i class="fa-solid fa-xmark"></i>
                     </div>
                     <div class="btn btn-primary col-6 col-md-3 text-center py-3 fs-5" 
                     @click="getUsers('new')"
-                    :class="{'opacity-25': this.userSearch.new}" v-if="this.permissions['admin']">
+                    :class="{'opacity-25': this.userSearch.new}" v-if="this.permission['admin']">
                         Novos
                         <i class="fa-solid fa-fire"></i>
                     </div>
                     <div class="btn btn-danger col-6 col-md-3 text-center py-3 fs-5" 
                     @click="getUsers('deleted')"
-                    :class="{'opacity-25': this.userSearch.deleted}" v-if="this.permissions['admin']">
+                    :class="{'opacity-25': this.userSearch.deleted}" v-if="this.permission['admin']">
                         Desabilitados
                         <i class="fa-solid fa-circle-minus"></i>
                     </div>
                     <div class="btn btn-dark col-6 col-md-3 text-center py-3 fs-5"
                     @click="getUsers('favorites')"
-                    :class="{'opacity-25': this.userSearch.favorites}" v-if="this.permissions['admin']">
+                    :class="{'opacity-25': this.userSearch.favorites}" v-if="this.permission['admin']">
                         Favoritos
                         <i class="fa-solid fa-star"></i>
                     </div>

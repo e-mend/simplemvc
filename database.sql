@@ -106,21 +106,23 @@ INSERT INTO
 VALUES
     ('admin', 'Padrao@123', 
 '{
-    "permissions": [
-    "can_read_post",
-    "can_create_post",
-    "can_update_post",
-    "can_delete_post",
-    "can_see_deleted_posts",
-    "post_1",
-    "post_2",
-    "post_3",
-    "can_read_inventory",
-    "can_create_inventory",
-    "can_update_inventory",
-    "can_delete_inventory",
-    "admin"
-  ]
+  "permission": {
+    "can_read_post": true,
+    "can_create_post": true,
+    "can_update_post": true,
+    "can_delete_post": true,
+    "can_see_deleted_posts": true,
+    "post_1": true,
+    "post_2": true,
+    "post_3": true,
+    "can_read_inventory": true,
+    "can_create_inventory": true,
+    "can_update_inventory": true,
+    "can_delete_inventory": true,
+    "user": true,
+    "admin": true
+  },
+  "email": ""
 }', NOW(), 'pleasechangeinapp@mail.com',
 'Rafael', 'Camargo Silva');
 

@@ -82,7 +82,7 @@ class HomeController extends Controller
 
             $_SESSION['user'] = $user[0];
             $_SESSION['user']['permission'] = 
-            json_decode($_SESSION['user']['permission'], true)['permissions'];
+            json_decode($_SESSION['user']['permission'], true)['permission'];
             $_SESSION['token'] = true;
 
             if(count($user) === 1 && $user[0]['password'] === Secure::DEFAULT_PASSWORD){
@@ -209,7 +209,7 @@ class HomeController extends Controller
     
                 $user = $this->user->get()[0];
                 $_SESSION['user'] = $user;
-                $_SESSION['user']['permission'] = json_decode($_SESSION['user']['permission'], true)['permissions'];
+                $_SESSION['user']['permission'] = json_decode($_SESSION['user']['permission'], true)['permission'];
     
                 if(!$toUpdate){
                     throw new Exception($toUpdate);

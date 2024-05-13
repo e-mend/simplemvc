@@ -90,7 +90,7 @@ class DashboardController extends Controller
     public function getUsersApi()
     {
         try {
-            if(!$this->secure->isLoggedIn() || !in_array('admin', $_SESSION['user']['permission'])){
+            if(!$this->secure->isLoggedIn() || !$this->secure->hasPermission('admin')){
                 throw new Exception("Não autorizado");
             }
 
@@ -154,7 +154,7 @@ class DashboardController extends Controller
             }
 
             if($params['id']){
-                $users[0]['permission'] = json_decode($users[0]['permission'], true)['permissions'];
+                $users[0]['permission'] = json_decode($users[0]['permission'], true)['permission'];
             }
 
             Json::send([
@@ -176,7 +176,7 @@ class DashboardController extends Controller
     public function sendPasswordApi()
     {
         try {
-            if(!$this->secure->isLoggedIn() || !in_array('admin', $_SESSION['user']['permission'])){
+            if(!$this->secure->isLoggedIn() || !$this->secure->hasPermission('admin')){
                 throw new Exception("Não autorizado");
             }
 
@@ -227,7 +227,7 @@ class DashboardController extends Controller
     public function getLinksApi()
     {
         try {
-            if(!$this->secure->isLoggedIn() || !in_array('admin', $_SESSION['user']['permission'])){
+            if(!$this->secure->isLoggedIn() || !$this->secure->hasPermission('admin')){
                 throw new Exception("Não autorizado");
             }
 

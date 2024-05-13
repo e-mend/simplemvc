@@ -24,7 +24,7 @@ const app = new Vue({
             option: '',
             user: {},
             blocked: false,
-            permissions: {},
+            permission: {},
             searchModalOpen: false,
             showModal: false,
             users: {},
@@ -279,11 +279,6 @@ const app = new Vue({
 
                 this.throwWarning(json['message'], ['alert-success']);
 
-                json['users'][0]['permission'] = json['users'][0]['permission'].reduce((obj, item, index) => {
-                    obj[item] = true;
-                    return obj;
-                }, {});
-
                 json['users'][0]['password'] = '';
                 this.userToEdit = json['users'][0];                
 
@@ -522,13 +517,8 @@ const app = new Vue({
 
                 this.user = json['user'];
 
-                const perm = json['user']['permission'].reduce((obj, item, index) => {
-                    obj[item] = true;
-                    return obj;
-                }, {});
-
-                this.permissions = perm;
-                console.log(this.permissions);
+                this.permission = json['user']['permission'];
+                console.log(this.permission);
 
             } catch (error) {
                 this.throwWarning(error.message, ['alert-danger']);

@@ -125,6 +125,11 @@ class Secure
         return;
     }
 
+    public function hasPermission(string $permission)
+    {
+        return $_SESSION['user']['permission'][$permission];
+    }
+
     public function generatePasswordToken(?array $data = null)
     {
         $this->generateUrl();
@@ -156,11 +161,11 @@ class Secure
 
         if ($data) {
             foreach ($data as &$key) {
-                $key['link'] = 'www.' . $_ENV['BASE_URL'] . '/new?token=' . $key['link'];
+                $key['link'] = 'www.' . $_ENV['BASE_URL'] . '/newuser?token=' . $key['link'];
             }
             return $data;
         }
 
-        return 'www.' . $_ENV['BASE_URL'] . '/new?token=' . $this->passwordToken;
+        return 'www.' . $_ENV['BASE_URL'] . '/newuser?token=' . $this->passwordToken;
     }
 }
