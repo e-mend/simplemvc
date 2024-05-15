@@ -118,10 +118,11 @@ class User
 
         if($search['favorite']){
             $select->where(['favorite' => $search['favorite']]);
+            $select->order($search['order'] ?? 'id DESC, created_at DESC');
         }
 
         $select->where(['is_deleted' => $search['is_deleted'] ?? false]);
-        $select->order($search['order'] ?? 'id DESC, created_at DESC');
+        $select->order($search['order'] ?? 'favorite DESC, id DESC, created_at DESC');
 
         if(!$isCount){
             $select->limit(self::OFFSET);

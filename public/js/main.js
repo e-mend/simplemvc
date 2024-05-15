@@ -472,10 +472,57 @@ const app = new Vue({
         },
         loadOptions(option) {
             this.loadingR(true);
-            this.option = option;  
+
+            if(this.blocked){
+                this.option === 'main';
+                return;
+            }
+
+            if(option === 'users' && !this.permission['admin']) {
+                this.option === 'main';
+                return;
+            }
+
+            if(option === 'safe' && !this.permission['can_read_post']) {
+                this.option === 'main';
+                return;
+            }
+
+            if(option === 'inventory' && !this.permission['can_read_inventory']) {
+                this.option === 'main';
+                return;
+            }
+
+            this.option = option;
 
             if(this.option === 'users') {
                 this.getUsers();
+            }
+        },
+        async changePermissions() {
+            try {
+                const response = await fetch('/changepermissions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        permission: this.userToEdit['permissions'],
+                        id: this.userToEdit['id']
+                    })
+                });
+
+                if(!response.ok) {
+                    throw new Error('Algo deu errado');
+                }
+
+                const json = await response.json();
+
+                if(!json.success) {
+                    throw new Error(json['message']);
+                }
+            } catch (error) {
+                
             }
         },
         loadingR(force = false) {

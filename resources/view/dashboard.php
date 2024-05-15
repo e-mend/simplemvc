@@ -1,7 +1,6 @@
 <?php require 'base/header.php';?>
 
 <body>
-
     <div class="container-fluid vertical-center position-absolute top-0 start-0" id="app">
         <div class="container top-0 position-fixed">
             <div class="row d-flex justify-content-between bg-primary py-3 py-md-3 rounded
@@ -23,22 +22,22 @@
                                     Menu
                                 </div>
                             </li>
-                            <li v-if="this.blocked || this.permission['can_read_inventory']">
+                            <li v-if="!this.blocked && this.permission['can_read_inventory']">
                                 <div @click="loadOptions('inventory')" class="dropdown-item btn">
                                     Inventário
                                 </div>
                             </li>
-                            <li v-if="this.blocked || this.permission['can_read_post']">
+                            <li v-if="!this.blocked && this.permission['can_read_post']">
                                 <div @click="loadOptions('safe')" class="dropdown-item btn">
                                     Cofre
                                 </div>
                             </li>
-                            <li class="this.blocked || !this.permission['admin']">
+                            <li v-if="!this.blocked && this.permission['admin']">
                                 <div @click="loadOptions('users')" class="dropdown-item btn">
                                     Usuários
                                 </div>
                             </li>
-                            <li class=" this.blocked || !this.permission['admin']">
+                            <li v-if="!this.blocked">
                                 <div @click="loadOptions('settings')" class="dropdown-item btn">
                                     Configurações
                                 </div>
@@ -91,7 +90,7 @@
                         Usuários
                         <i class="fa-solid fa-users"></i>
                     </div>
-                    <div @click="loadOptions('settings')" :class="{disabled: this.blocked || !this.permission['admin']}"
+                    <div @click="loadOptions('settings')" :class="{disabled: this.blocked}"
                     class="btn btn-primary col-12 col-md-6 text-white text-center py-3 fs-5">
                         Configurações
                         <i class="fa-solid fa-wrench"></i>
@@ -163,7 +162,7 @@
                     </div>
                 </div>
                 <div class="row d-flex justify-content-between rounded z-3 text-center">
-                    <div v-for="user in users" :key="user.id" class="bg-primary rounded text-white
+                    <div v-for="user in users" :key="user.id" class="bg-primary rounded text-white mt-1
                     text-center py-1 fs-5">
                         <div class="row d-flex justify-content-between">
                             <div class="col-12 col-md-3">
@@ -194,15 +193,14 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-12 col-md-12 text-start d-flex text-break">
+                            <!-- <div class="col-12">
                                 <div class="btn btn-primary disabled text-center" v-if="user.isNew">
                                     <i class="fa-solid fa-fire"></i>
                                 </div>
                                 <div class="btn btn-danger disabled text-center" v-if="user.is_deleted">
                                     <i class="fa-solid fa-circle-minus"></i>
                                 </div> 
-                            </div>
-                            
+                            </div> -->
                         </div>
                     </div>
                 </div>
@@ -526,7 +524,7 @@
                                 <div class="text-center fs-5 col-md-6 col-12">
                                     <div class="form-check form-switch">
                                         <input class="form-check-input" type="checkbox" role="switch" 
-                                        :checked="userToEdit.permission['can_read_post']"
+                                        v-model="userToEdit.permission['can_read_post']"
                                         :disabled="userToEdit.permission['admin']">
                                         <label class="form-check-label">
                                             Ver item
@@ -536,7 +534,7 @@
                                 <div class="text-center fs-5 col-md-6 col-12">
                                     <div class="form-check form-switch">
                                         <input class="form-check-input" type="checkbox" role="switch" 
-                                        :checked="userToEdit.permission['can_create_post']"
+                                        v-model="userToEdit.permission['can_create_post']"
                                         :disabled="userToEdit.permission['admin']">
                                         <label class="form-check-label">
                                             Criar item
@@ -546,7 +544,7 @@
                                 <div class="text-center fs-5 col-md-6 col-12">
                                     <div class="form-check form-switch">
                                         <input class="form-check-input" type="checkbox" role="switch"
-                                        :checked="userToEdit.permission['can_update_post']"
+                                        v-model="userToEdit.permission['can_update_post']"
                                         :disabled="userToEdit.permission['admin']">
                                         <label class="form-check-label">
                                             Modificar item
@@ -556,7 +554,7 @@
                                 <div class="text-center fs-5 col-md-6 col-12">
                                     <div class="form-check form-switch">
                                         <input class="form-check-input" type="checkbox" role="switch" 
-                                        :checked="userToEdit.permission['can_delete_post']"
+                                        v-model="userToEdit.permission['can_delete_post']"
                                         :disabled="userToEdit.permission['admin']">
                                         <label class="form-check-label">
                                             Apagar item
@@ -566,7 +564,7 @@
                                 <div class="text-center fs-5 col-md-6 col-12">
                                     <div class="form-check form-switch">
                                         <input class="form-check-input" type="checkbox" role="switch" 
-                                        :checked="userToEdit.permission['can_see_deleted_posts']"
+                                        v-model="userToEdit.permission['can_see_deleted_posts']"
                                         :disabled="userToEdit.permission['admin']">
                                         <label class="form-check-label">
                                             Ver item apagado
@@ -579,7 +577,7 @@
                                 <div class="text-center fs-5 col-md-3 col-12">
                                     <div class="form-check form-switch">
                                         <input class="form-check-input" type="checkbox" role="switch" 
-                                        :checked="userToEdit.permission['post_1']"
+                                        v-model="userToEdit.permission['post_1']"
                                         :disabled="userToEdit.permission['admin']">
                                         <label class="form-check-label">
                                             Cofre nível 1
@@ -589,7 +587,7 @@
                                 <div class="text-center fs-5 col-md-3 col-12">
                                     <div class="form-check form-switch">
                                         <input class="form-check-input" type="checkbox" role="switch"
-                                        :checked="userToEdit.permission['post_2']"
+                                        v-model="userToEdit.permission['post_2']"
                                         :disabled="userToEdit.permission['admin']">
                                         <label class="form-check-label" for="flexSwitchCheckDefault">
                                             Cofre nível 2
@@ -599,7 +597,7 @@
                                 <div class="text-center fs-5 col-md-3 col-12">
                                     <div class="form-check form-switch">
                                         <input class="form-check-input" type="checkbox" role="switch"
-                                        :checked="userToEdit.permission['post_3']"
+                                        v-model="userToEdit.permission['post_3']"
                                         :disabled="userToEdit.permission['admin']">
                                         <label class="form-check-label" for="flexSwitchCheckDefault">
                                             Cofre nível 3
@@ -613,7 +611,7 @@
                                 <div class="text-center fs-5 col-md-6 col-12">
                                     <div class="form-check form-switch">
                                         <input class="form-check-input" type="checkbox" role="switch"
-                                        :checked="userToEdit.permission['can_read_inventory']"
+                                        v-model="userToEdit.permission['can_read_inventory']"
                                         :disabled="userToEdit.permission['admin']">
                                         <label class="form-check-label">
                                             Ver item
@@ -623,7 +621,7 @@
                                 <div class="text-center fs-5 col-md-6 col-12">
                                     <div class="form-check form-switch">
                                         <input class="form-check-input" type="checkbox" role="switch"
-                                        :checked="userToEdit.permission['can_create_inventory']"
+                                        v-model="userToEdit.permission['can_create_inventory']"
                                         :disabled="userToEdit.permission['admin']">
                                         <label class="form-check-label" for="flexSwitchCheckDefault">
                                             Criar item
@@ -633,7 +631,7 @@
                                 <div class="text-center fs-5 col-md-6 col-12">
                                     <div class="form-check form-switch">
                                         <input class="form-check-input" type="checkbox" role="switch"
-                                        :checked="userToEdit.permission['can_delete_inventory']"
+                                        v-model="userToEdit.permission['can_delete_inventory']"
                                         :disabled="userToEdit.permission['admin']">
                                         <label class="form-check-label" for="flexSwitchCheckDefault">
                                             Apagar item
@@ -643,7 +641,7 @@
                                 <div class="text-center fs-5 col-md-6 col-12">
                                     <div class="form-check form-switch">
                                         <input class="form-check-input" type="checkbox" role="switch"
-                                        :checked="userToEdit.permission['can_update_inventory']"
+                                        v-model="userToEdit.permission['can_update_inventory']"
                                         :disabled="userToEdit.permission['admin']">
                                         <label class="form-check-label" for="flexSwitchCheckDefault">
                                             Modificar item
@@ -665,8 +663,8 @@
                                 </div> 
                                 <div class="text-center fs-5 col-md-6 col-12">
                                     <div class="form-check form-switch">
-                                        <input class="form-check-input" disabled type="checkbox" 
-                                        :checked="userToEdit"
+                                        <input class="form-check-input" type="checkbox" 
+                                        v-model="userToEdit.permission['admin']"
                                         role="switch" id="flexSwitchCheckDefault">
                                         <label class="form-check-label" for="flexSwitchCheckDefault">
                                             Admin
@@ -676,7 +674,7 @@
                                 <div class="text-center fs-5 col-md-6 col-12">
                                     <div class="form-check form-switch">
                                         <input class="form-check-input" 
-                                        disabled checked
+                                        v-model="userToEdit.permission['user']"
                                         type="checkbox" role="switch" id="flexSwitchCheckDefault">
                                         <label class="form-check-label" for="flexSwitchCheckDefault">
                                             Usuário comum
@@ -708,12 +706,13 @@
                                 </div>
                                 <div class="col-md-6 col-12">
                                     <div class="btn btn-warning text-center fs-5 w-100"
-                                    :class="{'disabled': userToEdit.permission['admin']}">
-                                        Deslogar usuário
+                                    :class="{'disabled': userToEdit.permission['admin']}"
+                                    @click="changePermissions()">
+                                        Alterar permissões
                                         <i class="fa-solid fa-bolt"></i>
                                     </div>
                                     <div class="text-center fs-5 w-100">
-                                        Se o usuário estiver logado, será deslogado automaticamente.
+                                        Altere as permissões desse usuário.
                                     </div>
                                 </div>
                             </div>

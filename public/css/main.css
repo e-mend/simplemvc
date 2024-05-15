@@ -66,6 +66,10 @@
     align-items: center;
 }
 
+.bg-primary-2{
+    background-color: var(--primary-color) !important;
+}
+
 .warn{
     z-index: 2000 !important;
 }

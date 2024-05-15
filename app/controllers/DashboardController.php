@@ -99,31 +99,22 @@ class DashboardController extends Controller
 
             if(!$params['id']){
                 if($params['new']){
-                    $query = array_merge($query, [
-                        'days' => Carbon::now()->subDays(self::NEW_USER_DAYS)->format('Y-m-d H:i:s')
-                    ]);
+                    $query['days'] = Carbon::now()->subDays(self::NEW_USER_DAYS)->format('Y-m-d H:i:s');
                 }
     
                 if($params['deleted']){
-                    $query = array_merge($query, [
-                        'is_deleted' => 1
-                    ]); 
+                    $query['is_deleted'] = 1; 
                 }else{
-                    $query = array_merge($query, [
-                        'is_deleted' => 0
-                    ]); 
+                    $query['is_deleted'] = 0;
                 }
     
                 if($params['favorites']){
-                    $query = array_merge($query, [
-                        'favorite' => 1
-                    ]);
+                    $query['favorite'] = 1;
+                    $query['order'] = 'favorite DESC, created_at DESC';
                 }
 
                 if($params['pagination']){
-                    $query = array_merge($query, [
-                        'offset' => ($params['pagination'] - 1) * User::OFFSET
-                    ]);
+                    $query['offset'] = ($params['pagination'] - 1) * User::OFFSET;
                 }
             }else{
                 $query['where'] = [
