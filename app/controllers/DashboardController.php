@@ -66,6 +66,78 @@ class DashboardController extends Controller
         }
     }
 
+    public function disableUserApi()
+    {
+        try {
+            if(!$this->secure->isLoggedIn() || !$this->secure->hasPermission('admin')){
+                throw new Exception("Não autorizado");
+            }
+
+            $params = Req::getParams();
+
+            if (!$params['id']){
+                throw new Exception("Id invalido");
+            }
+
+            $this->user->update([
+                'is_deleted' => 1
+            ], $params['id']);
+
+            Json::send([
+                'success' => true,
+                'message' => 'Conta desativada com sucesso'
+            ]);
+
+        } catch (\Throwable $th) {
+            Json::send([
+                'success' => false,
+                'message' => $th->getMessage()
+            ]);
+        }
+    }
+    
+    public function routinesApi()
+    {
+        try {
+            if(!$this->secure->isLoggedIn()){
+                throw new Exception("Sessão expirada");
+            }
+
+            $isWaiting = User::isWaitingCoroutine();
+
+            if($isWaiting === 'death'){
+                Json::send([
+                    'success' => true,
+                    'redirect' => '/',
+                    'message' => 'Sua conta foi morreu',
+                ]);
+            }
+
+            if($isWaiting === 'reset'){
+                Json::send([
+                    'success' => true,
+                    'redirect' => false,
+                    'type' => 'reset',
+                    'permission' => $_SESSION['user']['permission'],
+                    'message' => 'Permissões alteradas com sucesso',
+                ]);
+            }
+
+            Json::send([
+                'success' => true,
+                'redirect' => false,
+                'message' => 'Nada aconteceu',
+            ]);
+
+        } catch (\Throwable $th) {
+            Json::send([
+                'success' => false,
+                'redirect' => '/',
+                'message' => $th->getMessage()
+            ]);
+        }
+    }
+
     public function logoutApi()
     {
         try {

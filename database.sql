@@ -26,6 +26,7 @@ CREATE TABLE `InventoryApp`.`permission`(
 CREATE TABLE `InventoryApp`.`kill_switch`(
     `id` INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
     `user_id` INT NOT NULL,
+    `type` VARCHAR(255) NOT NULL,
     FOREIGN KEY (user_id) REFERENCES user(id)
 );
 

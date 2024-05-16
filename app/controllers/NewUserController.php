@@ -128,6 +128,42 @@ class NewUserController extends Controller
         }
     }
 
+    public function changePermissionApi()
+    {
+        try {
+            if(!$this->secure->isLoggedIn() || !$this->secure->hasPermission('admin')){
+                throw new Exception("Not Authorized");
+            }
+
+            $json = Json::getJson();
+
+            if(!$json['id'] || !$json['permission']){
+                throw new Exception("Erro ao processar a requisição");
+            }
+
+            $json['permission'] = [
+                'permission' => $json['permission'],
+            ];
+
+            $user = $this->user->update([
+                'permission' => json_encode($json['permission']),
+            ], $json['id']);
+
+            User::foresightCoroutine($json['id'], 'reset');
+
+            Json::send([
+                'success' => $user,
+                'message' => 'Alterado com sucesso',
+            ]);
+
+        } catch (\Throwable $th) {
+            Json::send([
+                'success' => false,
+                'message' => $th->getMessage(),
+            ]);
+        }
+    }
+
     public function validateNewUserEmailApi()
     {
         try {

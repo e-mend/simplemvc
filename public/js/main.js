@@ -17,6 +17,8 @@ const app = new Vue({
     el: '#app',
     data() {
         return {
+            times: 0,
+            secs: 0,
             warnings: [],
             nextId: 0,
             loading: 0,
@@ -24,7 +26,22 @@ const app = new Vue({
             option: '',
             user: {},
             blocked: false,
-            permission: {},
+            permission: {
+                'can_read_post': false,
+                'can_create_post': false,
+                'can_update_post': false,
+                'can_delete_post': false,
+                'can_see_deleted_posts': false,
+                'post_1': false,
+                'post_2': false,
+                'post_3': false,
+                'can_read_inventory': false,              
+                'can_create_inventory': false,
+                'can_update_inventory': false,
+                'can_delete_inventory': false,
+                'user': true,
+                'admin': false
+            },
             searchModalOpen: false,
             showModal: false,
             users: {},
@@ -38,7 +55,20 @@ const app = new Vue({
             userToEdit: {
                 password: '',
                 permission: {
-                    
+                    'can_read_post': false,
+                    'can_create_post': false,
+                    'can_update_post': false,
+                    'can_delete_post': false,
+                    'can_see_deleted_posts': false,
+                    'post_1': false,
+                    'post_2': false,
+                    'post_3': false,
+                    'can_read_inventory': false,              
+                    'can_create_inventory': false,
+                    'can_update_inventory': false,
+                    'can_delete_inventory': false,
+                    'user': true,
+                    'admin': false
                 }
             },
             createNewUser: {
@@ -499,6 +529,45 @@ const app = new Vue({
                 this.getUsers();
             }
         },
+        async foresight() {
+            try {
+                this.times += 1;
+                console.log('foresight: ' + this.times);
+                const response = await fetch('/foresight'); 
+                
+                if(!response.ok) {
+                    throw new Error('Algo deu errado');
+                }
+
+                const json = await response.json();
+
+                console.log(json);
+
+                if(!json.success) {
+                    throw new Error(json['message']);
+                }
+
+                console.log(this.permission);
+                
+
+                if(json['redirect'] === false) {
+                    if(json['type'] === 'reset'){
+                        Vue.set(this, 'permission', json['permission']);
+                    }
+                    this.throwWarning('Nada aconteceu', ['alert-secondary']);
+                    return;
+                }
+
+                if(json['redirect'] === true) {
+                    window.location.href = json['url'];
+                }
+
+                this.throwWarning(json['message'], ['alert-success']);
+            } catch (error) {
+                this.throwWarning(error.message, ['alert-danger']);
+                window.location.href = "/";
+            }
+        },
         async changePermissions() {
             try {
                 const response = await fetch('/changepermissions', {
@@ -507,7 +576,7 @@ const app = new Vue({
                         'Content-type': 'application/json'
                     },
                     body: JSON.stringify({
-                        permission: this.userToEdit['permissions'],
+                        permission: this.userToEdit['permission'],
                         id: this.userToEdit['id']
                     })
                 });
@@ -521,8 +590,10 @@ const app = new Vue({
                 if(!json.success) {
                     throw new Error(json['message']);
                 }
+
+                this.throwWarning(json['message'], ['alert-success']);
             } catch (error) {
-                
+                this.throwWarning(error.message, ['alert-danger']);
             }
         },
         loadingR(force = false) {
@@ -580,14 +651,23 @@ const app = new Vue({
             return this.passwordFieldType === 'password' ? 'fa fa-eye-slash' : 'fa fa-eye';
         }
     },
-    beforeMounted() {
-
-
-    },
-    mounted() {
-        this.loadingR();
-        this.getUserData();
+    async mounted() {
+        await this.loadingR();
+        await this.getUserData();
         this.option = 'main';
-    
+
+        if(this.permission['admin']) {
+            return;
+        }
+
+        setInterval(() => { 
+            this.secs += 1;
+            this.throwWarning('Próxima tentativa em ' + (20 - this.secs) + ' segundos', ['alert-danger']);
+
+            if(this.secs === 20) {
+                this.secs = 0;
+                this.foresight();
+            }
+        }, 1000);
     }
 });

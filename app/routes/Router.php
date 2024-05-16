@@ -43,6 +43,8 @@ final class Router
                 '/password' => fn() => self::load('NewUserController', 'changePasswordAction'),
                 '/getlinks' => fn() => self::load('DashboardController', 'getLinksApi'),
                 '/newuser' => fn() => self::load('NewUserController', 'newUserAction'),
+                '/disableuser' => fn() => self::load('DashboardController', 'disableUserApi'),
+                '/foresight' => fn() => self::load('DashboardController', 'routinesApi'),
           ],
           'post' => [
                 '/login' => fn() => self::load('HomeController', 'loginApi'),
@@ -58,6 +60,7 @@ final class Router
                 '/createlink' => fn() => self::load('NewUserController', 'createNewUserLinkApi'),
                 '/newuser' => fn() => self::load('NewUserController', 'validateNewUserApi'),
                 '/validatenewemail' => fn() => self::load('NewUserController', 'validateNewUserEmailApi'),
+                '/changepermissions' => fn() => self::load('NewUserController', 'changePermissionApi'),
           ]
         ];
     }
@@ -65,8 +68,6 @@ final class Router
     public static function execute()
     {
         try {
-            User::isWaitingDeath();
-
             $routes = self::routes();
             $request = Request::get();
             $uri = Uri::getUri('path');
@@ -84,8 +85,8 @@ final class Router
             $router();
 
         } catch (\Throwable $th) {
-            //echo $th->getMessage();
-
+            echo $th->getMessage();
+die();
             $_SESSION['premature'] = true;
             header('Location: /');
         }

@@ -11,6 +11,7 @@ use Laminas\Db\Sql\Insert;
 use Laminas\Db\Sql\Delete;
 use Carbon\Carbon;
 use Laminas\Db\Sql\Expression;
+use App\Requests\Json;
 
 class User
 {
@@ -28,7 +29,7 @@ class User
         $this->sql = new Sql($this->adapter);
     }
 
-    public static function isWaitingDeath()
+    public static function isWaitingCoroutine()
     {
         if($_SESSION['user']){
             $db = Database::getInstance();
@@ -39,24 +40,53 @@ class User
             $select->where(['user_id' => $_SESSION['user']['id']]);
 
             $select = $sql->buildSqlString($select);
-            $count = $adapter->query($select, Adapter::QUERY_MODE_EXECUTE);
+            $waitingUser = $adapter->query($select, Adapter::QUERY_MODE_EXECUTE)->toArray();
 
-            if(count($count) > 0){
-                session_destroy();
+            foreach ($waitingUser as $routine) {
+                if($routine['type'] === 'death'){
+                    session_destroy();
 
-                $delete = new Delete();
-                $delete->from('kill_switch')
-                    ->where(['id' => $_SESSION['user']['id']]);
+                    $delete = new Delete();
+                    $delete->from('kill_switch')
+                        ->where([
+                                'user_id' => $_SESSION['user']['id'],
+                                'type' => 'death'
+                            ]);
+    
+                    $deleteStmt = $sql->buildSqlString($delete);
+                    $result = $adapter->query($deleteStmt, Adapter::QUERY_MODE_EXECUTE);
+    
+                    return 'death';
+                }
 
-                $statement = $sql->prepareStatementForSqlObject($delete);
-                $result = $statement->execute();
+                if($routine['type'] === 'reset'){
+                    $select = $sql->select('user');
+                    $select->where(['id' => $_SESSION['user']['id']]);
 
-                header('Location: /');
+                    $select = $sql->buildSqlString($select);
+                    $user = $adapter->query($select, Adapter::QUERY_MODE_EXECUTE)->toArray()[0];
+
+                    $_SESSION['user']['permission'] = 
+                    json_decode($user['permission'], true)['permission'];
+
+                    $delete = new Delete();
+                    $delete->from('kill_switch')
+                        ->where([
+                                'user_id' => $_SESSION['user']['id'],
+                                'type' => 'reset',
+                            ]);
+    
+                    $deleteStmt = $sql->buildSqlString($delete);
+                    $result = $adapter->query($deleteStmt, Adapter::QUERY_MODE_EXECUTE);
+
+                    return 'reset';
+                }
             }
+            return false;
         }
     }
 
-    public static function foresightDeath(int $id)
+    public static function foresightCoroutine(int $id, string $type)
     {
         if($_SESSION['user']){
             $db = Database::getInstance();
@@ -67,7 +97,8 @@ class User
             $insert->into('kill_switch');
 
             $insert->values([
-                'user_id' => $id
+                'user_id' => $id,
+                'type' => $type,
             ]);
 
             $insert = $sql->buildSqlString($insert);
