@@ -290,7 +290,7 @@ const app = new Vue({
             }
 
         },
-        async userModal(id) {
+        async userModal(id, hideWarning = false) {
             $('#userModal').modal('show');
 
             try {
@@ -307,7 +307,9 @@ const app = new Vue({
                     return;
                 }
 
-                this.throwWarning(json['message'], ['alert-success']);
+                if(!hideWarning){
+                    this.throwWarning(json['message'], ['alert-success']);
+                }
 
                 json['users'][0]['password'] = '';
                 this.userToEdit = json['users'][0];                
@@ -531,8 +533,6 @@ const app = new Vue({
         },
         async foresight() {
             try {
-                this.times += 1;
-                console.log('foresight: ' + this.times);
                 const response = await fetch('/foresight'); 
                 
                 if(!response.ok) {
@@ -541,14 +541,9 @@ const app = new Vue({
 
                 const json = await response.json();
 
-                console.log(json);
-
                 if(!json.success) {
                     throw new Error(json['message']);
                 }
-
-                console.log(this.permission);
-                
 
                 if(json['redirect'] === false) {
                     if(json['type'] === 'reset'){
@@ -558,9 +553,7 @@ const app = new Vue({
                     return;
                 }
 
-                if(json['redirect'] === true) {
-                    window.location.href = json['url'];
-                }
+                window.location.href = json['redirect'];
 
                 this.throwWarning(json['message'], ['alert-success']);
             } catch (error) {
@@ -644,6 +637,31 @@ const app = new Vue({
             }
 
             this.blocked = false;
+        },
+        async disableUser(id) {
+            try {
+                const response = await fetch('/disableuser?id='+id);
+
+                if(!response.ok) {
+                    throw new Error('Algo deu errado');
+                }
+
+                const json = await response.json();
+
+                if(!json.success) {
+                    throw new Error(json['message']);
+                }
+
+                if(json['is_disabled']){
+                    this.throwWarning(json['message']+' <i class="fa-solid fa-check"></i>', ['alert-success']);
+                }else{
+                    this.throwWarning(json['message']+' <i class="fa-solid fa-xmark"></i>', ['alert-danger']);
+                }
+
+                this.userModal(id, true);
+            } catch (error) {
+                this.throwWarning(error.message, ['alert-danger']);
+            }
         }
     },
     computed: {

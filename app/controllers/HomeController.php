@@ -90,6 +90,8 @@ class HomeController extends Controller
                 $_SESSION['welcome'] = true;
             }
 
+            User::isWaitingCoroutine(true);
+
             Json::send([
                 'success' => true,
                 'redirect' => $redirect

@@ -188,7 +188,7 @@
                                         <i class="fa-regular fa-star"></i>
                                     </div>
                                     <div class="btn btn-primary text-center p-3 fs-5" 
-                                    @click="userModal(user.id)">
+                                    @click="userModal(user.id, true)">
                                         <i class="fa-solid fa-pencil"></i>
                                     </div>
                                 </div>
@@ -685,7 +685,8 @@
                             <div class="row d-flex justify-content-between mb-2">
                                 <div v-if="!userToEdit.is_deleted" class="col-md-6 col-12">
                                     <div class="btn btn-danger text-center fs-5 w-100"
-                                    :class="{'disabled': userToEdit.permission['admin']}">
+                                    :class="{'disabled': userToEdit.permission['admin']}"
+                                    @click="disableUser(userToEdit.id)">
                                         Desativar usuário
                                         <i class="fa-solid fa-xmark"></i>
                                     </div>
@@ -696,7 +697,8 @@
 
                                 <div v-else class="col-md-6 col-12">
                                     <div class="btn btn-success text-center fs-5 w-100"
-                                    :class="{'disabled': userToEdit.permission['admin']}">
+                                    :class="{'disabled': userToEdit.permission['admin']}"
+                                    @click="disableUser(userToEdit.id)">
                                         Reativar usuário
                                         <i class="fa-solid fa-check"></i>
                                     </div>

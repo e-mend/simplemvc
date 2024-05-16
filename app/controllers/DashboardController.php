@@ -79,13 +79,30 @@ class DashboardController extends Controller
                 throw new Exception("Id invalido");
             }
 
-            $this->user->update([
-                'is_deleted' => 1
+            $user = $this->user->get([
+                'where' => [
+                    'id' => $params['id']
+                ]
+            ])[0];
+
+            if(!$user){
+                throw new Exception("Id invalido");
+            }
+
+            $update = $this->user->update([
+                'is_deleted' => $user['is_deleted'] === 1 ? false : true
             ], $params['id']);
+
+            if(!$update){
+                throw new Exception("Erro ao processar a requisição");
+            }
+
+            User::foresightCoroutine($params['id'], 'death');
 
             Json::send([
                 'success' => true,
-                'message' => 'Conta desativada com sucesso'
+                'message' => $user['is_deleted'] === 0 ? 'Conta desabilitada com sucesso' : 'Conta habilitada com sucesso',
+                'is_disabled' => $user['is_deleted'] === 1
             ]);
 
         } catch (\Throwable $th) {
@@ -216,7 +233,7 @@ class DashboardController extends Controller
                                 ->diffInDays(Carbon::now()) <= User::NEW_USER_DAYS;
             }
 
-            if($params['id']){
+            if($params['id'] && $users[0]) {
                 $users[0]['permission'] = json_decode($users[0]['permission'], true)['permission'];
             }
 

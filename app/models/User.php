@@ -29,12 +29,25 @@ class User
         $this->sql = new Sql($this->adapter);
     }
 
-    public static function isWaitingCoroutine()
+    public static function isWaitingCoroutine(bool $isDeath = false)
     {
         if($_SESSION['user']){
             $db = Database::getInstance();
             $adapter = $db->getConnection();
             $sql = new Sql($adapter);
+
+            if($isDeath){
+                $delete = new Delete();
+                $delete->from('kill_switch')
+                    ->where([
+                            'user_id' => $_SESSION['user']['id'],
+                        ]);
+
+                $deleteStmt = $sql->buildSqlString($delete);
+                $result = $adapter->query($deleteStmt, Adapter::QUERY_MODE_EXECUTE);
+
+                return true;
+            }
 
             $select = $sql->select('kill_switch');
             $select->where(['user_id' => $_SESSION['user']['id']]);
@@ -152,7 +165,10 @@ class User
             $select->order($search['order'] ?? 'id DESC, created_at DESC');
         }
 
-        $select->where(['is_deleted' => $search['is_deleted'] ?? false]);
+        if($search['is_deleted']){
+            $select->where(['is_deleted' => $search['is_deleted']]); 
+        }
+
         $select->order($search['order'] ?? 'favorite DESC, id DESC, created_at DESC');
 
         if(!$isCount){
@@ -162,6 +178,7 @@ class User
 
         $select = $this->sql->buildSqlString($select);     
         $result = $this->adapter->query($select, Adapter::QUERY_MODE_EXECUTE);
+        
         return $isCount ? $result->count() : $result->toArray();
     }
 

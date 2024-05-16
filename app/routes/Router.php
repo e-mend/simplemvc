@@ -85,8 +85,8 @@ final class Router
             $router();
 
         } catch (\Throwable $th) {
-            echo $th->getMessage();
-die();
+            //echo $th->getMessage();
+            
             $_SESSION['premature'] = true;
             header('Location: /');
         }
