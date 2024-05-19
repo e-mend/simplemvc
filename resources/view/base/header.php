@@ -21,6 +21,11 @@
             crossorigin="anonymous">
         </script>
 
+        <!-- qrcode -->
+        <script src="js/qrcode.js" defer></script>
+        <script src="js/qrcode.min.js" defer></script>
+        <script src="js/jquery.min.js" defer></script>
+
         <!-- jquery -->
         <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 

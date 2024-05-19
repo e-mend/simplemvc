@@ -150,6 +150,21 @@ class User
         $select = $this->sql->select('user');
         $select->columns($search['columns'] ?? ['*']);
 
+        if($search['search']){
+            $searchTerm = '%' . $search['search'] . '%';
+            $select->where(function ($where) use ($searchTerm) {
+                $where->nest()
+                    ->like('first_name', $searchTerm)
+                    ->or
+                    ->like('last_name', $searchTerm)
+                    ->or
+                    ->like('email', $searchTerm)
+                    ->or
+                    ->like('username', $searchTerm)
+                    ->unnest();
+                });
+        }
+
         if(!empty($search['where'])){
             $select->where($search['where']);
         }
@@ -162,7 +177,6 @@ class User
 
         if($search['favorite']){
             $select->where(['favorite' => $search['favorite']]);
-            $select->order($search['order'] ?? 'id DESC, created_at DESC');
         }
 
         if($search['is_deleted']){
@@ -176,7 +190,7 @@ class User
             $select->offset($search['offset'] ?? 0);
         }
 
-        $select = $this->sql->buildSqlString($select);     
+        $select = $this->sql->buildSqlString($select);
         $result = $this->adapter->query($select, Adapter::QUERY_MODE_EXECUTE);
         
         return $isCount ? $result->count() : $result->toArray();

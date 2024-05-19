@@ -10,6 +10,7 @@ use App\Requests\Req;
 use Exception;
 use Carbon\Carbon;
 use App\Helpers\Mailer;
+use App\enum\AclRole;
 
 class DashboardController extends Controller
 {
@@ -35,7 +36,7 @@ class DashboardController extends Controller
     public function toggleFavoriteApi()
     {
         try {
-            if(!$this->secure->isLoggedIn()){
+            if(!$this->secure->isLoggedIn() || !$this->secure->hasPermission(AclRole::ADMIN->value)){
                 throw new Exception("Não autorizado");
             }
 
@@ -69,7 +70,7 @@ class DashboardController extends Controller
     public function disableUserApi()
     {
         try {
-            if(!$this->secure->isLoggedIn() || !$this->secure->hasPermission('admin')){
+            if(!$this->secure->isLoggedIn() || !$this->secure->hasPermission(AclRole::ADMIN->value)){
                 throw new Exception("Não autorizado");
             }
 
@@ -87,6 +88,12 @@ class DashboardController extends Controller
 
             if(!$user){
                 throw new Exception("Id invalido");
+            }
+
+            $permission = json_decode($user['permission'], true)['permission'];
+
+            if($permission[AclRole::SUPER_ADMIN->value] === true){
+                throw new Exception("Impossível desabilitar o super admin");
             }
 
             $update = $this->user->update([
@@ -179,7 +186,7 @@ class DashboardController extends Controller
     public function getUsersApi()
     {
         try {
-            if(!$this->secure->isLoggedIn() || !$this->secure->hasPermission('admin')){
+            if(!$this->secure->isLoggedIn() || !$this->secure->hasPermission(AclRole::ADMIN->value)){
                 throw new Exception("Não autorizado");
             }
 
@@ -187,6 +194,10 @@ class DashboardController extends Controller
             $query = [];
 
             if(!$params['id']){
+                if($params['search'] && $this->secure->isValid('search', $params['search'])){
+                    $query['search'] = $params['search'];
+                }
+
                 if($params['new']){
                     $query['days'] = Carbon::now()->subDays(self::NEW_USER_DAYS)->format('Y-m-d H:i:s');
                 }
@@ -256,7 +267,7 @@ class DashboardController extends Controller
     public function sendPasswordApi()
     {
         try {
-            if(!$this->secure->isLoggedIn() || !$this->secure->hasPermission('admin')){
+            if(!$this->secure->isLoggedIn() || !$this->secure->hasPermission(AclRole::ADMIN->value)){
                 throw new Exception("Não autorizado");
             }
 
@@ -307,7 +318,7 @@ class DashboardController extends Controller
     public function getLinksApi()
     {
         try {
-            if(!$this->secure->isLoggedIn() || !$this->secure->hasPermission('admin')){
+            if(!$this->secure->isLoggedIn() || !$this->secure->hasPermission(AclRole::ADMIN->value)){
                 throw new Exception("Não autorizado");
             }
 

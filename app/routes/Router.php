@@ -4,7 +4,6 @@ namespace App\routes;
 use Exception;
 use App\Helpers\Request;
 use App\Helpers\Uri;
-use App\Models\User;
 
 final class Router
 {
@@ -45,6 +44,8 @@ final class Router
                 '/newuser' => fn() => self::load('NewUserController', 'newUserAction'),
                 '/disableuser' => fn() => self::load('DashboardController', 'disableUserApi'),
                 '/foresight' => fn() => self::load('DashboardController', 'routinesApi'),
+                '/getitems' => fn() => self::load('InventoryController', 'getItemsApi'),
+                '/toggleitemfavorite' => fn() => self::load('InventoryController', 'toggleFavoriteApi'),
           ],
           'post' => [
                 '/login' => fn() => self::load('HomeController', 'loginApi'),

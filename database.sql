@@ -121,7 +121,8 @@ VALUES
     "can_update_inventory": true,
     "can_delete_inventory": true,
     "user": true,
-    "admin": true
+    "admin": true,
+    "super_admin": true
   },
   "email": ""
 }', NOW(), 'pleasechangeinapp@mail.com',

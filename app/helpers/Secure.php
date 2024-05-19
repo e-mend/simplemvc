@@ -22,6 +22,7 @@ class Secure
         'text' => "/^[a-zA-Z]{1,32}$/",
         'hex' => "/^[a-f0-9]{64}$/",
         'name' => "/^[a-zA-Z]{1,32}+\s?$/",
+        'search' => "/^[a-zA-Z\d@._%+-]{1,64}$/",
     ];
 
     private function __construct()

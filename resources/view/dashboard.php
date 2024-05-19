@@ -103,9 +103,168 @@
             </div>
             <!-- Inventory -->
             <div class="" v-if="option === 'inventory'">
-                <div class="row d-flex justify-content-between bg-primary py-3 py-md-3 rounded
-                    z-3">
-                    Inventário Aqui
+            <div class="row d-flex justify-content-between py-3 py-md-3 rounded
+                    border z-3 text-center">
+                <div class="col-12 fs-5">
+                    Inventário
+                </div>
+            </div>
+            <div class="row d-flex justify-content-between rounded z-3 text-center mt-2">
+                <div class="btn btn-primary col-12 col-md-6 text-center py-3 fs-5"
+                @click="searchModalOpen = !searchModalOpen">
+                    Procurar Item
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </div>
+                <div class="btn btn-secondary col-12 col-md-6 border-white text-center py-3 fs-5"
+                @click="addItemModal"
+                v-if="this.permission['can_create_inventory']">
+                    Adicionar Item
+                    <i class="fa-solid fa-plus"></i>
+                </div>
+            </div>
+            <div class="row d-flex justify-content-between rounded z-3 text-center" v-if="searchModalOpen">
+                <div class="rounded col-12 col-md-6 text-center py-3 fs-5">
+                    <div class="input-group d-flex justify-content-center">
+                        <input @input="getItems('search', 1, true)" type="text" 
+                        class="form-control fs-5 rounded" 
+                        v-model="itemSearch.search">
+                        <i class="fa-solid fa-magnifying-glass mx-2 my-auto"></i>
+                    </div>
+                </div>
+                <div class="rounded col-12 col-md-6 text-center py-3 fs-5">
+                    <div class="input-group d-flex justify-content-center">
+                        <div class="mx-2 my-auto">
+                        De:
+                        </div>
+                        <input @input="getItems('search', 1, true)" type="date"
+                        class="form-control fs-5 rounded"
+                        v-model="itemSearch.from">
+                        <div class="mx-2 my-auto">
+                        Até:
+                        </div>
+                        <input @input="getItems('search', 1, true)" type="date"
+                        class="form-control fs-5 rounded"
+                        v-model="itemSearch.to">
+                    </div>
+                </div>
+                <div class="btn btn-primary col text-center py-3 fs-5" 
+                @click="getItems('all')"
+                :class="{'opacity-25': this.itemSearch.all}">
+                    Todos
+                    <i class="fa-solid fa-xmark"></i>
+                </div>
+                <div class="btn btn-primary col-6 col-md-3 text-center py-3 fs-5" 
+                @click="getItems('new')"
+                :class="{'opacity-25': this.itemSearch.new}">
+                    Novos
+                    <i class="fa-solid fa-fire"></i>
+                </div>
+                <div class="btn btn-danger col-6 col-md-3 text-center py-3 fs-5" 
+                @click="getItems('deleted')"
+                v-if="this.permission['can_see_deleted_inventory']"
+                :class="{'opacity-25': this.itemSearch.deleted}">
+                    Apagados
+                    <i class="fa-solid fa-circle-minus"></i>
+                </div>
+                <div class="btn btn-dark col-6 col-md-3 text-center py-3 fs-5"
+                @click="getItems('favorites')"
+                :class="{'opacity-25': this.itemSearch.favorites}">
+                    Favoritos
+                    <i class="fa-solid fa-star"></i>
+                </div>
+            </div>
+            <div class="row d-flex justify-content-center rounded z-3 text-center">
+                <div v-for="item in items" :key="item.id" 
+                class="row bg-primary rounded text-white mt-1 text-center py-1 fs-5 justify-content-center">
+                    <div class="row d-flex overflow-hidden my-auto">
+                        <div class="col-md-2 col-12">
+                            {{ item.name }}
+                        </div>
+                        <div class="col-md-2 col-12">
+                            {{ item.quantity }}
+                        </div>
+                        <div class="col-md-4 col-12">
+                            {{ item.description }}
+                        </div>
+                        <div class="col-md-2 col-12">
+                            <div class="btn btn-primary text-center p-3 fs-5" 
+                            @click="toggleItemFavorite(item.id)" v-if="item.favorite">
+                                <i class="fa-solid fa-star"></i>
+                            </div>
+                            <div class="btn btn-primary text-center p-3 fs-5" 
+                            @click="toggleItemFavorite(item.id)" v-if="!item.favorite">
+                                <i class="fa-regular fa-star"></i>
+                            </div>
+                            <div class="btn btn-primary text-center p-3 fs-5" 
+                            @click="itemModal(item.id, true)">
+                                <i class="fa-solid fa-pencil"></i>
+                            </div>
+                        </div>
+                        <div class="col-md-2 col-2 my-auto">
+                            <div class="btn btn-primary disabled text-center my-auto p-3 fs-5" 
+                            v-if="item.isNew">
+                                <i class="fa-solid fa-fire"></i>
+                            </div>
+                            <div class="btn btn-danger disabled text-center my-auto p-3 fs-5" 
+                            v-if="item.is_deleted">
+                                <i class="fa-solid fa-circle-minus"></i>
+                            </div> 
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row d-flex justify-content-between rounded z-3 text-center">
+                <ul class="pagination justify-content-center">
+                    <button v-for="page in this.itemSearch.pagination"
+                    class="btn btn-primary fs-4"
+                    @click="getItems('reload', page)" :key="page">
+                        {{ page }}
+                    </button>
+                </ul>
+            </div>
+                <div id="inventory-modal" class="modal fade" id="staticBackdrop"
+                data-bs-backdrop="static" data-bs-keyboard="false" 
+                tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true"
+                v-if="this.permission['can_create_inventory']">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                        <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="staticBackdropLabel">Adicionar Item</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="row d-flex justify-content-between mb-2">
+                            
+                        </div>
+                        <div class="modal-body">
+                            <div class="row d-flex justify-content-center mb-2">
+                                <div class="col-md-6 col-12 form-group fs-5 mb-2">
+                                    <label for="item-name">Nome do produto</label>
+                                    <input type="text" class="form-control disabled fs-5" 
+                                    id="item-name" v-model="itemToAdd.name">
+                                </div>
+                                <div class="col-md-3 col-12 form-group fs-5 mb-2">
+                                    <label for="quantity">Quantidade</label>
+                                    <input type="text" class="form-control fs-5" 
+                                    id="quantity" v-model="itemToAdd.quantity">
+                                </div>
+                                <div class="col-md-3 col-12 form-group fs-5 mb-2">
+                                    <label for="price">Preço</label>
+                                    <input type="text" class="form-control fs-5" 
+                                    id="price" v-model="itemToAdd.price">
+                                </div>
+                                <div class="col-md-12 col-12 form-group fs-5 mb-2">
+                                    <label for="description">Descrição</label>
+                                    <textarea class="form-control fs-5"
+                                    id="description" v-model="itemToAdd.description"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" @click="addItem()" class="btn btn-primary">Adicionar</button>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                        </div>
+                        </div>
+                    </div>
                 </div>
             </div>
             <!-- Safe -->
@@ -136,6 +295,15 @@
                     </div>
                 </div>
                 <div class="row d-flex justify-content-between rounded z-3 text-center" v-if="searchModalOpen">
+                    <div class="rounded col-12 text-center py-3 fs-5" 
+                    v-if="this.permission['admin']">
+                        <div class="input-group d-flex justify-content-center">
+                            <input @input="getUsers('search', 1, true)" type="text" 
+                            class="form-control fs-5 rounded" 
+                            v-model="userSearch.search">
+                            <i class="fa-solid fa-magnifying-glass mx-2 my-auto"></i>
+                        </div>
+                    </div>
                     <div class="btn btn-primary col-6 col-md-3 text-center py-3 fs-5" 
                     @click="getUsers('all')"
                     :class="{'opacity-25': this.userSearch.all}" v-if="this.permission['admin']">
@@ -161,46 +329,43 @@
                         <i class="fa-solid fa-star"></i>
                     </div>
                 </div>
-                <div class="row d-flex justify-content-between rounded z-3 text-center">
-                    <div v-for="user in users" :key="user.id" class="bg-primary rounded text-white mt-1
-                    text-center py-1 fs-5">
-                        <div class="row d-flex justify-content-between">
-                            <div class="col-12 col-md-3">
-                                <div class="image-container mx-auto">
-                                    <img class="" src="https://w.wallhaven.cc/full/p9/wallhaven-p9x6ep.jpg" alt="">
-                                </div>
-                            </div>
-                            <div class="col-12 col-md-6 text-start d-flex text-break">
+                <div class="row d-flex justify-content-center rounded z-3 text-center">
+                    <div v-for="user in users" :key="user.id" 
+                    class="row bg-primary rounded text-white mt-1 text-center py-1 fs-5 justify-content-center">
+                        <div class="row d-flex overflow-hidden my-auto">
+                            <div class="col-md-2 col-12">
                                 {{ user.first_name }} {{ user.last_name }}
-                                <br>
+                            </div>
+                            <div class="col-md-2 col-12">
                                 {{ user.username }}
-                                <br>
+                            </div>
+                            <div class="col-md-4 col-12">
                                 {{ user.email }}
                             </div>
-                            <div class="col-6 col-md-3 mt-1">
-                                <div class="col-12">
-                                    <div class="btn btn-primary text-center p-3 fs-5" 
-                                    @click="toggleFavorite(user.id)" v-if="user.favorite">
-                                        <i class="fa-solid fa-star"></i>
-                                    </div>
-                                    <div class="btn btn-primary text-center p-3 fs-5" 
-                                    @click="toggleFavorite(user.id)" v-if="!user.favorite">
-                                        <i class="fa-regular fa-star"></i>
-                                    </div>
-                                    <div class="btn btn-primary text-center p-3 fs-5" 
-                                    @click="userModal(user.id, true)">
-                                        <i class="fa-solid fa-pencil"></i>
-                                    </div>
+                            <div class="col-md-2 col-12">
+                                <div class="btn btn-primary text-center p-3 fs-5" 
+                                @click="toggleFavorite(user.id)" v-if="user.favorite">
+                                    <i class="fa-solid fa-star"></i>
+                                </div>
+                                <div class="btn btn-primary text-center p-3 fs-5" 
+                                @click="toggleFavorite(user.id)" v-if="!user.favorite">
+                                    <i class="fa-regular fa-star"></i>
+                                </div>
+                                <div class="btn btn-primary text-center p-3 fs-5" 
+                                @click="userModal(user.id, true)">
+                                    <i class="fa-solid fa-pencil"></i>
                                 </div>
                             </div>
-                            <!-- <div class="col-12">
-                                <div class="btn btn-primary disabled text-center" v-if="user.isNew">
+                            <div class="col-md-2 col-2 my-auto">
+                                <div class="btn btn-primary disabled text-center my-auto p-3 fs-5" 
+                                v-if="user.isNew">
                                     <i class="fa-solid fa-fire"></i>
                                 </div>
-                                <div class="btn btn-danger disabled text-center" v-if="user.is_deleted">
+                                <div class="btn btn-danger disabled text-center my-auto p-3 fs-5" 
+                                v-if="user.is_deleted">
                                     <i class="fa-solid fa-circle-minus"></i>
                                 </div> 
-                            </div> -->
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -334,6 +499,15 @@
                                         </label>
                                     </div>
                                 </div>
+                                <div class="text-center fs-5 col-md-6 col-12">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" role="switch"
+                                        v-model="createNewUser.permission['can_see_deleted_inventory']">
+                                        <label class="form-check-label" for="flexSwitchCheckDefault">
+                                            Ver item apagado
+                                        </label>
+                                    </div>
+                                </div>
                                 <div class="text-center fs-2 col-md-12 col-12">
                                     Geral
                                     <i class="fa-solid fa-gears"></i>
@@ -369,23 +543,32 @@
                                 </div> 
                             </div>
                             <div class="row d-flex justify-content-center mb-4 fs-5">
-                                <div class="text-center col-md-12 col-12 d-flex">
-                                    <input type="text" class="form-control fs-5 mx-1" 
+                                <div class="row text-center d-flex">
+                                    <div class="col-12 col-md-6 px-0 mx-0 text-center">
+                                        <input type="text" 
+                                        class="form-control fs-5" 
                                         v-model="createNewUser.email"
                                         placeholder="E-mail"
                                         type="text">
-                                    <button type="submit" class="btn btn-primary col-4 fs-5"
+                                    </div>
+                                    <button type="submit" 
+                                    class="btn btn-primary col-12 col-md-6 fs-5"
                                     :disabled="blocked || createNewUser.email.length === 0" 
                                     @click="createLink(true)">
                                         Mandar E-mail
+                                        <i class="fa-solid fa-envelope-circle-check"></i>
                                     </button>
                                 </div>
-                                <div class="text-center col-md-12 col-12 d-flex mx-1 my-2">
-                                    <div class="col-8">
-                                    </div>
-                                    <button type="submit" class="btn btn-primary col-4 fs-5"
+                                <div class="row text-center d-flex mx-1 my-2">
+                                    <button type="submit" class="btn btn-primary col-12 col-md-6 fs-5"
+                                    :disabled="blocked" @click="createLink(false, true)">
+                                        Criar Qr Code
+                                        <i class="fa-solid fa-qrcode"></i>
+                                    </button>
+                                    <button type="submit" class="btn btn-primary col-12 col-md-6 fs-5"
                                     :disabled="blocked" @click="createLink()">
                                         Criar link
+                                        <i class="fa-solid fa-arrow-up-right-from-square"></i>
                                     </button>
                                 </div>
                             </div>
@@ -393,19 +576,19 @@
                                 <div class="text-center justify-content-center col-md-12 col-12 d-flex fs-3 mb-2">
                                     Ultimos links criados <i class="fa-regular fa-clipboard mx-2 my-auto"></i>
                                 </div>
-                                <div class="btn text-center col-md-12 col-12 d-flex fs-5"
+                                <div class="btn text-center row d-flex fs-5 btn-primary"
                                 v-for="link in links" @click="copyLink(link.id)"
                                 :class="link.deleted_at === null ? 'btn-primary' : 'btn-secondary'">
-                                    <div class="col-1 my-auto">
+                                    <div class="col col my-auto">
                                         <i class="fa-solid fa-link fs-5"></i>
                                     </div>
-                                    <div class="col-2 my-auto">
+                                    <div class="col my-auto">
                                         {{ link.fullname }}
                                     </div>
-                                    <div class="col-2">
+                                    <div class="col">
                                         {{ link.created_at }}
                                     </div>
-                                    <div class="col-6 overflow-hidden">
+                                    <div class="col-12 col-md-6 overflow-hidden">
                                         {{ link.link }}
                                     </div>
                                 </div>
@@ -417,7 +600,27 @@
                         </div>
                     </div>
                 </div>
-                <div id="userModal" class="modal fade" id="staticBackdrop"
+                <div id="qr-modal" class="modal fade" id="staticBackdrop"
+                data-bs-backdrop="static" data-bs-keyboard="false" 
+                tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h1 class="modal-title fs-5" id="staticBackdropLabel">QR code</h1>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body text-center">
+                                <div id="qrcode" class="d-flex justify-content-center"></div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" 
+                                data-bs-dismiss="modal">Fechar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>  
+
+                <div id="user-modal" class="modal fade" id="staticBackdrop"
                 data-bs-backdrop="static" data-bs-keyboard="false" 
                 tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
                     <div class="modal-dialog modal-lg">
@@ -525,7 +728,7 @@
                                     <div class="form-check form-switch">
                                         <input class="form-check-input" type="checkbox" role="switch" 
                                         v-model="userToEdit.permission['can_read_post']"
-                                        :disabled="userToEdit.permission['admin']">
+                                        :disabled="userToEdit.permission['super_admin']">
                                         <label class="form-check-label">
                                             Ver item
                                         </label>
@@ -535,7 +738,7 @@
                                     <div class="form-check form-switch">
                                         <input class="form-check-input" type="checkbox" role="switch" 
                                         v-model="userToEdit.permission['can_create_post']"
-                                        :disabled="userToEdit.permission['admin']">
+                                        :disabled="userToEdit.permission['super_admin']">
                                         <label class="form-check-label">
                                             Criar item
                                         </label>
@@ -545,7 +748,7 @@
                                     <div class="form-check form-switch">
                                         <input class="form-check-input" type="checkbox" role="switch"
                                         v-model="userToEdit.permission['can_update_post']"
-                                        :disabled="userToEdit.permission['admin']">
+                                        :disabled="userToEdit.permission['super_admin']">
                                         <label class="form-check-label">
                                             Modificar item
                                         </label>
@@ -555,7 +758,7 @@
                                     <div class="form-check form-switch">
                                         <input class="form-check-input" type="checkbox" role="switch" 
                                         v-model="userToEdit.permission['can_delete_post']"
-                                        :disabled="userToEdit.permission['admin']">
+                                        :disabled="userToEdit.permission['super_admin']">
                                         <label class="form-check-label">
                                             Apagar item
                                         </label>
@@ -565,7 +768,7 @@
                                     <div class="form-check form-switch">
                                         <input class="form-check-input" type="checkbox" role="switch" 
                                         v-model="userToEdit.permission['can_see_deleted_posts']"
-                                        :disabled="userToEdit.permission['admin']">
+                                        :disabled="userToEdit.permission['super_admin']">
                                         <label class="form-check-label">
                                             Ver item apagado
                                         </label>
@@ -578,7 +781,7 @@
                                     <div class="form-check form-switch">
                                         <input class="form-check-input" type="checkbox" role="switch" 
                                         v-model="userToEdit.permission['post_1']"
-                                        :disabled="userToEdit.permission['admin']">
+                                        :disabled="userToEdit.permission['super_admin']">
                                         <label class="form-check-label">
                                             Cofre nível 1
                                         </label>
@@ -588,7 +791,7 @@
                                     <div class="form-check form-switch">
                                         <input class="form-check-input" type="checkbox" role="switch"
                                         v-model="userToEdit.permission['post_2']"
-                                        :disabled="userToEdit.permission['admin']">
+                                        :disabled="userToEdit.permission['super_admin']">
                                         <label class="form-check-label" for="flexSwitchCheckDefault">
                                             Cofre nível 2
                                         </label>
@@ -598,7 +801,7 @@
                                     <div class="form-check form-switch">
                                         <input class="form-check-input" type="checkbox" role="switch"
                                         v-model="userToEdit.permission['post_3']"
-                                        :disabled="userToEdit.permission['admin']">
+                                        :disabled="userToEdit.permission['super_admin']">
                                         <label class="form-check-label" for="flexSwitchCheckDefault">
                                             Cofre nível 3
                                         </label>
@@ -612,7 +815,7 @@
                                     <div class="form-check form-switch">
                                         <input class="form-check-input" type="checkbox" role="switch"
                                         v-model="userToEdit.permission['can_read_inventory']"
-                                        :disabled="userToEdit.permission['admin']">
+                                        :disabled="userToEdit.permission['super_admin']">
                                         <label class="form-check-label">
                                             Ver item
                                         </label>
@@ -622,7 +825,7 @@
                                     <div class="form-check form-switch">
                                         <input class="form-check-input" type="checkbox" role="switch"
                                         v-model="userToEdit.permission['can_create_inventory']"
-                                        :disabled="userToEdit.permission['admin']">
+                                        :disabled="userToEdit.permission['super_admin']">
                                         <label class="form-check-label" for="flexSwitchCheckDefault">
                                             Criar item
                                         </label>
@@ -632,7 +835,7 @@
                                     <div class="form-check form-switch">
                                         <input class="form-check-input" type="checkbox" role="switch"
                                         v-model="userToEdit.permission['can_delete_inventory']"
-                                        :disabled="userToEdit.permission['admin']">
+                                        :disabled="userToEdit.permission['super_admin']">
                                         <label class="form-check-label" for="flexSwitchCheckDefault">
                                             Apagar item
                                         </label>
@@ -642,9 +845,19 @@
                                     <div class="form-check form-switch">
                                         <input class="form-check-input" type="checkbox" role="switch"
                                         v-model="userToEdit.permission['can_update_inventory']"
-                                        :disabled="userToEdit.permission['admin']">
+                                        :disabled="userToEdit.permission['super_admin']">
                                         <label class="form-check-label" for="flexSwitchCheckDefault">
                                             Modificar item
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="text-center fs-5 col-md-6 col-12">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" role="switch"
+                                        v-model="userToEdit.permission['can_delete_inventory']"
+                                        :disabled="userToEdit.permission['super_admin']">
+                                        <label class="form-check-label" for="flexSwitchCheckDefault">
+                                            Ver item apagado
                                         </label>
                                     </div>
                                 </div>
@@ -665,6 +878,7 @@
                                     <div class="form-check form-switch">
                                         <input class="form-check-input" type="checkbox" 
                                         v-model="userToEdit.permission['admin']"
+                                        :disabled="userToEdit.permission['super_admin']"
                                         role="switch" id="flexSwitchCheckDefault">
                                         <label class="form-check-label" for="flexSwitchCheckDefault">
                                             Admin
@@ -675,6 +889,7 @@
                                     <div class="form-check form-switch">
                                         <input class="form-check-input" 
                                         v-model="userToEdit.permission['user']"
+                                        :disabled="userToEdit.permission['super_admin']"
                                         type="checkbox" role="switch" id="flexSwitchCheckDefault">
                                         <label class="form-check-label" for="flexSwitchCheckDefault">
                                             Usuário comum
@@ -685,7 +900,7 @@
                             <div class="row d-flex justify-content-between mb-2">
                                 <div v-if="!userToEdit.is_deleted" class="col-md-6 col-12">
                                     <div class="btn btn-danger text-center fs-5 w-100"
-                                    :class="{'disabled': userToEdit.permission['admin']}"
+                                    :class="{'disabled': userToEdit.permission['super_admin']}"
                                     @click="disableUser(userToEdit.id)">
                                         Desativar usuário
                                         <i class="fa-solid fa-xmark"></i>
@@ -697,7 +912,7 @@
 
                                 <div v-else class="col-md-6 col-12">
                                     <div class="btn btn-success text-center fs-5 w-100"
-                                    :class="{'disabled': userToEdit.permission['admin']}"
+                                    :class="{'disabled': userToEdit.permission['super_admin']}"
                                     @click="disableUser(userToEdit.id)">
                                         Reativar usuário
                                         <i class="fa-solid fa-check"></i>
@@ -708,7 +923,7 @@
                                 </div>
                                 <div class="col-md-6 col-12">
                                     <div class="btn btn-warning text-center fs-5 w-100"
-                                    :class="{'disabled': userToEdit.permission['admin']}"
+                                    :class="{'disabled': userToEdit.permission['super_admin']}"
                                     @click="changePermissions()">
                                         Alterar permissões
                                         <i class="fa-solid fa-bolt"></i>

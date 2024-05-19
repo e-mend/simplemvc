@@ -39,18 +39,32 @@ const app = new Vue({
                 'can_create_inventory': false,
                 'can_update_inventory': false,
                 'can_delete_inventory': false,
+                'can_see_deleted_inventory': false,
                 'user': true,
                 'admin': false
             },
             searchModalOpen: false,
             showModal: false,
             users: {},
+            items: {},
             userSearch: {
                 deleted: false,
                 new: false,
                 favorites: false,
                 all: true,
-                pagination: 1
+                pagination: 1,
+                search: '',
+            },
+            itemSearch: {
+                deleted: false,
+                new: false,
+                favorites: false,
+                all: true,
+                pagination: 1,
+                search: '',
+                type: 'all',
+                from: '',
+                to: '',
             },
             userToEdit: {
                 password: '',
@@ -67,6 +81,7 @@ const app = new Vue({
                     'can_create_inventory': false,
                     'can_update_inventory': false,
                     'can_delete_inventory': false,
+                    'can_see_deleted_inventory': false,
                     'user': true,
                     'admin': false
                 }
@@ -86,7 +101,8 @@ const app = new Vue({
                     'can_update_inventory': false,
                     'can_delete_inventory': false,
                     'user': true,
-                    'admin': false
+                    'admin': false,
+                    'can_see_deleted_inventory': false,
                 },
                 email: '',
             },
@@ -94,8 +110,15 @@ const app = new Vue({
             number: false,
             special: false,
             loadingUsers: false,
+            loadingItems: false,
             passwordFieldType: 'password',
             links: {},
+            itemToAdd: {
+                name: '',
+                description: '',
+                quantity: 0,
+                price: 0,
+            }
         }
     },
     methods: {
@@ -119,7 +142,7 @@ const app = new Vue({
         togglePasswordVisibility() {
             this.passwordFieldType = this.passwordFieldType === 'password' ? 'text' : 'password';
         },
-        async createLink(hasEmail = false) {
+        async createLink(hasEmail = false, qr = false) {
             try {
                 if(!hasEmail) {
                     this.createNewUser.email = '';
@@ -144,12 +167,20 @@ const app = new Vue({
                 }
 
                 if(json['linkType'] === 'copy') {
-                    this.throwWarning(json['message'] + `<i class="fa-solid fa-clipboard"></i>`, 
-                    ['alert-success', 'clipboard-copy'], {
-                        'data-clipboard-text': json['link']
-                    });
+                    if(!qr){
+                        navigator.clipboard.writeText(json['link']);
+
+                        this.throwWarning(json['message'] + `<i class="fa-solid fa-clipboard"></i>`, 
+                        ['alert-success', 'clipboard-copy'], {
+                            'data-clipboard-text': json['link']
+                        });
+                    }
                 }else{
                     this.throwWarning(json['message'], ['alert-success']);
+                }
+
+                if(qr){
+                    this.qrCode(json['link']);
                 }
 
                 this.createNewUser.permission = {
@@ -291,7 +322,7 @@ const app = new Vue({
 
         },
         async userModal(id, hideWarning = false) {
-            $('#userModal').modal('show');
+            $('#user-modal').modal('show');
 
             try {
                 const response = await fetch('/getusers?id='+id);
@@ -392,6 +423,45 @@ const app = new Vue({
                 this.users[index].favorite = !this.users[index].favorite;
             }
         },
+        async toggleItemFavorite(id) {
+            try {
+                const index = this.items.findIndex(user => user.id === id);
+
+                if (index === -1) {
+                    this.throwWarning('Algo deu errado', ['alert-danger']);
+                    return;
+                }
+
+                this.items[index].favorite = !this.items[index].favorite;
+
+                const response = await fetch('/toggleitemfavorite', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        id: id,
+                        favorite: this.items[index].favorite
+                    })
+                })
+
+                if(!response.ok) {
+                    throw new Error('Algo deu errado');
+                }
+
+                const json = await response.json();
+
+                if(!json.success) {
+                    throw new Error('Algo deu errado');
+                }
+
+                this.throwWarning(json['message'], ['alert-success']);
+
+            } catch (error) {
+                this.throwWarning(error.message, ['alert-danger']);
+                this.items[index].favorite = !this.items[index].favorite;
+            }
+        },
         async logout() {
             try {
                 const response = await fetch('/logout');
@@ -414,14 +484,25 @@ const app = new Vue({
                 this.blocked = true;
             }
         },
-        async getUsers(type = 'all', pagination = 1) {
+        qrCode(text){
+            $('#qr-modal').modal('show');
+
+            var qrcode = new QRCode(document.getElementById("qrcode"), {
+                text: text,
+                width: 256,
+                height: 256,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+            });
+        },
+        async getUsers(type = 'all', pagination = 1, noAlert = false) {
             this.loadingUsers = true;
             this.loadingR();
 
             let url = '/getusers';
             let first = true;
             
-            if(type !== 'reload' && pagination === 1) {
+            if(type !== 'reload' && type !== 'search' && pagination === 1) {
                 this.userSearch[type] = !this.userSearch[type]; 
             }
 
@@ -440,12 +521,18 @@ const app = new Vue({
                 first = false;
             }
 
+            if(this.userSearch['search'].length > 0) {
+                url += (first ? '?' : '&') + 'search=' + this.userSearch['search'];
+                first = false;
+            }
+
             if(this.userSearch['all']) {
                 url = '/getusers?all=true';
                 this.userSearch['all'] = false;
                 this.userSearch['deleted'] = false;
                 this.userSearch['new'] = false;
                 this.userSearch['favorites'] = false;
+                this.userSearch['search'] = '';
             }
 
             url += (first ? '?' : '&') + 'pagination=' + pagination;
@@ -464,7 +551,10 @@ const app = new Vue({
                     return;
                 }
 
-                this.throwWarning(json['message'], ['alert-success']);
+                if(!noAlert){
+                    this.throwWarning(json['message'], ['alert-success']);
+                }
+
                 this.users = json['users'];
                 this.userSearch.pagination = json['count'];
 
@@ -473,6 +563,87 @@ const app = new Vue({
             }
 
             this.loadingUsers = false;
+        },
+        async getItems(type = 'all', pagination = 1, noAlert = false) {
+            this.loadingItems = true;
+            this.loadingR();
+
+            let url = '/getitems';
+            let first = true;
+            
+            if(type !== 'reload' && type !== 'search' && pagination === 1) {
+                this.userSearch[type] = !this.userSearch[type]; 
+            }
+
+            if(this.userSearch['deleted']) {
+                url += (first ? '?' : '&') + 'deleted=true';
+                first = false;
+            }
+
+            if(this.userSearch['new']) {
+                url += (first ? '?' : '&') + 'new=true';
+                first = false;
+            }
+
+            if(this.userSearch['favorites']) {
+                url += (first ? '?' : '&') +  'favorites=true';
+                first = false;
+            }
+
+            if(this.userSearch['search'].length > 0) {
+                url += (first ? '?' : '&') + 'search=' + this.userSearch['search'];
+                first = false;
+            }
+
+            if(this.userSearch['from'].length > 0) {
+                url += (first ? '?' : '&') + 'from=' + this.userSearch['from'];
+                first = false;
+            }
+
+            if(this.userSearch['to'].length > 0) {
+                url += (first ? '?' : '&') + 'to=' + this.userSearch['to'];
+                first = false;
+            }
+
+            if(this.userSearch['all']) {
+                url = '/getusers?all=true';
+                this.userSearch['all'] = false;
+                this.userSearch['deleted'] = false;
+                this.userSearch['new'] = false;
+                this.userSearch['favorites'] = false;
+                this.userSearch['search'] = '';
+                this.userSearch['from'] = '';
+                this.userSearch['to'] = '';
+            }
+
+            url += (first ? '?' : '&') + 'pagination=' + pagination;
+
+            try {
+                const response = await fetch(url);
+
+                if(!response.ok) {
+                    throw new Error('Algo deu errado');
+                }
+
+                const json = await response.json();
+
+                if(!json.success) {
+                    this.throwWarning(json['message']);
+                    return;
+                }
+
+                if(!noAlert){
+                    this.throwWarning(json['message'], ['alert-success']);
+                }
+
+                this.items = json['items'];
+                this.itemSearch.pagination = json['count'];
+
+            } catch (error) {
+                this.throwWarning(error.message, ['alert-danger']);
+            }
+
+            this.loadingItems = false;
         },
         removeMessage(id) {
             const index = this.warnings.findIndex(message => message.id === id);
@@ -662,6 +833,42 @@ const app = new Vue({
             } catch (error) {
                 this.throwWarning(error.message, ['alert-danger']);
             }
+        },
+        addItemModal() {
+            $('#inventory-modal').modal('show');
+        },
+        async addItem() {
+            try {
+                const response = await fetch('/additem', {
+                    method: 'POST',
+                    headers: {
+                        'Content-type': 'application/json'
+                    },
+                    body: JSON.stringify(this.itemToAdd)
+                });
+
+                if(!response.ok) {
+                    throw new Error('Algo deu errado');
+                }
+
+                const json = await response.json();
+
+                if(!json.success) {
+                    throw new Error(json['message']);
+                }
+
+                this.throwWarning(json['message'], ['alert-success']);
+                this.itemToAdd = {
+                    name: '',
+                    quantity: 0,
+                    description: '',
+                    price: 0
+                };
+
+                this.getItems('reload');
+            } catch (error) {
+                this.throwWarning(error.message, ['alert-danger']);
+            }
         }
     },
     computed: {
@@ -670,6 +877,7 @@ const app = new Vue({
         }
     },
     async mounted() {
+
         await this.loadingR();
         await this.getUserData();
         this.option = 'main';

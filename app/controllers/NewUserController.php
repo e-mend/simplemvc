@@ -10,6 +10,7 @@ use App\Requests\Req;
 use Exception;
 use Carbon\Carbon;
 use App\Helpers\Mailer;
+use App\enum\AclRole;
 
 class NewUserController extends Controller
 {
@@ -28,27 +29,26 @@ class NewUserController extends Controller
     public function newUserAction()
     {
         try {
-            // if($this->secure->isLoggedIn()){
-            //     throw new Exception("Não autorizado");
-            // }
+            if($this->secure->isLoggedIn()){
+                throw new Exception("Não autorizado");
+            }
 
             $request = Req::getParams();
 
-            // if(!$request['token'] || !$this->secure->isValidHex($request['token'])){
-            //     throw new Exception("Token invalido");
-            // }
+            if(!$request['token'] || !$this->secure->isValidHex($request['token'])){
+                throw new Exception("Token invalido");
+            }
 
-            //$token = $this->user->getNewUserLink($request['token']);
+            $token = $this->user->getNewUserLink($request['token']);
 
-            // if(!$token){
-            //     throw new Exception("Token expirado");
-            // }
+            if(!$token){
+                throw new Exception("Token expirado");
+            }
 
             View::render('newUser');
 
         } catch (\Throwable $th) {
-            echo $th->getMessage();
-            //header("Location: /");
+            header("Location: /");
         }
     }
 
@@ -107,7 +107,6 @@ class NewUserController extends Controller
                 }
             }
 
-
             $_SESSION['userToCreate'] = $json;
             $_SESSION['userToCreate']['permission'] = $token['permission'];
 
@@ -139,6 +138,22 @@ class NewUserController extends Controller
 
             if(!$json['id'] || !$json['permission']){
                 throw new Exception("Erro ao processar a requisição");
+            }
+
+            $user = $this->user->get([
+                'where' => [
+                    'id' => $json['id']
+                ]
+            ])[0];
+
+            if(!$user){
+                throw new Exception("Id invalido");
+            }
+
+            $permission = json_decode($user['permission'], true)['permission'];
+
+            if($permission[AclRole::SUPER_ADMIN->value] === true){
+                throw new Exception("Impossível alterar o super admin");
             }
 
             $json['permission'] = [
