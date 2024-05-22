@@ -243,20 +243,23 @@
                                     id="item-name" v-model="itemToAdd.name">
                                 </div>
                                 <div class="col-md-3 col-12 form-group fs-5 mb-2">
-                                    <label for="quantity">Quantidade</label>
-                                    <input type="text" class="form-control fs-5" 
-                                    id="quantity" v-model="itemToAdd.quantity">
-                                </div>
-                                <div class="col-md-3 col-12 form-group fs-5 mb-2">
                                     <label for="price">Preço</label>
                                     <input type="text" class="form-control fs-5" 
                                     id="price" v-model="itemToAdd.price"
                                     @input="formatPrice">
                                 </div>
+                                <div class="col-md-3 col-12 form-group fs-5 mb-2">
+                                    <label for="quantity">Quantidade</label>
+                                    <input type="text" class="form-control fs-5" 
+                                    id="quantity" v-model="itemToAdd.quantity">
+                                </div>
                                 <div class="col-md-12 col-12 form-group fs-5 mb-2">
                                     <label for="description">Descrição</label>
                                     <textarea class="form-control fs-5"
                                     id="description" v-model="itemToAdd.description"></textarea>
+                                </div>
+                                <div class="col-md-12 col-12 form-group fs-3 mt-3 text-center">
+                                    Total: {{ totalPrice }}
                                 </div>
                             </div>
                         </div>

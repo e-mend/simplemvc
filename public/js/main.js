@@ -533,6 +533,7 @@ const app = new Vue({
                 this.userSearch['new'] = false;
                 this.userSearch['favorites'] = false;
                 this.userSearch['search'] = '';
+                first = false;
             }
 
             url += (first ? '?' : '&') + 'pagination=' + pagination;
@@ -572,48 +573,49 @@ const app = new Vue({
             let first = true;
             
             if(type !== 'reload' && type !== 'search' && pagination === 1) {
-                this.userSearch[type] = !this.userSearch[type]; 
+                this.itemSearch[type] = !this.itemSearch[type]; 
             }
 
-            if(this.userSearch['deleted']) {
+            if(this.itemSearch['deleted']) {
                 url += (first ? '?' : '&') + 'deleted=true';
                 first = false;
             }
 
-            if(this.userSearch['new']) {
+            if(this.itemSearch['new']) {
                 url += (first ? '?' : '&') + 'new=true';
                 first = false;
             }
 
-            if(this.userSearch['favorites']) {
+            if(this.itemSearch['favorites']) {
                 url += (first ? '?' : '&') +  'favorites=true';
                 first = false;
             }
 
-            if(this.userSearch['search'].length > 0) {
-                url += (first ? '?' : '&') + 'search=' + this.userSearch['search'];
+            if(this.itemSearch['search'].length > 0) {
+                url += (first ? '?' : '&') + 'search=' + this.itemSearch['search'];
                 first = false;
             }
 
-            if(this.userSearch['from'].length > 0) {
-                url += (first ? '?' : '&') + 'from=' + this.userSearch['from'];
+            if(this.itemSearch['from'].length > 0) {
+                url += (first ? '?' : '&') + 'from=' + this.itemSearch['from'];
                 first = false;
             }
 
-            if(this.userSearch['to'].length > 0) {
-                url += (first ? '?' : '&') + 'to=' + this.userSearch['to'];
+            if(this.itemSearch['to'].length > 0) {
+                url += (first ? '?' : '&') + 'to=' + this.itemSearch['to'];
                 first = false;
             }
 
-            if(this.userSearch['all']) {
+            if(this.itemSearch['all']) {
                 url = '/getusers?all=true';
-                this.userSearch['all'] = false;
-                this.userSearch['deleted'] = false;
-                this.userSearch['new'] = false;
-                this.userSearch['favorites'] = false;
-                this.userSearch['search'] = '';
-                this.userSearch['from'] = '';
-                this.userSearch['to'] = '';
+                this.itemSearch['all'] = false;
+                this.itemSearch['deleted'] = false;
+                this.itemSearch['new'] = false;
+                this.itemSearch['favorites'] = false;
+                this.itemSearch['search'] = '';
+                this.itemSearch['from'] = '';
+                this.itemSearch['to'] = '';
+                first = false;
             }
 
             url += (first ? '?' : '&') + 'pagination=' + pagination;
@@ -700,6 +702,10 @@ const app = new Vue({
 
             if(this.option === 'users') {
                 this.getUsers();
+            }
+
+            if(this.option === 'inventory') {
+                this.getItems();
             }
         },
         async foresight() {
@@ -862,6 +868,7 @@ const app = new Vue({
             this.itemToAdd.price = formatter.format(value);
         },
         async addItem() {
+            this.itemToAdd.price = this.itemToAdd.price.replace(/[^0-9]/g, '');
             try {
                 const response = await fetch('/additem', {
                     method: 'POST',
@@ -886,11 +893,12 @@ const app = new Vue({
                     name: '',
                     quantity: 0,
                     description: '',
-                    price: 0
+                    price: 'R$ 0,00'
                 };
 
                 this.getItems('reload');
             } catch (error) {
+                this.formatPrice();
                 this.throwWarning(error.message, ['alert-danger']);
             }
         }
@@ -899,7 +907,30 @@ const app = new Vue({
         iconClass() {
             return this.passwordFieldType === 'password' ? 'fa fa-eye-slash' : 'fa fa-eye';
         },
+        totalPrice() {
+            let value = this.itemToAdd.price.replace(/[^0-9]/g, '');
 
+            if(value.substring(0, 1) == '0'){
+                value = value.substring(1);
+            }
+
+            if(value.length <= 3) {
+                let zeros = 3 - value.length;
+                value = '0'.repeat(zeros)+value;
+                value = value.substring(0, 1) + '.' + value.substring(1);
+            }else{
+                value = value.substring(0, value.length - 2) + '.' + 
+                value.substring(value.length - 2);
+            }
+
+            var formatter = new Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL',
+                maximumFractionDigits: 2,
+            });
+
+            return formatter.format(value * this.itemToAdd.quantity);
+        }
     },
     async mounted() {
 

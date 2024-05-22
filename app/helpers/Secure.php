@@ -21,8 +21,11 @@ class Secure
         'pin' => "/^[0-9]{6}$/",
         'text' => "/^[a-zA-Z]{1,32}$/",
         'hex' => "/^[a-f0-9]{64}$/",
-        'name' => "/^[a-zA-Z]{1,32}+\s?$/",
+        'name' => "/^[a-zA-Z\s]{1,64}+\s?$/",
         'search' => "/^[a-zA-Z\d@._%+-]{1,64}$/",
+        'quantity' => "/^[0-9]{1,20}$/",
+        'price' => "/^[0-9]{1,20}$/",
+        'description' => "/^[a-zA-Z\d@._%+-]{1,64}$/",
     ];
 
     private function __construct()

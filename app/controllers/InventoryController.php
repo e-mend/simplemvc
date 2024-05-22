@@ -120,9 +120,9 @@ class InventoryController extends Controller
             $count = $this->inventory->get($query, true);
 
             foreach ($items as &$item) {
-                $user['created_at_formatted'] = Carbon::createFromFormat('Y-m-d H:i:s', $user['created_at'])
+                $item['created_at_formatted'] = Carbon::createFromFormat('Y-m-d H:i:s', $item['created_at'])
                                                 ->format('d/m/Y H:i:s');
-                $user['isNew'] = Carbon::createFromFormat('Y-m-d H:i:s', $user['created_at'])
+                $item['isNew'] = Carbon::createFromFormat('Y-m-d H:i:s', $item['created_at'])
                                 ->diffInDays(Carbon::now()) <= Inventory::NEW_ITEM_DAYS;
             }
 
@@ -137,7 +137,56 @@ class InventoryController extends Controller
             Json::send([
                 'success' => false,
                 'message' => $th->getMessage(),
-                'users' => $params
+            ]);
+        }
+    }
+
+    public function addItemApi()
+    {
+        try {
+            if(!$this->secure->isLoggedIn() || !$this->secure->hasPermission(AclRole::CAN_CREATE_INVENTORY->value)){
+                throw new Exception("Não autorizado");
+            }
+
+            $json = Json::getJson();
+
+            if(!$json['name'] || !$this->secure->isValid('name', $json['name'])){
+                throw new Exception("Revise o nome");
+            }
+
+            if(!$json['price'] || !$this->secure->isValid('price', $json['price'])){
+                throw new Exception("Revise o valor");
+            }
+
+            if(!$json['quantity'] || !$this->secure->isValid('quantity', $json['quantity'])){
+                throw new Exception("Revise a quantidade");
+            }
+
+            if($json['description'] != '' && !$this->secure->isValid('description', $json['description'])){
+                throw new Exception("Revise a descrição");
+            }
+
+            $insert = $this->inventory->createItem([
+                'name' => $json['name'],
+                'price' => $json['price'],
+                'quantity' => $json['quantity'],
+                'description' => $json['description'],
+                'created_at' => Carbon::now()->format('Y-m-d H:i:s'),
+                'created_by' => $_SESSION['user']['id']
+            ]);
+
+            if(!$insert){
+                throw new Exception("Erro ao processar a requisição");
+            }
+
+            Json::send([
+                'success' => true,
+                'message' => 'Item adicionado com sucesso',
+            ]);
+        } catch (\Throwable $th) {
+            Json::send([
+                'success' => false,
+                'message' => $th->getMessage()
             ]);
         }
     }
