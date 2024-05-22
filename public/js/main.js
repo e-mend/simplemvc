@@ -117,7 +117,7 @@ const app = new Vue({
                 name: '',
                 description: '',
                 quantity: 0,
-                price: 0,
+                price: 'R$ 0,00',
             }
         }
     },
@@ -837,6 +837,30 @@ const app = new Vue({
         addItemModal() {
             $('#inventory-modal').modal('show');
         },
+        formatPrice() {
+            let value = this.itemToAdd.price.replace(/[^0-9]/g, '');
+
+            if(value.substring(0, 1) == '0'){
+                value = value.substring(1);
+            }
+
+            if(value.length <= 3) {
+                let zeros = 3 - value.length;
+                value = '0'.repeat(zeros)+value;
+                value = value.substring(0, 1) + '.' + value.substring(1);
+            }else{
+                value = value.substring(0, value.length - 2) + '.' + 
+                value.substring(value.length - 2);
+            }
+
+            var formatter = new Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL',
+                maximumFractionDigits: 2,
+            });
+
+            this.itemToAdd.price = formatter.format(value);
+        },
         async addItem() {
             try {
                 const response = await fetch('/additem', {
@@ -874,7 +898,8 @@ const app = new Vue({
     computed: {
         iconClass() {
             return this.passwordFieldType === 'password' ? 'fa fa-eye-slash' : 'fa fa-eye';
-        }
+        },
+
     },
     async mounted() {
 

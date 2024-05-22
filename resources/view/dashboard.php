@@ -250,7 +250,8 @@
                                 <div class="col-md-3 col-12 form-group fs-5 mb-2">
                                     <label for="price">Preço</label>
                                     <input type="text" class="form-control fs-5" 
-                                    id="price" v-model="itemToAdd.price">
+                                    id="price" v-model="itemToAdd.price"
+                                    @input="formatPrice">
                                 </div>
                                 <div class="col-md-12 col-12 form-group fs-5 mb-2">
                                     <label for="description">Descrição</label>
