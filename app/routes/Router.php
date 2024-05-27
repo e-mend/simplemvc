@@ -63,6 +63,7 @@ final class Router
                 '/validatenewemail' => fn() => self::load('NewUserController', 'validateNewUserEmailApi'),
                 '/changepermissions' => fn() => self::load('NewUserController', 'changePermissionApi'),
                 '/additem' => fn() => self::load('InventoryController', 'addItemApi'),
+                '/uploadimage' => fn() => self::load('InventoryController', 'uploadImageApi'),
           ]
         ];
     }

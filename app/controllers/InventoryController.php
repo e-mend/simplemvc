@@ -141,6 +141,17 @@ class InventoryController extends Controller
         }
     }
 
+    public function uploadImageApi()
+    {
+        try {
+            if(!$this->secure->isLoggedIn() || !$this->secure->hasPermission(AclRole::CAN_UPDATE_INVENTORY->value)){
+                throw new Exception("Não autorizado");
+            }
+
+            $params = Req::getFiles();
+
+            if(!$params['id']){
+
     public function addItemApi()
     {
         try {

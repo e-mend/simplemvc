@@ -843,8 +843,11 @@ const app = new Vue({
         addItemModal() {
             $('#inventory-modal').modal('show');
         },
-        formatPrice() {
-            let value = this.itemToAdd.price.replace(/[^0-9]/g, '');
+        formatPriceInput(){
+            this.itemToAdd.price = this.formatPrice(this.itemToAdd.price);
+        },
+        formatPrice(price) {
+            let value = price.replace(/[^0-9]/g, '');
 
             if(value.substring(0, 1) == '0'){
                 value = value.substring(1);
@@ -865,7 +868,7 @@ const app = new Vue({
                 maximumFractionDigits: 2,
             });
 
-            this.itemToAdd.price = formatter.format(value);
+            return formatter.format(value);
         },
         async addItem() {
             this.itemToAdd.price = this.itemToAdd.price.replace(/[^0-9]/g, '');
@@ -898,7 +901,7 @@ const app = new Vue({
 
                 this.getItems('reload');
             } catch (error) {
-                this.formatPrice();
+                this.formatPriceInput();
                 this.throwWarning(error.message, ['alert-danger']);
             }
         }

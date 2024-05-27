@@ -102,9 +102,9 @@
                 </div>
             </div>
             <!-- Inventory -->
-            <div class="" v-if="option === 'inventory'">
-            <div class="row d-flex justify-content-between py-3 py-md-3 rounded
-                    border z-3 text-center">
+            <div class="container-margin" v-if="option === 'inventory'">
+            <div class="row d-flex justify-content-between py-3 py-md-3 rounded 
+            border z-3 text-center">
                 <div class="col-12 fs-5">
                     Inventário
                 </div>
@@ -175,40 +175,88 @@
             </div>
             <div class="row d-flex justify-content-center rounded z-3 text-center">
                 <div v-for="item in items" :key="item.id" 
-                class="row bg-primary rounded text-white mt-1 text-center py-1 fs-5 justify-content-center">
-                    <div class="row d-flex overflow-hidden my-auto">
-                        <div class="col-md-2 col-12">
-                            {{ item.name }}
-                        </div>
-                        <div class="col-md-2 col-12">
-                            {{ item.quantity }}
-                        </div>
-                        <div class="col-md-4 col-12">
-                            {{ item.description }}
-                        </div>
-                        <div class="col-md-2 col-12">
-                            <div class="btn btn-primary text-center p-3 fs-5" 
-                            @click="toggleItemFavorite(item.id)" v-if="item.favorite">
-                                <i class="fa-solid fa-star"></i>
+                class="col-12 col-md-3 bg-light rounded
+                shadow-lg border-dark-subtle
+                card rounded text-black mt-1 text-center 
+                py-1 fs-5 justify-content-center">
+                    <div class="row d-flex my-auto">
+                        <div :id="'carouselId' + item.id" class="card-img-top img-container carousel slide">
+                            <!-- <img :src="item.image" 
+                            class="produkt-img rounded"
+                            style="" alt="..."> -->
+                            <div class="carousel-inner" v-if="item.image">
+                                <div class="carousel-item" v-for="(image, index) in item.image" 
+                                :class="{active: index === 0}">
+                                    <img :src="item.image" 
+                                    class="d-block w-100" alt="...">
+                                </div>
                             </div>
-                            <div class="btn btn-primary text-center p-3 fs-5" 
-                            @click="toggleItemFavorite(item.id)" v-if="!item.favorite">
-                                <i class="fa-regular fa-star"></i>
+                            <div class="carousel-inner mt-2" v-else>
+                                <i class="fa-solid fa-dolly fs-big my-auto"></i>
                             </div>
-                            <div class="btn btn-primary text-center p-3 fs-5" 
-                            @click="itemModal(item.id, true)">
-                                <i class="fa-solid fa-pencil"></i>
-                            </div>
+                            <button class="carousel-control-prev" type="button" :data-bs-target="'#carouselId' + item.id"
+                            data-bs-slide="prev">
+                                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                <span class="visually-hidden">Previous</span>
+                            </button>
+                            <button class="carousel-control-next" type="button" :data-bs-target="'#carouselId' + item.id"
+                            data-bs-slide="next">
+                                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                <span class="visually-hidden">Next</span>
+                            </button>
                         </div>
-                        <div class="col-md-2 col-2 my-auto">
-                            <div class="btn btn-primary disabled text-center my-auto p-3 fs-5" 
-                            v-if="item.isNew">
-                                <i class="fa-solid fa-fire"></i>
+                        <div class="card-body">
+                            <div class="col-md-12 col-12 fs-4">
+                                {{ item.name }}
                             </div>
-                            <div class="btn btn-danger disabled text-center my-auto p-3 fs-5" 
-                            v-if="item.is_deleted">
-                                <i class="fa-solid fa-circle-minus"></i>
-                            </div> 
+                            <div class="col-md-12 col-12 bg-light rounded text-black text-start">
+                                Descrição:
+                                <br>
+                                {{ item.description }}
+                            </div>
+                            <div class="col-md-12 col-12 text-start">
+                                <i class="fa-solid fa-box"></i>
+                                Estoque:
+                                <div class="fs-5 btn btn-light">
+                                    {{ item.quantity }}
+                                </div>
+                                <br>
+                                <i class="fa-solid fa-money-bill"></i>
+                                Valor:
+                                <div class="fs-5 btn btn-light">
+                                    {{ formatPrice(item.price) }}
+                                </div>
+                            </div>
+                            <div class="col-md-12 col-12 text-start">
+                                <div class="col-md-12 col-12 text-black my-2" 
+                                v-if="item.isNew">
+                                    <i class="fa-solid fa-fire fs-4"></i>
+                                    Item Novo
+                                </div>
+                                <div class="col-md-12 col-12 text-black my-3" 
+                                v-if="item.is_deleted">
+                                    <i class="fa-solid fa-trash fs-4"></i>
+                                    Item Apagado
+                                </div>
+                            </div>
+                            <div class="col-md-12 col-12">
+                                <div class="btn btn-light text-center p-3 fs-5" 
+                                @click="toggleItemFavorite(item.id)" v-if="item.favorite">
+                                    <i class="fa-solid fa-star"></i>
+                                </div>
+                                <div class="btn btn-outline-light border-black text-black text-center p-3 fs-5" 
+                                @click="toggleItemFavorite(item.id)" v-if="!item.favorite">
+                                    <i class="fa-regular fa-star"></i>
+                                </div>
+                                <div class="btn btn-primary text-center p-3 fs-5" 
+                                @click="itemModal(item.id, true)">
+                                    <i class="fa-solid fa-pencil"></i>
+                                </div>
+                                <div class="btn btn-danger text-center p-3 fs-5" 
+                                @click="alert">
+                                    <i class="fa-solid fa-trash"></i>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -246,7 +294,7 @@
                                     <label for="price">Preço</label>
                                     <input type="text" class="form-control fs-5" 
                                     id="price" v-model="itemToAdd.price"
-                                    @input="formatPrice">
+                                    @input="formatPriceInput">
                                 </div>
                                 <div class="col-md-3 col-12 form-group fs-5 mb-2">
                                     <label for="quantity">Quantidade</label>
@@ -272,14 +320,14 @@
                 </div>
             </div>
             <!-- Safe -->
-            <div class="" v-if="option === 'safe'">
+            <div class="container-margin" v-if="option === 'safe'">
                 <div class="row d-flex justify-content-between bg-primary py-3 py-md-3 rounded
                     z-3">
                     Cofre Aqui
                 </div>
             </div>
             <!-- Users -->
-            <div class="" v-if="option === 'users'">
+            <div class="container-margin" v-if="option === 'users'">
                 <div class="row d-flex justify-content-between py-3 py-md-3 rounded
                     border z-3 text-center">
                     <div class="col-12 fs-5">

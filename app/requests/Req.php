@@ -12,4 +12,14 @@ class Req
         }
         return $queryParams;
    }
+
+   public static function getPostParams()
+   {
+        return $_POST;
+   }
+
+   public static function getFiles()
+   {
+        return $_FILES;
+   }
 }

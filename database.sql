@@ -42,6 +42,7 @@ CREATE TABLE `InventoryApp`.`inventory`(
     `deleted_at` DATETIME,
     `created_by` INT,
     `favorite` BOOLEAN NOT NULL DEFAULT 0,
+    `image` JSON,
     FOREIGN KEY (created_by) REFERENCES user(id),
     FOREIGN KEY (deleted_by) REFERENCES user(id)
 );
