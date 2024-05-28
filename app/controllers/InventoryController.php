@@ -124,6 +124,9 @@ class InventoryController extends Controller
                                                 ->format('d/m/Y H:i:s');
                 $item['isNew'] = Carbon::createFromFormat('Y-m-d H:i:s', $item['created_at'])
                                 ->diffInDays(Carbon::now()) <= Inventory::NEW_ITEM_DAYS;
+                if($item['image']){
+                    $item['image'] = json_decode($item['image'], true);
+                }
             }
 
             Json::send([
@@ -141,17 +144,6 @@ class InventoryController extends Controller
         }
     }
 
-    public function uploadImageApi()
-    {
-        try {
-            if(!$this->secure->isLoggedIn() || !$this->secure->hasPermission(AclRole::CAN_UPDATE_INVENTORY->value)){
-                throw new Exception("Não autorizado");
-            }
-
-            $params = Req::getFiles();
-
-            if(!$params['id']){
-
     public function addItemApi()
     {
         try {
@@ -159,7 +151,8 @@ class InventoryController extends Controller
                 throw new Exception("Não autorizado");
             }
 
-            $json = Json::getJson();
+            $json = Json::getJsonFromPost('data');
+
 
             if(!$json['name'] || !$this->secure->isValid('name', $json['name'])){
                 throw new Exception("Revise o nome");
@@ -177,13 +170,26 @@ class InventoryController extends Controller
                 throw new Exception("Revise a descrição");
             }
 
+            $files = Req::getFiles();
+
+            if(count($files) <= Req::MAX_IMAGES){
+                foreach ($files as $file) {
+                    if(!Req::validateFile($file)){
+                        throw new Exception("Imagem inválida");
+                    }
+                }
+            }
+
             $insert = $this->inventory->createItem([
                 'name' => $json['name'],
                 'price' => $json['price'],
                 'quantity' => $json['quantity'],
                 'description' => $json['description'],
                 'created_at' => Carbon::now()->format('Y-m-d H:i:s'),
-                'created_by' => $_SESSION['user']['id']
+                'created_by' => $_SESSION['user']['id'],
+                'image' => json_encode([
+                    'content' => Req::getImages()
+                ]),
             ]);
 
             if(!$insert){

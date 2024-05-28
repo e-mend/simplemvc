@@ -36,4 +36,11 @@ class Json
         self::$jsonData = json_decode($rawData, true);
         return self::$jsonData ?? false;
     }
+
+    public static function getJsonFromPost(string $postParam)
+    {
+        $rawData = file_get_contents('php://input');
+        self::$jsonData = json_decode($postParam, true);
+        return self::$jsonData ?? false;
+    }
 }

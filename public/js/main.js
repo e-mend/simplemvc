@@ -118,6 +118,9 @@ const app = new Vue({
                 description: '',
                 quantity: 0,
                 price: 'R$ 0,00',
+                image1: null,
+                image2: null,
+                image3: null
             }
         }
     },
@@ -870,15 +873,41 @@ const app = new Vue({
 
             return formatter.format(value);
         },
+        onFileChange(event, imageKey) {
+            const file = event.target.files[0];
+            this.itemToAdd[imageKey] = file;
+        },
         async addItem() {
             this.itemToAdd.price = this.itemToAdd.price.replace(/[^0-9]/g, '');
+
+            const formData = new FormData();
+
+            formData.append('data', JSON.stringify({
+                name: this.itemToAdd.name,
+                quantity: this.itemToAdd.quantity,
+                description: this.itemToAdd.description,
+                price: this.itemToAdd.price
+            }));
+
+            if(this.itemToAdd.image1 != null) {
+                formData.append('image1', this.itemToAdd.image1);
+            }
+
+            if(this.itemToAdd.image2 != null) {
+                formData.append('image2', this.itemToAdd.image2);
+            }
+
+            if(this.itemToAdd.image3 != null) {
+                formData.append('image3', this.itemToAdd.image3);
+            }
+
             try {
                 const response = await fetch('/additem', {
                     method: 'POST',
                     headers: {
-                        'Content-type': 'application/json'
+                        'Content-type': 'multipart/form-data'
                     },
-                    body: JSON.stringify(this.itemToAdd)
+                    body: formData
                 });
 
                 if(!response.ok) {

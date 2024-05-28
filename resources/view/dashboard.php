@@ -185,9 +185,9 @@
                             class="produkt-img rounded"
                             style="" alt="..."> -->
                             <div class="carousel-inner" v-if="item.image">
-                                <div class="carousel-item" v-for="(image, index) in item.image" 
+                                <div class="carousel-item" v-for="(image, index) in item.image['content']" 
                                 :class="{active: index === 0}">
-                                    <img :src="item.image" 
+                                    <img :src="'data:image/' + image['type'] + ';base64,' + image['base64']" 
                                     class="d-block w-100" alt="...">
                                 </div>
                             </div>
@@ -308,6 +308,26 @@
                                 </div>
                                 <div class="col-md-12 col-12 form-group fs-3 mt-3 text-center">
                                     Total: {{ totalPrice }}
+                                </div>
+                            </div>
+                            <div class="row d-flex justify-content-center mb-2">
+                                <div class="col-md-12 col-12 form-group fs-5 mb-2">
+                                    <label for="image1">Imagem 1</label>
+                                    <input type="file" class="form-control fs-5" 
+                                    id="image1" @change="onFileChange($event, 'image1')"
+                                    accept="image/*">
+                                </div>
+                                <div class="col-md-12 col-12 form-group fs-5 mb-2">
+                                    <label for="image2">Imagem 2</label>
+                                    <input type="file" class="form-control fs-5" 
+                                    id="image2" @change="onFileChange($event, 'image2')"
+                                    accept="image/*">
+                                </div>
+                                <div class="col-md-12 col-12 form-group fs-5 mb-2">
+                                    <label for="image3">Imagem 3</label>
+                                    <input type="file" class="form-control fs-5" 
+                                    id="image3" @change="onFileChange($event, 'image3')"
+                                    accept="image/*">
                                 </div>
                             </div>
                         </div>
