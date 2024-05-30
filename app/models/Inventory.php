@@ -19,7 +19,7 @@ class Inventory
     private $sql;
     private $adapter;
 
-    public const OFFSET = 30;
+    public const OFFSET = 40;
     public const NEW_ITEM_DAYS = 7;
 
     public function __construct()
@@ -37,7 +37,7 @@ class Inventory
             $update->where(['id' => $id]);
             $update = $this->sql->buildSqlString($update);
             $result = $this->adapter->query($update, Adapter::QUERY_MODE_EXECUTE);
-            return $result->count() > 0;
+            return $result;
         } catch (\Throwable $th) {
             return false;
         }
@@ -114,6 +114,6 @@ class Inventory
         
         $statement = $this->sql->prepareStatementForSqlObject($insert);
         $results = $statement->execute();
-        return $results->getAffectedRows() > 0;
+        return $results->getGeneratedValue();
     }
 }

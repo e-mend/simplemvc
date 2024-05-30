@@ -114,10 +114,10 @@ const app = new Vue({
             passwordFieldType: 'password',
             links: {},
             itemToAdd: {
-                name: '',
-                description: '',
-                quantity: 0,
-                price: 'R$ 0,00',
+                name: 'Item Teste',
+                description: 'Descrição do item',
+                quantity: 3,
+                price: 'R$ 1000,00',
                 image1: null,
                 image2: null,
                 image3: null
@@ -428,7 +428,7 @@ const app = new Vue({
         },
         async toggleItemFavorite(id) {
             try {
-                const index = this.items.findIndex(user => user.id === id);
+                const index = this.items.findIndex(item => item.id === id);
 
                 if (index === -1) {
                     this.throwWarning('Algo deu errado', ['alert-danger']);
@@ -610,7 +610,7 @@ const app = new Vue({
             }
 
             if(this.itemSearch['all']) {
-                url = '/getusers?all=true';
+                url = '/getitems';
                 this.itemSearch['all'] = false;
                 this.itemSearch['deleted'] = false;
                 this.itemSearch['new'] = false;
@@ -618,7 +618,7 @@ const app = new Vue({
                 this.itemSearch['search'] = '';
                 this.itemSearch['from'] = '';
                 this.itemSearch['to'] = '';
-                first = false;
+                first = true;
             }
 
             url += (first ? '?' : '&') + 'pagination=' + pagination;
@@ -643,7 +643,6 @@ const app = new Vue({
 
                 this.items = json['items'];
                 this.itemSearch.pagination = json['count'];
-
             } catch (error) {
                 this.throwWarning(error.message, ['alert-danger']);
             }
@@ -843,6 +842,31 @@ const app = new Vue({
                 this.throwWarning(error.message, ['alert-danger']);
             }
         },
+        async disableItem(id) {
+            try {
+                const response = await fetch('/disableitem?id='+id);
+
+                if(!response.ok) {
+                    throw new Error('Algo deu errado');
+                }
+
+                const json = await response.json();
+
+                if(!json.success) {
+                    throw new Error(json['message']);
+                }
+
+                if(json['is_disabled']){
+                    this.throwWarning(json['message']+' <i class="fa-solid fa-check"></i>', ['alert-success']);
+                }else{
+                    this.throwWarning(json['message']+' <i class="fa-solid fa-xmark"></i>', ['alert-danger']);
+                }
+
+                this.getItems('reload');
+            } catch (error) {
+                this.throwWarning(error.message, ['alert-danger']);
+            }
+        },
         addItemModal() {
             $('#inventory-modal').modal('show');
         },
@@ -880,57 +904,101 @@ const app = new Vue({
         async addItem() {
             this.itemToAdd.price = this.itemToAdd.price.replace(/[^0-9]/g, '');
 
-            const formData = new FormData();
-
-            formData.append('data', JSON.stringify({
-                name: this.itemToAdd.name,
-                quantity: this.itemToAdd.quantity,
-                description: this.itemToAdd.description,
-                price: this.itemToAdd.price
-            }));
-
-            if(this.itemToAdd.image1 != null) {
-                formData.append('image1', this.itemToAdd.image1);
-            }
-
-            if(this.itemToAdd.image2 != null) {
-                formData.append('image2', this.itemToAdd.image2);
-            }
-
-            if(this.itemToAdd.image3 != null) {
-                formData.append('image3', this.itemToAdd.image3);
-            }
-
             try {
                 const response = await fetch('/additem', {
                     method: 'POST',
                     headers: {
-                        'Content-type': 'multipart/form-data'
+                        'Content-type': 'application/json'
                     },
-                    body: formData
+                    body: JSON.stringify({
+                        name: this.itemToAdd.name,
+                        quantity: this.itemToAdd.quantity,
+                        description: this.itemToAdd.description,
+                        price: this.itemToAdd.price
+                    })
                 });
 
-                if(!response.ok) {
+                if (!response.ok) {
                     throw new Error('Algo deu errado');
                 }
 
                 const json = await response.json();
 
-                if(!json.success) {
+                if (!json.success) {
                     throw new Error(json['message']);
                 }
+
+                this.upload(json['id']);
 
                 this.throwWarning(json['message'], ['alert-success']);
                 this.itemToAdd = {
                     name: '',
                     quantity: 0,
                     description: '',
-                    price: 'R$ 0,00'
+                    price: 'R$ 0,00',
+                    image1: null,
+                    image2: null,
+                    image3: null
                 };
 
                 this.getItems('reload');
             } catch (error) {
                 this.formatPriceInput();
+                this.throwWarning(error.message, ['alert-danger']);
+            }
+        },
+        async upload(id) {
+            if (this.itemToAdd.image1 === null 
+                && this.itemToAdd.image2 === null 
+                && this.itemToAdd.image3 === null) {
+                return;
+            }
+
+            const formData = new FormData();
+
+            if (this.itemToAdd.image1 != null) {
+                formData.append('image1', this.itemToAdd.image1);
+            }
+
+            if (this.itemToAdd.image2 != null) {
+                formData.append('image2', this.itemToAdd.image2);
+            }
+
+            if (this.itemToAdd.image3 != null) {
+                formData.append('image3', this.itemToAdd.image3);
+            }
+
+            formData.append('id', id);
+
+            try {
+                const response = await fetch('/uploadimage', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error('Algo deu errado');
+                }
+
+                const json = await response.json();
+
+                if (!json.success) {
+                    throw new Error(json['message']);
+                }
+
+                this.getItems('reload');
+
+                this.throwWarning(json['message'], ['alert-success']);
+                this.itemToAdd = {
+                    name: '',
+                    quantity: 0,
+                    description: '',
+                    price: 'R$ 0,00',
+                    image1: null,
+                    image2: null,
+                    image3: null
+                };
+            } catch (error) {
                 this.throwWarning(error.message, ['alert-danger']);
             }
         }

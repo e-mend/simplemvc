@@ -178,21 +178,19 @@
                 class="col-12 col-md-3 bg-light rounded
                 shadow-lg border-dark-subtle
                 card rounded text-black mt-1 text-center 
-                py-1 fs-5 justify-content-center">
-                    <div class="row d-flex my-auto">
-                        <div :id="'carouselId' + item.id" class="card-img-top img-container carousel slide">
-                            <!-- <img :src="item.image" 
-                            class="produkt-img rounded"
-                            style="" alt="..."> -->
-                            <div class="carousel-inner" v-if="item.image">
-                                <div class="carousel-item" v-for="(image, index) in item.image['content']" 
+                py-1 fs-5 pt-0">
+                    <div class="row d-flex rounded">
+                        <div :id="'carouselId' + item.id" 
+                        class="card-img-top px-0 img-container carousel slide w-100">
+                            <div class="carousel-inner rounded" v-if="item.image">
+                                <div class="carousel-item" v-for="(image, index) in item.image" 
                                 :class="{active: index === 0}">
-                                    <img :src="'data:image/' + image['type'] + ';base64,' + image['base64']" 
-                                    class="d-block w-100" alt="...">
+                                    <img :src="'data:image/' + image['extension'] + ';base64,' + image['base64']" 
+                                    class="d-block w-100 rounded" alt="...">
                                 </div>
                             </div>
-                            <div class="carousel-inner mt-2" v-else>
-                                <i class="fa-solid fa-dolly fs-big my-auto"></i>
+                            <div class="carousel-inner" v-else>
+                                <i class="fa-solid fa-dolly fs-big mt-4"></i>
                             </div>
                             <button class="carousel-control-prev" type="button" :data-bs-target="'#carouselId' + item.id"
                             data-bs-slide="prev">
@@ -214,7 +212,7 @@
                                 <br>
                                 {{ item.description }}
                             </div>
-                            <div class="col-md-12 col-12 text-start">
+                            <div class="col-md-12 col-12 text-start mb-2">
                                 <i class="fa-solid fa-box"></i>
                                 Estoque:
                                 <div class="fs-5 btn btn-light">
@@ -228,33 +226,33 @@
                                 </div>
                             </div>
                             <div class="col-md-12 col-12 text-start">
-                                <div class="col-md-12 col-12 text-black my-2" 
+                                <div class="col-md-12 col-12 text-black fs-5 btn btn-light" 
                                 v-if="item.isNew">
                                     <i class="fa-solid fa-fire fs-4"></i>
                                     Item Novo
                                 </div>
-                                <div class="col-md-12 col-12 text-black my-3" 
+                                <div class="col-md-12 col-12 text-black fs-5 btn btn-light" 
                                 v-if="item.is_deleted">
                                     <i class="fa-solid fa-trash fs-4"></i>
                                     Item Apagado
                                 </div>
                             </div>
                             <div class="col-md-12 col-12">
-                                <div class="btn btn-light text-center p-3 fs-5" 
-                                @click="toggleItemFavorite(item.id)" v-if="item.favorite">
-                                    <i class="fa-solid fa-star"></i>
-                                </div>
-                                <div class="btn btn-outline-light border-black text-black text-center p-3 fs-5" 
-                                @click="toggleItemFavorite(item.id)" v-if="!item.favorite">
-                                    <i class="fa-regular fa-star"></i>
+                                <div class="btn text-center p-3 fs-5" 
+                                :class="{'btn-light': item.favorite, 'btn-outline-light text-black': !item.favorite}"
+                                @click="toggleItemFavorite(item.id)" v-if="permission['admin']">
+                                    <i class="fa-star"
+                                    :class="{'fa-solid': item.favorite, 'fa-regular': !item.favorite}"></i>
                                 </div>
                                 <div class="btn btn-primary text-center p-3 fs-5" 
-                                @click="itemModal(item.id, true)">
+                                @click="itemModal(item.id, true)"
+                                v-if="permission['can_update_inventory']">
                                     <i class="fa-solid fa-pencil"></i>
                                 </div>
-                                <div class="btn btn-danger text-center p-3 fs-5" 
-                                @click="alert">
-                                    <i class="fa-solid fa-trash"></i>
+                                <div class="btn text-center p-3 fs-5" 
+                                :class="{'btn-danger': !item.is_deleted, 'btn-outline-success': item.is_deleted}"
+                                @click="disableItem(item.id)" v-if="permission['can_delete_inventory']">
+                                    <i class="fa-solid" :class="{'fa-trash': !item.is_deleted, 'fa-circle-minus': item.is_deleted}"></i></i>
                                 </div>
                             </div>
                         </div>

@@ -57,7 +57,7 @@ class InventoryController extends Controller
 
             Json::send([
                 'success' => true,
-                'message' => $item['is_deleted'] === 0 ? 'Item desabilitado com sucesso' : 'Item',
+                'message' => $item['is_deleted'] === 1 ? 'Item desativado com sucesso' : 'Item reativado com sucesso',
                 'is_disabled' => $item['is_deleted'] === 1
             ]);
 
@@ -88,7 +88,7 @@ class InventoryController extends Controller
                     $query['days'] = Carbon::now()->subDays(self::NEW_ITEM_DAYS)->format('Y-m-d H:i:s');
                 }
     
-                if($params['deleted'] && $this->secure->hasPermission(AclRole::CAN_SEE_DELETE_INVENTORY->value)){
+                if($params['deleted'] && $this->secure->hasPermission(AclRole::CAN_SEE_DELETED_INVENTORY->value)){
                     $query['is_deleted'] = 1; 
                 }else{
                     $query['is_deleted'] = 0;
@@ -109,6 +109,8 @@ class InventoryController extends Controller
 
                 if($params['pagination']){
                     $query['offset'] = ($params['pagination'] - 1) * Inventory::OFFSET;
+                }else{
+                    $query['offset'] = 0;
                 }
             }else{
                 $query['where'] = [
@@ -144,6 +146,77 @@ class InventoryController extends Controller
         }
     }
 
+    public function toggleFavoriteApi()
+    {
+        try {
+            if(!$this->secure->isLoggedIn() || !$this->secure->hasPermission(AclRole::ADMIN->value)){
+                throw new Exception("Não autorizado");
+            }
+
+            $json = Json::getJson();
+
+            if(!$json['id']){
+                throw new Exception("Id inválido");
+            }
+
+            $toUpdate = $this->inventory->update([
+                'favorite' => $json['favorite']
+            ], $json['id']);
+
+            if(!$toUpdate){
+                throw new Exception("Erro ao processar a requisição");
+            }
+
+            Json::send([
+                'success' => true,
+                'message' => $json['favorite'] ? 'Favorito adicionado com sucesso' : 'Favorito removido com sucesso'
+            ]);
+        } catch (\Throwable $th) {
+            Json::send([
+                'success' => false,
+                'message' => $th->getMessage()
+            ]);
+        }
+    }
+
+    public function uploadImageApi()
+    {
+        try {
+            if(!$this->secure->isLoggedIn() || !$this->secure->hasPermission(AclRole::CAN_CREATE_INVENTORY->value)){
+                throw new Exception("Não autorizado");
+            }
+
+            $files = Req::getFiles();
+
+            if(count($files) <= Req::MAX_IMAGES){
+                foreach ($files as $file) {
+                    if(!Req::validateFile($file)){
+                        throw new Exception("Imagem inválida");
+                    }
+                }
+            }
+
+            $insert = $this->inventory->update([
+                'image' => json_encode(Req::getImages()),
+            ], $_POST['id']);
+
+            if(!$insert){
+                throw new Exception("Erro ao processar a requisição");
+            }
+
+            Json::send([
+                'success' => true,
+                'message' => 'Imagem enviada com sucesso'
+            ]);
+        } catch (\Throwable $th) {
+            Json::send([
+                'success' => false,
+                'message' => $th->getMessage(),
+                'insert' => $insert
+            ]);
+        }
+    }
+
     public function addItemApi()
     {
         try {
@@ -151,7 +224,7 @@ class InventoryController extends Controller
                 throw new Exception("Não autorizado");
             }
 
-            $json = Json::getJsonFromPost('data');
+            $json = Json::getJson();
 
 
             if(!$json['name'] || !$this->secure->isValid('name', $json['name'])){
@@ -170,16 +243,6 @@ class InventoryController extends Controller
                 throw new Exception("Revise a descrição");
             }
 
-            $files = Req::getFiles();
-
-            if(count($files) <= Req::MAX_IMAGES){
-                foreach ($files as $file) {
-                    if(!Req::validateFile($file)){
-                        throw new Exception("Imagem inválida");
-                    }
-                }
-            }
-
             $insert = $this->inventory->createItem([
                 'name' => $json['name'],
                 'price' => $json['price'],
@@ -187,18 +250,12 @@ class InventoryController extends Controller
                 'description' => $json['description'],
                 'created_at' => Carbon::now()->format('Y-m-d H:i:s'),
                 'created_by' => $_SESSION['user']['id'],
-                'image' => json_encode([
-                    'content' => Req::getImages()
-                ]),
             ]);
-
-            if(!$insert){
-                throw new Exception("Erro ao processar a requisição");
-            }
 
             Json::send([
                 'success' => true,
                 'message' => 'Item adicionado com sucesso',
+                'id' => $insert
             ]);
         } catch (\Throwable $th) {
             Json::send([
