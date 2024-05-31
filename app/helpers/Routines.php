@@ -67,7 +67,7 @@ class Routines
                     $user = $adapter->query($select, Adapter::QUERY_MODE_EXECUTE)->toArray()[0];
 
                     $_SESSION['user']['option']['permission'] = 
-                    json_decode($user['permission'], true)['permission'];
+                    json_decode($user['option'], true)['permission'];
 
                     $delete = new Delete();
                     $delete->from('kill_switch')
@@ -88,7 +88,9 @@ class Routines
 
     public static function foresightCoroutine(int $id, string $type)
     {
-        if($_SESSION['user']){
+        $secure = Secure::getInstance();
+
+        if($secure->isLoggedIn()){
             $db = Database::getInstance();
             $adapter = $db->getConnection();
             $sql = new Sql($adapter);

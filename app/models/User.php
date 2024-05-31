@@ -8,6 +8,7 @@ use Laminas\Db\Sql\Select;
 use Laminas\Db\Adapter\Adapter;
 use Laminas\Db\Sql\Sql;
 use Laminas\Db\Sql\Insert;
+use Laminas\Db\Sql\Where;
 use Laminas\Db\Sql\Delete;
 use Carbon\Carbon;
 use Laminas\Db\Sql\Expression;
@@ -112,20 +113,22 @@ class User
         return $isCount ? $result->count() : $result->toArray();
     }
 
-    public function getUserForLogin(array $where = null)
+    public function getUserForLogin(array $where)
     {
         try {
             $select = $this->sql->select('user');
 
-            $select->where([
-                'email' => $where['username'],
-                'username' => $where['username']
-            ], 
-            PredicateSet::OP_OR);
+            $whereClause = new Where();
 
-            $select->where([
-                'is_disasled' => false
-            ]);
+            $whereClause->nest()
+                ->equalTo('email', $where['username'])
+                ->or
+                ->equalTo('username', $where['username'])
+                ->unnest()
+                ->and
+                ->equalTo('is_disabled', 0);
+
+            $select->where($whereClause);
 
             $select = $this->sql->buildSqlString($select);
             $result = $this->adapter->query($select, Adapter::QUERY_MODE_EXECUTE)->toArray();

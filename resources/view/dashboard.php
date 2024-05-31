@@ -103,492 +103,493 @@
             </div>
             <!-- Inventory -->
             <div class="container-margin" v-if="option === 'inventory'">
-            <div class="row d-flex justify-content-between py-3 py-md-3 rounded 
-            border z-3 text-center">
-                <div class="col-12 fs-5">
-                    Inventário
+                <div class="row d-flex justify-content-between py-3 py-md-3 rounded 
+                border z-3 text-center">
+                    <div class="col-12 fs-5">
+                        Inventário
+                    </div>
                 </div>
-            </div>
-            <div class="row d-flex justify-content-between rounded z-3 text-center mt-2">
-                <div class="btn btn-primary col-12 col-md-6 text-center py-3 fs-5"
-                @click="searchModalOpen = !searchModalOpen">
-                    Procurar Item
-                    <i class="fa-solid fa-magnifying-glass"></i>
+                <div class="row d-flex justify-content-between rounded z-3 text-center mt-2">
+                    <div class="btn btn-primary col-12 col-md-6 text-center py-3 fs-5"
+                    @click="searchModalOpen = !searchModalOpen">
+                        Procurar Item
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </div>
+                    <div class="btn btn-secondary col-12 col-md-6 border-white text-center py-3 fs-5"
+                    @click="addItemModal"
+                    v-if="this.permission['can_create_inventory']">
+                        Adicionar Item
+                        <i class="fa-solid fa-plus"></i>
+                    </div>
                 </div>
-                <div class="btn btn-secondary col-12 col-md-6 border-white text-center py-3 fs-5"
-                @click="addItemModal"
+                <div class="row d-flex justify-content-between rounded z-3 text-center" v-if="searchModalOpen">
+                    <div class="rounded col-12 col-md-6 text-center py-3 fs-5">
+                        <div class="input-group d-flex justify-content-center">
+                            <input @input="getItems('search', true, 1)" type="text" 
+                            class="form-control fs-5 rounded" 
+                            v-model="itemSearch.search">
+                            <i class="fa-solid fa-magnifying-glass mx-2 my-auto"></i>
+                        </div>
+                    </div>
+                    <div class="rounded col-12 col-md-6 text-center py-3 fs-5">
+                        <div class="input-group d-flex justify-content-center">
+                            <div class="mx-2 my-auto">
+                            De:
+                            </div>
+                            <input @input="getItems('search', false, 1)" type="date"
+                            class="form-control fs-5 rounded"
+                            v-model="itemSearch.from">
+                            <div class="mx-2 my-auto">
+                            Até:
+                            </div>
+                            <input @input="getItems('search', false, 1)" type="date"
+                            class="form-control fs-5 rounded"
+                            v-model="itemSearch.to">
+                        </div>
+                    </div>
+                    <div class="btn btn-primary col text-center py-3 fs-5" 
+                    @click="getItems('all', false)"
+                    :class="{'opacity-25': this.itemSearch.all}">
+                        Todos
+                        <i class="fa-solid fa-xmark"></i>
+                    </div>
+                    <div class="btn btn-primary col-6 col-md-3 text-center py-3 fs-5" 
+                    @click="getItems('new')"
+                    :class="{'opacity-25': this.itemSearch.new}">
+                        Novos
+                        <i class="fa-solid fa-fire"></i>
+                    </div>
+                    <div class="btn btn-danger col-6 col-md-3 text-center py-3 fs-5" 
+                    @click="getItems('deleted', false)"
+                    v-if="this.permission['can_see_disabled_inventory']"
+                    :class="{'opacity-25': this.itemSearch.deleted}">
+                        Apagados
+                        <i class="fa-solid fa-circle-minus"></i>
+                    </div>
+                    <div class="btn btn-dark col-6 col-md-3 text-center py-3 fs-5"
+                    @click="getItems('favorites', false)"
+                    :class="{'opacity-25': this.itemSearch.favorites}">
+                        Favoritos
+                        <i class="fa-solid fa-star"></i>
+                    </div>
+                </div>
+                <div class="row d-flex justify-content-center rounded z-3 text-center">
+                    <div v-for="item in items" :key="item.id" 
+                    class="col-12 col-md-3 bg-light rounded
+                    shadow-lg border-dark-subtle
+                    card rounded text-black mt-1 text-center 
+                    py-1 fs-5 pt-0">
+                        <div class="row d-flex rounded">
+                            <div :id="'carouselId' + item.id" 
+                            class="card-img-top px-0 img-container border-none py-0 carousel slide w-100 btn">
+                                <div class="carousel-inner rounded" v-if="item.image">
+                                    <div class="carousel-item" 
+                                    @click="imageModal(item.id)"
+                                    v-for="(image, index) in item.image" 
+                                    :class="{active: index === 0}">
+                                        <img :src="'data:image/' + image['extension'] + ';base64,' + image['base64']" 
+                                        class="d-block w-100 rounded" alt="...">
+                                    </div>
+                                </div>
+                                <div class="carousel-inner" v-else>
+                                    <i class="fa-solid fa-dolly fs-big mt-4"></i>
+                                </div>
+                                <button class="carousel-control-prev" type="button" :data-bs-target="'#carouselId' + item.id"
+                                data-bs-slide="prev">
+                                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                    <span class="visually-hidden">Previous</span>
+                                </button>
+                                <button class="carousel-control-next" type="button" :data-bs-target="'#carouselId' + item.id"
+                                data-bs-slide="next">
+                                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                    <span class="visually-hidden">Next</span>
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <div class="col-md-12 col-12 fs-4">
+                                    {{ item.name }}
+                                </div>
+                                <div class="col-md-12 col-12 bg-light rounded text-black text-start">
+                                    Descrição:
+                                    <br>
+                                    {{ item.description }}
+                                </div>
+                                <div class="col-md-12 col-12 text-start mb-2">
+                                    <i class="fa-solid fa-box"></i>
+                                    Estoque:
+                                    <div class="fs-5 btn btn-light">
+                                        {{ item.quantity }}
+                                    </div>
+                                    <br>
+                                    <i class="fa-solid fa-money-bill"></i>
+                                    Valor:
+                                    <div class="fs-5 btn btn-light">
+                                        {{ formatPrice(item.price) }}
+                                    </div>
+                                </div>
+                                <div class="col-md-12 col-12 text-start">
+                                    <div class="col-md-12 col-12 text-black fs-5 btn btn-light" 
+                                    v-if="item.isNew">
+                                        <i class="fa-solid fa-fire fs-4"></i>
+                                        Item Novo
+                                    </div>
+                                    <div class="col-md-12 col-12 text-black fs-5 btn btn-light" 
+                                    v-if="item.is_disabled">
+                                        <i class="fa-solid fa-trash fs-4"></i>
+                                        Item Apagado
+                                    </div>
+                                </div>
+                                <div class="col-md-12 col-12">
+                                    <div class="btn text-center p-3 fs-5" 
+                                    :class="{'btn-light': item.favorite, 'btn-outline-light text-black': !item.favorite}"
+                                    @click="toggleItemFavorite(item.id)" v-if="permission['admin']">
+                                        <i class="fa-star"
+                                        :class="{'fa-solid': item.favorite, 'fa-regular': !item.favorite}"></i>
+                                    </div>
+                                    <div class="btn btn-primary text-center p-3 fs-5" 
+                                    @click="editItemModal(item.id)"
+                                    v-if="permission['can_update_inventory']">
+                                        <i class="fa-solid fa-pencil"></i>
+                                    </div>
+                                    <div class="btn text-center p-3 fs-5"
+                                    :class="{'btn-danger': item.is_disabled, 'btn-outline-success': !item.is_disabled}"
+                                    @click="disableItem(item.id)" 
+                                    v-if="permission['can_disable_inventory']">
+                                        <i class="fa-solid" :class="{'fa-toggle-on': item.is_disabled, 'fa-toggle-off': !item.is_disabled}"></i></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row d-flex justify-content-between rounded z-3 text-center">
+                    <ul class="pagination justify-content-center">
+                        <button v-for="page in this.itemSearch.pagination"
+                        class="btn btn-primary fs-4"
+                        @click="getItems('reload', false, page)" :key="page">
+                            {{ page }}
+                        </button>
+                    </ul>
+                </div>
+                <div id="inventory-modal" class="modal fade" id="staticBackdrop"
+                data-bs-backdrop="static" data-bs-keyboard="false" 
+                tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true"
                 v-if="this.permission['can_create_inventory']">
-                    Adicionar Item
-                    <i class="fa-solid fa-plus"></i>
-                </div>
-            </div>
-            <div class="row d-flex justify-content-between rounded z-3 text-center" v-if="searchModalOpen">
-                <div class="rounded col-12 col-md-6 text-center py-3 fs-5">
-                    <div class="input-group d-flex justify-content-center">
-                        <input @input="getItems('search', true, 1)" type="text" 
-                        class="form-control fs-5 rounded" 
-                        v-model="itemSearch.search">
-                        <i class="fa-solid fa-magnifying-glass mx-2 my-auto"></i>
-                    </div>
-                </div>
-                <div class="rounded col-12 col-md-6 text-center py-3 fs-5">
-                    <div class="input-group d-flex justify-content-center">
-                        <div class="mx-2 my-auto">
-                        De:
-                        </div>
-                        <input @input="getItems('search', false, 1)" type="date"
-                        class="form-control fs-5 rounded"
-                        v-model="itemSearch.from">
-                        <div class="mx-2 my-auto">
-                        Até:
-                        </div>
-                        <input @input="getItems('search', false, 1)" type="date"
-                        class="form-control fs-5 rounded"
-                        v-model="itemSearch.to">
-                    </div>
-                </div>
-                <div class="btn btn-primary col text-center py-3 fs-5" 
-                @click="getItems('all', false)"
-                :class="{'opacity-25': this.itemSearch.all}">
-                    Todos
-                    <i class="fa-solid fa-xmark"></i>
-                </div>
-                <div class="btn btn-primary col-6 col-md-3 text-center py-3 fs-5" 
-                @click="getItems('new')"
-                :class="{'opacity-25': this.itemSearch.new}">
-                    Novos
-                    <i class="fa-solid fa-fire"></i>
-                </div>
-                <div class="btn btn-danger col-6 col-md-3 text-center py-3 fs-5" 
-                @click="getItems('deleted', false)"
-                v-if="this.permission['can_see_disabled_inventory']"
-                :class="{'opacity-25': this.itemSearch.deleted}">
-                    Apagados
-                    <i class="fa-solid fa-circle-minus"></i>
-                </div>
-                <div class="btn btn-dark col-6 col-md-3 text-center py-3 fs-5"
-                @click="getItems('favorites', false)"
-                :class="{'opacity-25': this.itemSearch.favorites}">
-                    Favoritos
-                    <i class="fa-solid fa-star"></i>
-                </div>
-            </div>
-            <div class="row d-flex justify-content-center rounded z-3 text-center">
-                <div v-for="item in items" :key="item.id" 
-                class="col-12 col-md-3 bg-light rounded
-                shadow-lg border-dark-subtle
-                card rounded text-black mt-1 text-center 
-                py-1 fs-5 pt-0">
-                    <div class="row d-flex rounded">
-                        <div :id="'carouselId' + item.id" 
-                        class="card-img-top px-0 img-container border-none py-0 carousel slide w-100 btn">
-                            <div class="carousel-inner rounded" v-if="item.image">
-                                <div class="carousel-item" 
-                                @click="imageModal(item.id)"
-                                v-for="(image, index) in item.image" 
-                                :class="{active: index === 0}">
-                                    <img :src="'data:image/' + image['extension'] + ';base64,' + image['base64']" 
-                                    class="d-block w-100 rounded" alt="...">
-                                </div>
-                            </div>
-                            <div class="carousel-inner" v-else>
-                                <i class="fa-solid fa-dolly fs-big mt-4"></i>
-                            </div>
-                            <button class="carousel-control-prev" type="button" :data-bs-target="'#carouselId' + item.id"
-                            data-bs-slide="prev">
-                                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                                <span class="visually-hidden">Previous</span>
-                            </button>
-                            <button class="carousel-control-next" type="button" :data-bs-target="'#carouselId' + item.id"
-                            data-bs-slide="next">
-                                <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                                <span class="visually-hidden">Next</span>
-                            </button>
-                        </div>
-                        <div class="card-body">
-                            <div class="col-md-12 col-12 fs-4">
-                                {{ item.name }}
-                            </div>
-                            <div class="col-md-12 col-12 bg-light rounded text-black text-start">
-                                Descrição:
-                                <br>
-                                {{ item.description }}
-                            </div>
-                            <div class="col-md-12 col-12 text-start mb-2">
-                                <i class="fa-solid fa-box"></i>
-                                Estoque:
-                                <div class="fs-5 btn btn-light">
-                                    {{ item.quantity }}
-                                </div>
-                                <br>
-                                <i class="fa-solid fa-money-bill"></i>
-                                Valor:
-                                <div class="fs-5 btn btn-light">
-                                    {{ formatPrice(item.price) }}
-                                </div>
-                            </div>
-                            <div class="col-md-12 col-12 text-start">
-                                <div class="col-md-12 col-12 text-black fs-5 btn btn-light" 
-                                v-if="item.isNew">
-                                    <i class="fa-solid fa-fire fs-4"></i>
-                                    Item Novo
-                                </div>
-                                <div class="col-md-12 col-12 text-black fs-5 btn btn-light" 
-                                v-if="item.is_disabled">
-                                    <i class="fa-solid fa-trash fs-4"></i>
-                                    Item Apagado
-                                </div>
-                            </div>
-                            <div class="col-md-12 col-12">
-                                <div class="btn text-center p-3 fs-5" 
-                                :class="{'btn-light': item.favorite, 'btn-outline-light text-black': !item.favorite}"
-                                @click="toggleItemFavorite(item.id)" v-if="permission['admin']">
-                                    <i class="fa-star"
-                                    :class="{'fa-solid': item.favorite, 'fa-regular': !item.favorite}"></i>
-                                </div>
-                                <div class="btn btn-primary text-center p-3 fs-5" 
-                                @click="itemModal(item.id)"
-                                v-if="permission['can_update_inventory']">
-                                    <i class="fa-solid fa-pencil"></i>
-                                </div>
-                                <div class="btn text-center p-3 fs-5"
-                                :class="{'btn-danger': item.is_disabled, 'btn-outline-success': !item.is_disabled}"
-                                @click="disableItem(item.id)" 
-                                v-if="permission['can_disable_inventory']">
-                                    <i class="fa-solid" :class="{'fa-toggle-on': item.is_disabled, 'fa-toggle-off': !item.is_disabled}"></i></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="row d-flex justify-content-between rounded z-3 text-center">
-                <ul class="pagination justify-content-center">
-                    <button v-for="page in this.itemSearch.pagination"
-                    class="btn btn-primary fs-4"
-                    @click="getItems('reload', false, page)" :key="page">
-                        {{ page }}
-                    </button>
-                </ul>
-            </div>
-            <div id="inventory-modal" class="modal fade" id="staticBackdrop"
-            data-bs-backdrop="static" data-bs-keyboard="false" 
-            tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true"
-            v-if="this.permission['can_create_inventory']">
-                <div class="modal-dialog modal-lg">
-                    <div class="modal-content">
-                    <div class="modal-header">
-                        <h1 class="modal-title fs-5" id="staticBackdropLabel">Adicionar Item</h1>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="row d-flex justify-content-between mb-2">
-                        
-                    </div>
-                    <div class="modal-body">
-                        <div class="row d-flex justify-content-center mb-2">
-                            <div class="col-md-6 col-12 form-group fs-5 mb-2">
-                                <label for="item-name">Nome do produto</label>
-                                <input type="text" class="form-control disabled fs-5" 
-                                id="item-name" v-model="itemToAdd.name">
-                            </div>
-                            <div class="col-md-3 col-12 form-group fs-5 mb-2">
-                                <label for="price">Preço</label>
-                                <input type="text" class="form-control fs-5" 
-                                id="price" v-model="itemToAdd.price"
-                                @input="formatPriceInput">
-                            </div>
-                            <div class="col-md-3 col-12 form-group fs-5 mb-2">
-                                <label for="quantity">Quantidade</label>
-                                <input type="text" class="form-control fs-5" 
-                                id="quantity" v-model="itemToAdd.quantity">
-                            </div>
-                            <div class="col-md-12 col-12 form-group fs-5 mb-2">
-                                <label for="description">Descrição</label>
-                                <textarea class="form-control fs-5"
-                                id="description" v-model="itemToAdd.description"></textarea>
-                            </div>
-                            <div class="col-md-12 col-12 form-group fs-3 mt-3 text-center">
-                                Total: {{ totalPrice }}
-                            </div>
-                        </div>
-                        <div class="row d-flex justify-content-center mb-2">
-                            <div class="col-12 form-group fs-5 position-relative text-center">
-                                <div class="">
-                                    Imagem Principal
-                                </div>
-                                <div class="btn btn-danger position-absolute end-0"
-                                v-if="itemToAdd.image1"
-                                @click="removeImage('image1')">
-                                    <i class="fa-solid fa-xmark"></i>
-                                </div>
-                            </div>
-                            <div class="col-12 form-group fs-5 rounded 
-                                btn border shadow">
-                                <label for="image1">
-                                <div v-if="!itemToAdd.image1" class="mt-2">
-                                    <i class="fa-solid fa-file-image fs-1"></i>
-                                </div>
-                                <div class="img-container2" v-else>
-                                    <img :src="itemToAdd.image1Link" class="w-100">
-                                </div>
-                                <input type="file" class="d-none" 
-                                id="image1" @change="onFileChange($event, 'image1')"
-                                accept="image/*">
-                                </label>
-                            </div>
-                            <div class="col-12 form-group fs-5 position-relative text-center">
-                                <div class="">
-                                    Imagem 2
-                                </div>
-                                <div class="btn btn-danger position-absolute end-0"
-                                v-if="itemToAdd.image2"
-                                @click="removeImage('image2')">
-                                    <i class="fa-solid fa-xmark"></i>
-                                </div>
-                            </div>
-                            <div class="col-12 form-group fs-5 mb-2 rounded 
-                            btn border shadow">
-                                <label for="image2">
-                                <div v-if="!itemToAdd.image2" class="mt-2">
-                                    <i class="fa-solid fa-file-image fs-1"></i>
-                                </div>
-                                <div class="img-container2" v-else>
-                                    <img :src="itemToAdd.image2Link" class="w-100">
-                                </div>
-                                <input type="file" class="d-none" 
-                                id="image2" @change="onFileChange($event, 'image2')"
-                                accept="image/*">
-                                </label>
-                            </div>
-                            <div class="col-12 form-group fs-5 position-relative text-center">
-                                <div class="">
-                                    Imagem 3
-                                </div>
-                                <div class="btn btn-danger position-absolute end-0"
-                                v-if="itemToAdd.image3"
-                                @click="removeImage('image3')">
-                                    <i class="fa-solid fa-xmark"></i>
-                                </div>
-                            </div>
-                            <div class="col-12 form-group fs-5 mb-2 rounded 
-                            btn border shadow">
-                                <label for="image3">
-                                <div v-if="!itemToAdd.image3" class="mt-2">
-                                    <i class="fa-solid fa-file-image fs-1"></i>
-                                </div>
-                                <div class="img-container2" v-else>
-                                    <img :src="itemToAdd.image3Link" class="w-100 rounded">
-                                </div>
-                                <input type="file" class="d-none" 
-                                id="image3" @change="onFileChange($event, 'image3')"
-                                accept="image/*">
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" @click="addItem()" class="btn btn-primary">Adicionar</button>
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
-                    </div>
-                    </div>
-                </div>
-            </div>
-            <div id="edit-inventory-modal" class="modal fade" id="staticBackdrop"
-            data-bs-backdrop="static" data-bs-keyboard="false" 
-            tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true"
-            v-if="this.permission['can_update_inventory']">
-                <div class="modal-dialog modal-lg">
-                    <div class="modal-content">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
                         <div class="modal-header">
-                            <h1 class="modal-title fs-5" id="staticBackdropLabel">
-                                Editar item
-                            </h1>
+                            <h1 class="modal-title fs-5" id="staticBackdropLabel">Adicionar Item</h1>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
+                        <div class="row d-flex justify-content-between mb-2">
+                            
+                        </div>
                         <div class="modal-body">
-                            <div class="row d-flex justify-content-between py-3 py-md-3 rounded
-                                z-3">
-                                <div class="row d-flex justify-content-center mb-2">
-                                    <div class="col-md-12 col-12 form-group fs-5 mb-2">
-                                        <label for="edit-product-name">Nome</label>
-                                        <input type="text" class="form-control disabled fs-5" 
-                                        id="edit-product-name" v-model="itemToEdit.name">
+                            <div class="row d-flex justify-content-center mb-2">
+                                <div class="col-md-6 col-12 form-group fs-5 mb-2">
+                                    <label for="item-name">Nome do produto</label>
+                                    <input type="text" class="form-control disabled fs-5" 
+                                    id="item-name" v-model="itemToAdd.name">
+                                </div>
+                                <div class="col-md-3 col-12 form-group fs-5 mb-2">
+                                    <label for="price">Preço</label>
+                                    <input type="text" class="form-control fs-5" 
+                                    id="price" v-model="itemToAdd.price"
+                                    @input="formatPriceInput">
+                                </div>
+                                <div class="col-md-3 col-12 form-group fs-5 mb-2">
+                                    <label for="quantity">Quantidade</label>
+                                    <input type="text" class="form-control fs-5" 
+                                    id="quantity" v-model="itemToAdd.quantity">
+                                </div>
+                                <div class="col-md-12 col-12 form-group fs-5 mb-2">
+                                    <label for="description">Descrição</label>
+                                    <textarea class="form-control fs-5"
+                                    id="description" v-model="itemToAdd.description"></textarea>
+                                </div>
+                                <div class="col-md-12 col-12 form-group fs-3 mt-3 text-center">
+                                    Total: {{ totalPrice }}
+                                </div>
+                            </div>
+                            <div class="row d-flex justify-content-center mb-2">
+                                <div class="col-12 form-group fs-5 position-relative text-center">
+                                    <div class="">
+                                        Imagem Principal
                                     </div>
-                                    <div class="col-md-6 col-12 form-group fs-5 mb-2">
-                                        <i class="fa-solid fa-user"></i>
-                                        Criado em: {{ itemToEdit.created_at_formatted }}
-                                    </div>
-                                    <div class="col-md-6 col-12 form-group fs-5 mb-2">
-                                        <i class="fa-solid fa-user"></i>
-                                        Criado por: {{ itemToEdit.created_by_name }}
-                                    </div>
-                                    <div class="col-md-6 col-12 form-group fs-5 mb-2" 
-                                    v-if="itemToEdit.updated_at">
-                                        <i class="fa-regular fa-clock"></i>
-                                        Atualizado em: {{ itemToEdit.updated_at_formatted }}
-                                    </div>
-                                    <div class="col-md-6 col-12 form-group fs-5 mb-2" 
-                                    v-if="itemToEdit.updated_by">
-                                        <i class="fa-regular fa-user"></i>
-                                        Atualizado por: {{ itemToEdit.updated_by_name }}
-                                    </div>
-                                    <div class="col-md-12 col-12 form-group fs-5 mb-2">
-                                        <label for="edit-product-description">Descrição</label>
-                                        <textarea class="form-control fs-5"
-                                        id="edit-product-description" v-model="itemToEdit.description">
-                                        </textarea>
-                                    </div>
-                                    <div class="col-md-4 col-12 form-group fs-5 mb-2">
-                                        <label for="edit-product-quantity">Estoque</label>
-                                        <input type="text" class="form-control disabled fs-5" 
-                                        id="edit-product-quantity" v-model="itemToEdit.quantity">
-                                    </div>
-                                    <div class="col-md-4 col-12 form-group fs-5 mb-2">
-                                        <label for="edit-product-price">Valor</label>
-                                        <input type="text" class="form-control disabled fs-5" 
-                                        id="edit-product-price" v-model="itemToEdit.price">
-                                    </div>
-                                    <div class="col-md-3 col-12 form-group fs-5 mb-2">
-                                        <label for="edit-product-total">Total</label>
-                                        {{ itemToEdit.total }}
-                                    </div>
-                                    <div class="mt-auto mb-2 text-center fs-5 col-md-12 col-12">
-                                        <button class="btn btn-primary fs-5 col-md-4 col-12"
-                                        @click="alert">
-                                            Atualizar
-                                            <i class="fa-regular fa-thumbs-up"></i>
-                                        </button>
+                                    <div class="btn btn-danger position-absolute end-0"
+                                    v-if="itemToAdd.image1"
+                                    @click="removeImage('image1')">
+                                        <i class="fa-solid fa-xmark"></i>
                                     </div>
                                 </div>
-                                <div class="row d-flex justify-content-center mb-2">
-                                    <div class="col-12 form-group fs-5 
-                                    position-relative text-center">
-                                        <div class="">
-                                            Imagem Principal
-                                        </div>
-                                        <div class="btn btn-danger position-absolute end-0"
-                                        v-if="itemToEdit.image1"
-                                        @click="removeImage('image1', 2)">
-                                            <i class="fa-solid fa-xmark"></i>
-                                        </div>
-                                    </div>
-                                    <div class="col-12 form-group fs-5 rounded 
-                                        btn border shadow">
-                                        <label for="image1">
-                                        <div v-if="!itemToEdit.image1" class="mt-2">
-                                            <i class="fa-solid fa-file-image fs-1"></i>
-                                        </div>
-                                        <div class="img-container2" v-else>
-                                            <img :src="itemToEdit.image1Link" class="w-100">
-                                        </div>
-                                        <input type="file" class="d-none" 
-                                        id="image1" @change="onFileChange($event, 'image1', 2)"
-                                        accept="image/*">
-                                        </label>
-                                    </div>
-                                    <div class="col-12 form-group fs-5 position-relative text-center">
-                                        <div class="">
-                                            Imagem 2
-                                        </div>
-                                        <div class="btn btn-danger position-absolute end-0"
-                                        v-if="itemToAdd.image2"
-                                        @click="removeImage('image2', 2)">
-                                            <i class="fa-solid fa-xmark"></i>
-                                        </div>
-                                    </div>
-                                    <div class="col-12 form-group fs-5 mb-2 rounded 
+                                <div class="col-12 form-group fs-5 rounded 
                                     btn border shadow">
-                                        <label for="image2">
-                                        <div v-if="!itemToEdit.image2" class="mt-2">
-                                            <i class="fa-solid fa-file-image fs-1"></i>
-                                        </div>
-                                        <div class="img-container2" v-else>
-                                            <img :src="itemToEdit.image2Link" class="w-100">
-                                        </div>
-                                        <input type="file" class="d-none" 
-                                        id="image2" @change="onFileChange($event, 'image2', 2)"
-                                        accept="image/*">
-                                        </label>
+                                    <label for="image1">
+                                    <div v-if="!itemToAdd.image1" class="mt-2">
+                                        <i class="fa-solid fa-file-image fs-1"></i>
                                     </div>
-                                    <div class="col-12 form-group fs-5 position-relative 
-                                    text-center">
-                                        <div class="">
-                                            Imagem 3
-                                        </div>
-                                        <div class="btn btn-danger position-absolute end-0"
-                                        v-if="itemToEdit.image3"
-                                        @click="removeImage('image3', 2)">
-                                            <i class="fa-solid fa-xmark"></i>
-                                        </div>
+                                    <div class="img-container2" v-else>
+                                        <img :src="itemToAdd.image1Link" class="w-100">
                                     </div>
-                                    <div class="col-12 form-group fs-5 mb-2 rounded 
-                                    btn border shadow">
-                                        <label for="image3">
-                                        <div v-if="!itemToEdit.image3" class="mt-2">
-                                            <i class="fa-solid fa-file-image fs-1"></i>
-                                        </div>
-                                        <div class="img-container2" v-else>
-                                            <img :src="itemToEdit.image3Link" class="w-100 rounded">
-                                        </div>
-                                        <input type="file" class="d-none" 
-                                        id="image3" @change="onFileChange($event, 'image3', 2)"
-                                        accept="image/*">
-                                        </label>
+                                    <input type="file" class="d-none" 
+                                    id="image1" @change="onFileChange($event, 'image1')"
+                                    accept="image/*">
+                                    </label>
+                                </div>
+                                <div class="col-12 form-group fs-5 position-relative text-center">
+                                    <div class="">
+                                        Imagem 2
+                                    </div>
+                                    <div class="btn btn-danger position-absolute end-0"
+                                    v-if="itemToAdd.image2"
+                                    @click="removeImage('image2')">
+                                        <i class="fa-solid fa-xmark"></i>
                                     </div>
                                 </div>
-                                <div class="row d-flex justify-content-between py-3 py-md-3 rounded
-                                z-3">
-                                    <div class="mt-auto mb-2 text-center fs-5 col-md-12 col-12">
-                                        <button class="btn btn-primary fs-5 col-md-4 col-12"
-                                        @click="alert">
-                                            Atualizar imagens
-                                            <i class="fa-solid fa-image"></i>
-                                        </button>
+                                <div class="col-12 form-group fs-5 mb-2 rounded 
+                                btn border shadow">
+                                    <label for="image2">
+                                    <div v-if="!itemToAdd.image2" class="mt-2">
+                                        <i class="fa-solid fa-file-image fs-1"></i>
+                                    </div>
+                                    <div class="img-container2" v-else>
+                                        <img :src="itemToAdd.image2Link" class="w-100">
+                                    </div>
+                                    <input type="file" class="d-none" 
+                                    id="image2" @change="onFileChange($event, 'image2')"
+                                    accept="image/*">
+                                    </label>
+                                </div>
+                                <div class="col-12 form-group fs-5 position-relative text-center">
+                                    <div class="">
+                                        Imagem 3
+                                    </div>
+                                    <div class="btn btn-danger position-absolute end-0"
+                                    v-if="itemToAdd.image3"
+                                    @click="removeImage('image3')">
+                                        <i class="fa-solid fa-xmark"></i>
+                                    </div>
+                                </div>
+                                <div class="col-12 form-group fs-5 mb-2 rounded 
+                                btn border shadow">
+                                    <label for="image3">
+                                    <div v-if="!itemToAdd.image3" class="mt-2">
+                                        <i class="fa-solid fa-file-image fs-1"></i>
+                                    </div>
+                                    <div class="img-container2" v-else>
+                                        <img :src="itemToAdd.image3Link" class="w-100 rounded">
+                                    </div>
+                                    <input type="file" class="d-none" 
+                                    id="image3" @change="onFileChange($event, 'image3')"
+                                    accept="image/*">
+                                    </label>
                                 </div>
                             </div>
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-danger"
-                            v-if="this.permission['admin']">
-                                Apagar permanentemente <i class="fa-regular fa-trash-can"></i>
-                            </button>
-                            <button type="button" class="btn btn-secondary" 
-                            data-bs-dismiss="modal">Fechar</button>
+                            <button type="button" @click="addItem()" class="btn btn-primary">Adicionar</button>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                        </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div id="image-modal" class="modal fade" id="staticBackdrop"
-            data-bs-backdrop="static" data-bs-keyboard="false" 
-            tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-                <div class="modal-dialog modal-xl">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h1 class="modal-title fs-5" id="staticBackdropLabel"></h1>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                        <div id="image-carousel" 
-                            class="card-img-top px-0 img-container h-100 carousel slide w-100">
-                            <div class="carousel-inner rounded">
-                                <div class="carousel-item" 
-                                v-for="(image, index) in imageModalContent" 
-                                :class="{active: index === 0}">
-                                    <img :src="'data:image/' + image['extension'] + ';base64,' + image['base64']" 
-                                    class="d-block w-100 rounded" alt="...">
+                <div id="edit-inventory-modal" class="modal fade" id="staticBackdrop"
+                data-bs-backdrop="static" data-bs-keyboard="false" 
+                tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true"
+                v-if="this.permission['can_update_inventory']">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h1 class="modal-title fs-5" id="staticBackdropLabel">
+                                    Editar item
+                                </h1>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="row d-flex justify-content-between py-3 py-md-3 rounded
+                                    z-3">
+                                    <div class="row d-flex justify-content-center mb-2">
+                                        <div class="col-md-12 col-12 form-group fs-5 mb-2">
+                                            <label for="edit-product-name">Nome</label>
+                                            <input type="text" class="form-control disabled fs-5" 
+                                            id="edit-product-name" v-model="itemToEdit.name">
+                                        </div>
+                                        <div class="col-md-6 col-12 form-group fs-5 mb-2">
+                                            <i class="fa-solid fa-user"></i>
+                                            Criado em: {{ itemToEdit.created_at_formatted }}
+                                        </div>
+                                        <div class="col-md-6 col-12 form-group fs-5 mb-2">
+                                            <i class="fa-solid fa-user"></i>
+                                            Criado por: {{ itemToEdit.created_by_name }}
+                                        </div>
+                                        <div class="col-md-6 col-12 form-group fs-5 mb-2" 
+                                        v-if="itemToEdit.updated_at">
+                                            <i class="fa-regular fa-clock"></i>
+                                            Atualizado em: {{ itemToEdit.updated_at_formatted }}
+                                        </div>
+                                        <div class="col-md-6 col-12 form-group fs-5 mb-2" 
+                                        v-if="itemToEdit.updated_by">
+                                            <i class="fa-regular fa-user"></i>
+                                            Atualizado por: {{ itemToEdit.updated_by_name }}
+                                        </div>
+                                        <div class="col-md-12 col-12 form-group fs-5 mb-2">
+                                            <label for="edit-product-description">Descrição</label>
+                                            <textarea class="form-control fs-5"
+                                            id="edit-product-description" v-model="itemToEdit.description">
+                                            </textarea>
+                                        </div>
+                                        <div class="col-md-4 col-12 form-group fs-5 mb-2">
+                                            <label for="edit-product-quantity">Estoque</label>
+                                            <input type="text" class="form-control disabled fs-5" 
+                                            id="edit-product-quantity" v-model="itemToEdit.quantity">
+                                        </div>
+                                        <div class="col-md-4 col-12 form-group fs-5 mb-2">
+                                            <label for="edit-product-price">Valor</label>
+                                            <input type="text" class="form-control disabled fs-5" 
+                                            id="edit-product-price" v-model="itemToEdit.price">
+                                        </div>
+                                        <div class="col-md-3 col-12 form-group fs-5 mb-2">
+                                            <label for="edit-product-total">Total</label>
+                                            {{ itemToEdit.total }}
+                                        </div>
+                                        <div class="mt-auto mb-2 text-center fs-5 col-md-12 col-12">
+                                            <button class="btn btn-primary fs-5 col-md-4 col-12"
+                                            @click="alert">
+                                                Atualizar
+                                                <i class="fa-regular fa-thumbs-up"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="row d-flex justify-content-center mb-2">
+                                        <div class="col-12 form-group fs-5 
+                                        position-relative text-center">
+                                            <div class="">
+                                                Imagem Principal
+                                            </div>
+                                            <div class="btn btn-danger position-absolute end-0"
+                                            v-if="itemToEdit.image1"
+                                            @click="removeImage('image1', 2)">
+                                                <i class="fa-solid fa-xmark"></i>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 form-group fs-5 rounded 
+                                            btn border shadow">
+                                            <label for="image1">
+                                            <div v-if="!itemToEdit.image1" class="mt-2">
+                                                <i class="fa-solid fa-file-image fs-1"></i>
+                                            </div>
+                                            <div class="img-container2" v-else>
+                                                <img :src="itemToEdit.image1Link" class="w-100">
+                                            </div>
+                                            <input type="file" class="d-none" 
+                                            id="image1" @change="onFileChange($event, 'image1', 2)"
+                                            accept="image/*">
+                                            </label>
+                                        </div>
+                                        <div class="col-12 form-group fs-5 position-relative text-center">
+                                            <div class="">
+                                                Imagem 2
+                                            </div>
+                                            <div class="btn btn-danger position-absolute end-0"
+                                            v-if="itemToAdd.image2"
+                                            @click="removeImage('image2', 2)">
+                                                <i class="fa-solid fa-xmark"></i>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 form-group fs-5 mb-2 rounded 
+                                        btn border shadow">
+                                            <label for="image2">
+                                            <div v-if="!itemToEdit.image2" class="mt-2">
+                                                <i class="fa-solid fa-file-image fs-1"></i>
+                                            </div>
+                                            <div class="img-container2" v-else>
+                                                <img :src="itemToEdit.image2Link" class="w-100">
+                                            </div>
+                                            <input type="file" class="d-none" 
+                                            id="image2" @change="onFileChange($event, 'image2', 2)"
+                                            accept="image/*">
+                                            </label>
+                                        </div>
+                                        <div class="col-12 form-group fs-5 position-relative 
+                                        text-center">
+                                            <div class="">
+                                                Imagem 3
+                                            </div>
+                                            <div class="btn btn-danger position-absolute end-0"
+                                            v-if="itemToEdit.image3"
+                                            @click="removeImage('image3', 2)">
+                                                <i class="fa-solid fa-xmark"></i>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 form-group fs-5 mb-2 rounded 
+                                        btn border shadow">
+                                            <label for="image3">
+                                            <div v-if="!itemToEdit.image3" class="mt-2">
+                                                <i class="fa-solid fa-file-image fs-1"></i>
+                                            </div>
+                                            <div class="img-container2" v-else>
+                                                <img :src="itemToEdit.image3Link" class="w-100 rounded">
+                                            </div>
+                                            <input type="file" class="d-none" 
+                                            id="image3" @change="onFileChange($event, 'image3', 2)"
+                                            accept="image/*">
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="row d-flex justify-content-between py-3 py-md-3 rounded
+                                    z-3">
+                                        <div class="mt-auto mb-2 text-center fs-5 col-md-12 col-12">
+                                            <button class="btn btn-primary fs-5 col-md-4 col-12"
+                                            @click="alert">
+                                                Atualizar imagens
+                                                <i class="fa-solid fa-image"></i>
+                                            </button>
+                                    </div>
                                 </div>
                             </div>
-                            <button class="carousel-control-prev" type="button" data-bs-target="#image-carousel"
-                            data-bs-slide="prev">
-                                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                                <span class="visually-hidden">Previous</span>
-                            </button>
-                            <button class="carousel-control-next" type="button" data-bs-target="#image-carousel"
-                            data-bs-slide="next">
-                                <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                                <span class="visually-hidden">Next</span>
-                            </button>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-danger"
+                                v-if="this.permission['admin']">
+                                    Apagar permanentemente <i class="fa-regular fa-trash-can"></i>
+                                </button>
+                                <button type="button" class="btn btn-secondary" 
+                                data-bs-dismiss="modal">Fechar</button>
+                            </div>
                         </div>
+                    </div>
+                </div>
+                <div id="image-modal" class="modal fade" id="staticBackdrop"
+                data-bs-backdrop="static" data-bs-keyboard="false" 
+                tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-xl">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h1 class="modal-title fs-5" id="staticBackdropLabel"></h1>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                            <div id="image-carousel" 
+                                class="card-img-top px-0 img-container h-100 carousel slide w-100">
+                                <div class="carousel-inner rounded">
+                                    <div class="carousel-item" 
+                                    v-for="(image, index) in imageModalContent" 
+                                    :class="{active: index === 0}">
+                                        <img :src="'data:image/' + image['extension'] + ';base64,' + image['base64']" 
+                                        class="d-block w-100 rounded" alt="...">
+                                    </div>
+                                </div>
+                                <button class="carousel-control-prev" type="button" data-bs-target="#image-carousel"
+                                data-bs-slide="prev">
+                                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                    <span class="visually-hidden">Previous</span>
+                                </button>
+                                <button class="carousel-control-next" type="button" data-bs-target="#image-carousel"
+                                data-bs-slide="next">
+                                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                    <span class="visually-hidden">Next</span>
+                                </button>
+                            </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -596,10 +597,10 @@
             </div>
             <!-- Safe -->
             <div class="container-margin" v-if="option === 'safe'">
-                <div class="row d-flex justify-content-between bg-primary py-3 py-md-3 rounded
-                    z-3">
-                    Cofre Aqui
-                </div>
+                    <div class="row d-flex justify-content-between bg-primary py-3 py-md-3 rounded
+                        z-3">
+                        Cofre Aqui
+                    </div>
             </div>
             <!-- Users -->
             <div class="container-margin" v-if="option === 'users'">
@@ -927,25 +928,6 @@
                         </div>
                     </div>
                 </div>
-                <div id="qr-modal" class="modal fade" id="staticBackdrop"
-                data-bs-backdrop="static" data-bs-keyboard="false" 
-                tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-                    <div class="modal-dialog modal-lg">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h1 class="modal-title fs-5" id="staticBackdropLabel">QR code</h1>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div>
-                            <div class="modal-body text-center">
-                                <div id="qrcode" class="d-flex justify-content-center"></div>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" 
-                                data-bs-dismiss="modal">Fechar</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>  
                 <div id="user-modal" class="modal fade" id="staticBackdrop"
                 data-bs-backdrop="static" data-bs-keyboard="false" 
                 tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
@@ -1283,24 +1265,44 @@
                     Configurações Aqui
                 </div>
             </div>
-        </div>
-        <!-- Warnings -->
-        <div class="container position-fixed bottom-0 w-100 warn">
-            <div class="row justify-content-center warnings-container">
-                <div v-for="warning in warnings" :key="warning.id" class="warning col-12 col-md-12" 
-                @click="isClicked(warning.id)">
-                    <div class="alert text-center animate__animated animate__fadeInUp
-                    animate__faster col-md-6 mx-auto
-                    d-flex justify-content-between py-3 mb-1 fs-5"  
-                    :class="warning.class">
-                        <div class="justify-content-center flex-grow-1" v-html="warning.text">
-                        </div> 
-                        <div class="d-flex" role="button"
-                        @click="removeMessage(warning.id)">
-                            <i class="fa-solid fa-xmark my-auto"></i>
+            <!-- Warnings -->
+            <div class="container position-fixed bottom-0 w-100 warn">
+                <div class="row justify-content-center warnings-container">
+                    <div v-for="warning in warnings" :key="warning.id" class="warning col-12 col-md-12" 
+                    @click="isClicked(warning.id)">
+                        <div class="alert text-center animate__animated animate__fadeInUp
+                        animate__faster col-md-6 mx-auto
+                        d-flex justify-content-between py-3 mb-1 fs-5"  
+                        :class="warning.class">
+                            <div class="justify-content-center flex-grow-1" v-html="warning.text">
+                            </div> 
+                            <div class="d-flex" role="button"
+                            @click="removeMessage(warning.id)">
+                                <i class="fa-solid fa-xmark my-auto"></i>
+                            </div>
                         </div>
                     </div>
                 </div>
+            </div>
+            <!-- QR Modal -->
+            <div id="qr-modal" class="modal fade" id="staticBackdrop"
+                data-bs-backdrop="static" data-bs-keyboard="false" 
+                tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h1 class="modal-title fs-5" id="staticBackdropLabel">QR code</h1>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body text-center">
+                                <div id="qrcode" class="d-flex justify-content-center"></div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" 
+                                data-bs-dismiss="modal">Fechar</button>
+                            </div>
+                        </div>
+                    </div>
             </div>
         </div>
     </div>

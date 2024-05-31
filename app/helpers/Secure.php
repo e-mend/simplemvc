@@ -123,7 +123,9 @@ class Secure
             'created_at' => Carbon::now()->format('Y-m-d H:i:s'),
             'type' => 'user',
             'created_by' => $_SESSION['user']['id'],
-            'permission' => json_encode($data)
+            'option' => json_encode([
+                'permission' => $data,
+            ])
         ]);
 
         return;

@@ -142,26 +142,6 @@ const app = new Vue({
         }
     },
     methods: {
-        throwWarning(textMessage, classObject = {
-            'alert-danger': true,
-            'clipboard-copy': true
-        }, config = {}) {
-            const newMessage = {
-                id: this.nextId++,
-                text: textMessage,
-                class: classObject,
-                config: config
-            };
-
-            this.warnings.push(newMessage);
-
-            setTimeout(() => {
-                this.removeMessage(newMessage.id);
-            }, 5000);
-        },
-        togglePasswordVisibility() {
-            this.passwordFieldType = this.passwordFieldType === 'password' ? 'text' : 'password';
-        },
         async createLink(hasEmail = false, qr = false) {
             try {
                 if(!hasEmail) {
@@ -444,45 +424,6 @@ const app = new Vue({
                 this.users[index].favorite = !this.users[index].favorite;
             }
         },
-        async toggleItemFavorite(id) {
-            try {
-                const index = this.items.findIndex(item => item.id === id);
-
-                if (index === -1) {
-                    this.throwWarning('Algo deu errado', ['alert-danger']);
-                    return;
-                }
-
-                this.items[index].favorite = !this.items[index].favorite;
-
-                const response = await fetch('/toggleitemfavorite', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        id: id,
-                        favorite: this.items[index].favorite
-                    })
-                })
-
-                if(!response.ok) {
-                    throw new Error('Algo deu errado');
-                }
-
-                const json = await response.json();
-
-                if(!json.success) {
-                    throw new Error('Algo deu errado');
-                }
-
-                this.throwWarning(json['message'], ['alert-success']);
-
-            } catch (error) {
-                this.throwWarning(error.message, ['alert-danger']);
-                this.items[index].favorite = !this.items[index].favorite;
-            }
-        },
         async logout() {
             try {
                 const response = await fetch('/logout');
@@ -504,17 +445,6 @@ const app = new Vue({
                 this.throwWarning(error.message, ['alert-danger']);
                 this.blocked = true;
             }
-        },
-        qrCode(text){
-            $('#qr-modal').modal('show');
-
-            var qrcode = new QRCode(document.getElementById("qrcode"), {
-                text: text,
-                width: 256,
-                height: 256,
-                colorDark: "#000000",
-                colorLight: "#ffffff",
-            });
         },
         async getUsers(type = 'all', pagination = 1, noAlert = false) {
             this.loadingUsers = true;
@@ -585,6 +515,120 @@ const app = new Vue({
             }
 
             this.loadingUsers = false;
+        },
+        async foresight() {
+            try {
+                const response = await fetch('/foresight'); 
+                
+                if(!response.ok) {
+                    throw new Error('Algo deu errado');
+                }
+
+                const json = await response.json();
+
+                if(!json.success) {
+                    throw new Error(json['message']);
+                }
+
+                if(json['redirect'] === false) {
+                    if(json['type'] === 'reset'){
+                        Vue.set(this, 'permission', json['permission']);
+                        this.throwWarning(json['message'], ['alert-secondary']);
+                        return;
+                    }
+                    this.throwWarning('Nada aconteceu', ['alert-secondary']);
+                    return;
+                }
+
+                window.location.href = json['redirect'];
+
+                this.throwWarning(json['message'], ['alert-success']);
+            } catch (error) {
+                this.throwWarning(error.message, ['alert-danger']);
+                window.location.href = "/";
+            }
+        },
+        async changePermissions() {
+            try {
+                const response = await fetch('/changepermissions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        permission: this.userToEdit['permission'],
+                        id: this.userToEdit['id']
+                    })
+                });
+
+                if(!response.ok) {
+                    throw new Error('Algo deu errado');
+                }
+
+                const json = await response.json();
+
+                if(!json.success) {
+                    throw new Error(json['message']);
+                }
+
+                this.throwWarning(json['message'], ['alert-success']);
+            } catch (error) {
+                this.throwWarning(error.message, ['alert-danger']);
+            }
+        },
+        async getUserData() {
+            this.blocked = true;
+            try {
+                const response = await fetch('/userdata');
+
+                if(!response.ok) {
+                    throw new Error('Algo deu errado');
+                }
+
+                const json = await response.json();
+
+                if(!json.success) {
+                    throw new Error('Erro no servidor');
+                }
+
+                this.throwWarning(json['message'], ['alert-success']);
+
+                this.user = json['user'];
+
+                this.permission = json['user']['permission'];
+                console.log(this.permission);
+
+            } catch (error) {
+                this.throwWarning(error.message, ['alert-danger']);
+                this.blocked = true;
+            }
+
+            this.blocked = false;
+        },
+        async disableUser(id) {
+            try {
+                const response = await fetch('/disableuser?id='+id);
+
+                if(!response.ok) {
+                    throw new Error('Algo deu errado');
+                }
+
+                const json = await response.json();
+
+                if(!json.success) {
+                    throw new Error(json['message']);
+                }
+
+                if(json['is_disabled']){
+                    this.throwWarning(json['message']+' <i class="fa-solid fa-check"></i>', ['alert-success']);
+                }else{
+                    this.throwWarning(json['message']+' <i class="fa-solid fa-xmark"></i>', ['alert-danger']);
+                }
+
+                this.userModal(id, true);
+            } catch (error) {
+                this.throwWarning(error.message, ['alert-danger']);
+            }
         },
         async getItems(type = 'all', noAlert = true, pagination = 1) {
             this.loadingItems = true;
@@ -667,111 +711,27 @@ const app = new Vue({
 
             this.loadingItems = false;
         },
-        removeMessage(id) {
-            const index = this.warnings.findIndex(message => message.id === id);
-            if (index !== -1) {
-                this.warnings.splice(index, 1);
-            }
-        },
-        isClicked(id) {
-            const index = this.warnings.findIndex(message => message.id === id);
-            if (index === -1) {
-                return;
-            }
-
-            let obj = this.warnings[index].class;
-
-            if(Object.values(obj).includes('clipboard-copy')) {
-                navigator.clipboard.writeText(this.warnings[index]['config']['data-clipboard-text']);
-            }
-        },
-        copyLink(id) {
-            const index = this.links.findIndex(message => message.id === id);
-            if (index === -1) {
-                return;
-            }
-
-            navigator.clipboard.writeText(this.links[index]['link']);
-            this.throwWarning(`Link copiado para a área de transferência <i class="fa-solid fa-clipboard"></i>`, 
-            ['alert-secondary']);
-        },
-        loadOptions(option) {
-            this.loadingR(true);
-
-            if(this.blocked){
-                this.option === 'main';
-                return;
-            }
-
-            if(option === 'users' && !this.permission['admin']) {
-                this.option === 'main';
-                return;
-            }
-
-            if(option === 'safe' && !this.permission['can_read_post']) {
-                this.option === 'main';
-                return;
-            }
-
-            if(option === 'inventory' && !this.permission['can_read_inventory']) {
-                this.option === 'main';
-                return;
-            }
-
-            this.option = option;
-
-            if(this.option === 'users') {
-                this.getUsers();
-            }
-
-            if(this.option === 'inventory') {
-                this.getItems();
-            }
-        },
-        async foresight() {
+        async toggleItemFavorite(id) {
             try {
-                const response = await fetch('/foresight'); 
-                
-                if(!response.ok) {
-                    throw new Error('Algo deu errado');
-                }
+                const index = this.items.findIndex(item => item.id === id);
 
-                const json = await response.json();
-
-                if(!json.success) {
-                    throw new Error(json['message']);
-                }
-
-                if(json['redirect'] === false) {
-                    if(json['type'] === 'reset'){
-                        Vue.set(this, 'permission', json['permission']);
-                        this.throwWarning(json['message'], ['alert-secondary']);
-                        return;
-                    }
-                    this.throwWarning('Nada aconteceu', ['alert-secondary']);
+                if (index === -1) {
+                    this.throwWarning('Algo deu errado', ['alert-danger']);
                     return;
                 }
 
-                window.location.href = json['redirect'];
+                this.items[index].favorite = !this.items[index].favorite;
 
-                this.throwWarning(json['message'], ['alert-success']);
-            } catch (error) {
-                this.throwWarning(error.message, ['alert-danger']);
-                window.location.href = "/";
-            }
-        },
-        async changePermissions() {
-            try {
-                const response = await fetch('/changepermissions', {
+                const response = await fetch('/toggleitemfavorite', {
                     method: 'POST',
                     headers: {
-                        'Content-type': 'application/json'
+                        'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        permission: this.userToEdit['permission'],
-                        id: this.userToEdit['id']
+                        id: id,
+                        favorite: this.items[index].favorite
                     })
-                });
+                })
 
                 if(!response.ok) {
                     throw new Error('Algo deu errado');
@@ -780,86 +740,14 @@ const app = new Vue({
                 const json = await response.json();
 
                 if(!json.success) {
-                    throw new Error(json['message']);
-                }
-
-                this.throwWarning(json['message'], ['alert-success']);
-            } catch (error) {
-                this.throwWarning(error.message, ['alert-danger']);
-            }
-        },
-        loadingR(force = false) {
-            if(force) {
-                clearInterval(this.intervalId);
-                this.intervalId = null;
-                this.loading = 0;
-            }
-
-            if(this.intervalId != null) {
-                return;
-            }
-
-            this.intervalId = setInterval(() => {
-                this.loading += 5;
-
-                if(this.loading > 100) {
-                    clearInterval(this.intervalId);
-                    this.intervalId = null;
-                }
-            }, 100);
-        },
-        async getUserData() {
-            this.blocked = true;
-            try {
-                const response = await fetch('/userdata');
-
-                if(!response.ok) {
                     throw new Error('Algo deu errado');
-                }
-
-                const json = await response.json();
-
-                if(!json.success) {
-                    throw new Error('Erro no servidor');
                 }
 
                 this.throwWarning(json['message'], ['alert-success']);
 
-                this.user = json['user'];
-
-                this.permission = json['user']['permission'];
-                console.log(this.permission);
-
             } catch (error) {
                 this.throwWarning(error.message, ['alert-danger']);
-                this.blocked = true;
-            }
-
-            this.blocked = false;
-        },
-        async disableUser(id) {
-            try {
-                const response = await fetch('/disableuser?id='+id);
-
-                if(!response.ok) {
-                    throw new Error('Algo deu errado');
-                }
-
-                const json = await response.json();
-
-                if(!json.success) {
-                    throw new Error(json['message']);
-                }
-
-                if(json['is_disabled']){
-                    this.throwWarning(json['message']+' <i class="fa-solid fa-check"></i>', ['alert-success']);
-                }else{
-                    this.throwWarning(json['message']+' <i class="fa-solid fa-xmark"></i>', ['alert-danger']);
-                }
-
-                this.userModal(id, true);
-            } catch (error) {
-                this.throwWarning(error.message, ['alert-danger']);
+                this.items[index].favorite = !this.items[index].favorite;
             }
         },
         async disableItem(id) {
@@ -887,11 +775,7 @@ const app = new Vue({
                 this.throwWarning(error.message, ['alert-danger']);
             }
         },
-        addItemModal() {
-            $('#inventory-modal').modal('show');
-            
-        },
-        async itemModal(id) {
+        async editItemModal(id) {
             $('#edit-inventory-modal').modal('show');  
 
             try {
@@ -907,6 +791,9 @@ const app = new Vue({
             } catch (error) {
                 this.throwWarning(error.message, ['alert-danger']);
             }
+        },
+        addItemModal() {
+            $('#inventory-modal').modal('show');
         },
         imageModal(id) {
             const item = this.items.find(item => item.id === id);
@@ -1084,7 +971,119 @@ const app = new Vue({
             } catch (error) {
                 this.throwWarning(error.message, ['alert-danger']);
             }
-        }
+        },
+        throwWarning(textMessage, classObject = {
+            'alert-danger': true,
+            'clipboard-copy': true
+        }, config = {}) {
+            const newMessage = {
+                id: this.nextId++,
+                text: textMessage,
+                class: classObject,
+                config: config
+            };
+
+            this.warnings.push(newMessage);
+
+            setTimeout(() => {
+                this.removeMessage(newMessage.id);
+            }, 5000);
+        },
+        togglePasswordVisibility() {
+            this.passwordFieldType = this.passwordFieldType === 'password' ? 'text' : 'password';
+        },
+        loadingR(force = false) {
+            if(force) {
+                clearInterval(this.intervalId);
+                this.intervalId = null;
+                this.loading = 0;
+            }
+
+            if(this.intervalId != null) {
+                return;
+            }
+
+            this.intervalId = setInterval(() => {
+                this.loading += 5;
+
+                if(this.loading > 100) {
+                    clearInterval(this.intervalId);
+                    this.intervalId = null;
+                }
+            }, 100);
+        },
+        removeMessage(id) {
+            const index = this.warnings.findIndex(message => message.id === id);
+            if (index !== -1) {
+                this.warnings.splice(index, 1);
+            }
+        },
+        isClicked(id) {
+            const index = this.warnings.findIndex(message => message.id === id);
+            if (index === -1) {
+                return;
+            }
+
+            let obj = this.warnings[index].class;
+
+            if(Object.values(obj).includes('clipboard-copy')) {
+                navigator.clipboard.writeText(this.warnings[index]['config']['data-clipboard-text']);
+            }
+        },
+        copyLink(id) {
+            const index = this.links.findIndex(message => message.id === id);
+            if (index === -1) {
+                return;
+            }
+
+            navigator.clipboard.writeText(this.links[index]['link']);
+            this.throwWarning(`Link copiado para a área de transferência <i class="fa-solid fa-clipboard"></i>`, 
+            ['alert-secondary']);
+        },
+        loadOptions(option) {
+            this.loadingR(true);
+
+            if(this.blocked){
+                this.option === 'main';
+                return;
+            }
+
+            if(option === 'users' && !this.permission['admin']) {
+                this.option === 'main';
+                return;
+            }
+
+            if(option === 'safe' && !this.permission['can_read_post']) {
+                this.option === 'main';
+                return;
+            }
+
+            if(option === 'inventory' && !this.permission['can_read_inventory']) {
+                this.option === 'main';
+                return;
+            }
+
+            this.option = option;
+
+            if(this.option === 'users') {
+                this.getUsers();
+            }
+
+            if(this.option === 'inventory') {
+                this.getItems();
+            }
+        },
+        qrCode(text){
+            $('#qr-modal').modal('show');
+
+            var qrcode = new QRCode(document.getElementById("qrcode"), {
+                text: text,
+                width: 256,
+                height: 256,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+            });
+        },
     },
     computed: {
         iconClass() {
@@ -1113,7 +1112,7 @@ const app = new Vue({
             });
 
             return formatter.format(value * this.itemToAdd.quantity);
-        }
+        },
     },
     async mounted() {
 
@@ -1127,7 +1126,6 @@ const app = new Vue({
 
         setInterval(() => { 
             this.secs += 1;
-            //this.throwWarning('Próxima tentativa em ' + (20 - this.secs) + ' segundos', ['alert-danger']);
 
             if(this.secs === 20) {
                 this.secs = 0;

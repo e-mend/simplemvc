@@ -26,28 +26,38 @@
                     @focus="changeText('email')"
                     v-model="loginForm.email" id="email" placeholder="Email">
                 </div>
-                <div class="form-group fs-5 mb-2">
-                    <input type="password" class="form-control fs-5" 
-                    @focus="changeText('password')"
-                    @input="passwordEnter"
-                    v-model="loginForm.password" id="password" placeholder="Senha">
-                    <div class="d-flex justify-content-center mt-1"
+                <div class="form-group fs-5 mb-2 d-flex">
+                    <div class="col-9">
+                        <input type="password" class="form-control fs-5 w-100" 
+                        @focus="changeText('password')"
+                        @input="passwordEnter"
+                        v-model="loginForm.password" id="password" placeholder="Senha">
+                    </div>
+                    <div class="col-3">
+                        <span 
+                            class="toggle-password my-auto rounded text-white mx-2" 
+                            @click="togglePasswordVisibility">
+                            <i :class="iconClass"></i>
+                        </span>
+                    </div>
+                   
+                </div>
+                <div class="d-flex row justify-content-center mt-1"
                     v-if="loginForm.password.length > 0">
-                        <div class="btn btn-primary animate__pulse animate__infinite
-                        animate__slower text-white" 
-                        :class="{'animate__animated': upper}">
-                            A-Z
-                        </div>
-                        <div class="btn btn-primary animate__pulse animate__infinite
-                        animate__slower text-white" 
-                        :class="{'animate__animated': number}">
-                            0-9
-                        </div>
-                        <div class="btn btn-primary animate__pulse animate__infinite white
-                        animate__slower text-white" 
-                        :class="{'animate__animated': special}">
-                            @$!%*?&
-                        </div>
+                    <div class="btn btn-primary col-4 animate__pulse animate__infinite
+                    animate__slower text-white" 
+                    :class="{'animate__animated': upper}">
+                        A-Z
+                    </div>
+                    <div class="btn btn-primary col-4 animate__pulse animate__infinite
+                    animate__slower text-white" 
+                    :class="{'animate__animated': number}">
+                        0-9
+                    </div>
+                    <div class="btn btn-primary col-4 animate__pulse animate__infinite white
+                    animate__slower text-white" 
+                    :class="{'animate__animated': special}">
+                        @$!%*?&
                     </div>
                 </div>
             </div>
@@ -140,6 +150,7 @@
                     special: false,
                     validateEmail: false,
                     pin: '',
+                    passwordFieldType: 'password',
                 }
             },
             methods: {
@@ -149,6 +160,9 @@
                   }  
 
                   return this.updateUser();
+                },
+                togglePasswordVisibility() {
+                    this.passwordFieldType = this.passwordFieldType === 'password' ? 'text' : 'password';
                 },
                 changeText(text) {
                     this.typedText = '';
@@ -308,6 +322,11 @@
                 if(this.validateEmail){
                     this.changeText('validate');
                 }
+            },
+            computed: {
+                iconClass() {
+                    return this.passwordFieldType === 'password' ? 'fa fa-eye-slash' : 'fa fa-eye';
+                },
             },
             beforeDestroy() {
                 if (this.intervalId) {

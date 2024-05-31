@@ -84,7 +84,7 @@ class HomeController extends Controller
 
             $_SESSION['user'] = $user[0];
             $_SESSION['user']['option'] = 
-            json_decode($user[0]['options'], true);
+            json_decode($user[0]['option'], true);
 
             $_SESSION['token'] = true;
 
@@ -110,7 +110,7 @@ class HomeController extends Controller
             Json::send([
                 'success' => false,
                 'redirect' => false,
-                'message' => 'Erro ao processar a requisição'
+                'message' => $th->getFile().' - '.$th->getLine().' - '.$th->getMessage()
             ]);
         }
     }
@@ -149,7 +149,7 @@ class HomeController extends Controller
     {
         try {
             if(!$this->secure->isLoggedIn()){
-                throw new PermissionException("Não autorizado");
+                throw new PermissionException();
             }
 
             $json = Json::getJson();

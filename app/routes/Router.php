@@ -2,6 +2,7 @@
 namespace App\routes;
 
 use Exception;
+use Throwable;
 use App\Helpers\Request;
 use App\Helpers\Uri;
 
@@ -20,7 +21,7 @@ final class Router
 
             $controller = new $controllerNamespace();
             $controller->$method();
-        } catch (\Throwable $th) {
+        } catch (Throwable $th) {
             $_SESSION['premature'] = true;
             header('Location: /');
         }
@@ -56,7 +57,7 @@ final class Router
                 '/disableuser' => fn() => self::load('DashboardController', 'disableUserApi'),
                 '/sendpasswordemail' => fn() => self::load('DashboardController', 'sendPasswordApi'),
                 '/changepassword' => fn() => self::load('NewUserController', 'changePasswordApi'),
-                '/createlink' => fn() => self::load('NewUserController', 'createNewUserLinkApi'),
+                '/createlink' => fn() => self::load('NewUserController', 'createNewLinkApi'),
                 '/newuser' => fn() => self::load('NewUserController', 'newUserApi'),
                 '/validatenewemail' => fn() => self::load('NewUserController', 'validateNewEmailApi'),
                 '/changepermissions' => fn() => self::load('NewUserController', 'changePermissionApi'),
@@ -86,7 +87,7 @@ final class Router
 
             $router();
 
-        } catch (\Throwable $th) {
+        } catch (Throwable $th) {
             $_SESSION['premature'] = true;
             header('Location: /');
         }
