@@ -48,6 +48,16 @@ class Inventory
         $select = $this->sql->select('inventory');
         $select->columns(['*']);
 
+        $select->join(['uc' => 'user'], 
+        'uc.id = inventory.created_by', 
+        ['created_by_name' => new Expression('concat(uc.first_name, " ", uc.last_name)')], 
+        Select::JOIN_LEFT);
+
+        $select->join(['uu' => 'user'], 
+        'uu.id = inventory.updated_by', 
+        ['updated_by_name' => new Expression('concat(uu.first_name, " ", uu.last_name)')], 
+        Select::JOIN_LEFT);
+
         if($search['search']){
             $searchTerm = '%' . $search['search'] . '%';
             $select->where(function ($where) use ($searchTerm) {
@@ -89,8 +99,8 @@ class Inventory
             $select->where(['favorite' => $search['favorite']]);
         }
 
-        if($search['is_deleted']){
-            $select->where(['is_deleted' => $search['is_deleted']]); 
+        if($search['is_disabled']){
+            $select->where(['is_disabled' => $search['is_disabled']]); 
         }
 
         $select->order($search['order'] ?? 'favorite DESC, id DESC, created_at DESC');

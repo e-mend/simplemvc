@@ -12,111 +12,23 @@ use Laminas\Db\Sql\Delete;
 use Carbon\Carbon;
 use Laminas\Db\Sql\Expression;
 use App\Requests\Json;
+use Throwable;
 
 class User
 {
+    public const OFFSET = 30;
+    public const NEW_USER_DAYS = 7;
+    private const PASSWORD_LINK_EXPIRE_MINUTES = 60;
+    private const NEW_USER_LINK_EXPIRE_MINUTES = 120;
     private $db;
     private $sql;
     private $adapter;
-
-    public const OFFSET = 30;
-    public const NEW_USER_DAYS = 7;
 
     public function __construct()
     {
         $this->db = Database::getInstance();
         $this->adapter = $this->db->getConnection();
         $this->sql = new Sql($this->adapter);
-    }
-
-    public static function isWaitingCoroutine(bool $isDeath = false)
-    {
-        if($_SESSION['user']){
-            $db = Database::getInstance();
-            $adapter = $db->getConnection();
-            $sql = new Sql($adapter);
-
-            if($isDeath){
-                $delete = new Delete();
-                $delete->from('kill_switch')
-                    ->where([
-                            'user_id' => $_SESSION['user']['id'],
-                        ]);
-
-                $deleteStmt = $sql->buildSqlString($delete);
-                $result = $adapter->query($deleteStmt, Adapter::QUERY_MODE_EXECUTE);
-
-                return true;
-            }
-
-            $select = $sql->select('kill_switch');
-            $select->where(['user_id' => $_SESSION['user']['id']]);
-
-            $select = $sql->buildSqlString($select);
-            $waitingUser = $adapter->query($select, Adapter::QUERY_MODE_EXECUTE)->toArray();
-
-            foreach ($waitingUser as $routine) {
-                if($routine['type'] === 'death'){
-                    session_destroy();
-
-                    $delete = new Delete();
-                    $delete->from('kill_switch')
-                        ->where([
-                                'user_id' => $_SESSION['user']['id'],
-                                'type' => 'death'
-                            ]);
-    
-                    $deleteStmt = $sql->buildSqlString($delete);
-                    $result = $adapter->query($deleteStmt, Adapter::QUERY_MODE_EXECUTE);
-    
-                    return 'death';
-                }
-
-                if($routine['type'] === 'reset'){
-                    $select = $sql->select('user');
-                    $select->where(['id' => $_SESSION['user']['id']]);
-
-                    $select = $sql->buildSqlString($select);
-                    $user = $adapter->query($select, Adapter::QUERY_MODE_EXECUTE)->toArray()[0];
-
-                    $_SESSION['user']['permission'] = 
-                    json_decode($user['permission'], true)['permission'];
-
-                    $delete = new Delete();
-                    $delete->from('kill_switch')
-                        ->where([
-                                'user_id' => $_SESSION['user']['id'],
-                                'type' => 'reset',
-                            ]);
-    
-                    $deleteStmt = $sql->buildSqlString($delete);
-                    $result = $adapter->query($deleteStmt, Adapter::QUERY_MODE_EXECUTE);
-
-                    return 'reset';
-                }
-            }
-            return false;
-        }
-    }
-
-    public static function foresightCoroutine(int $id, string $type)
-    {
-        if($_SESSION['user']){
-            $db = Database::getInstance();
-            $adapter = $db->getConnection();
-            $sql = new Sql($adapter);
-
-            $insert = new Insert();
-            $insert->into('kill_switch');
-
-            $insert->values([
-                'user_id' => $id,
-                'type' => $type,
-            ]);
-
-            $insert = $sql->buildSqlString($insert);
-            $adapter->query($insert, Adapter::QUERY_MODE_EXECUTE);
-        }
     }
 
     public function update(array $data, string $id)
@@ -128,21 +40,25 @@ class User
             $update = $this->sql->buildSqlString($update);
             $this->adapter->query($update, Adapter::QUERY_MODE_EXECUTE);
             return true;
-        } catch (\Throwable $th) {
+        } catch (Throwable $th) {
             return false;
         }
     }
 
     public function userExists(string $email, string $username)
     {
-        $select = $this->sql->select('user');
-        $select->where([
-            'email' => $email,
-            'username' => $username
-        ], 
-        PredicateSet::OP_OR);
-        $select = $this->sql->buildSqlString($select);    
-        return $this->adapter->query($select, Adapter::QUERY_MODE_EXECUTE)->toArray();
+        try {
+            $select = $this->sql->select('user');
+            $select->where([
+                'email' => $email,
+                'username' => $username
+            ], 
+            PredicateSet::OP_OR);
+            $select = $this->sql->buildSqlString($select);    
+            return $this->adapter->query($select, Adapter::QUERY_MODE_EXECUTE)->toArray();
+        } catch (Throwable $th) {
+            return false;
+        }
     }
 
     public function get(array $search = null, bool $isCount = false)
@@ -179,8 +95,8 @@ class User
             $select->where(['favorite' => $search['favorite']]);
         }
 
-        if($search['is_deleted']){
-            $select->where(['is_deleted' => $search['is_deleted']]); 
+        if($search['is_disabled']){
+            $select->where(['is_disabled' => $search['is_disabled']]); 
         }
 
         $select->order($search['order'] ?? 'favorite DESC, id DESC, created_at DESC');
@@ -196,22 +112,28 @@ class User
         return $isCount ? $result->count() : $result->toArray();
     }
 
-    public function getUsers(array $where = null)
+    public function getUserForLogin(array $where = null)
     {
-        $select = $this->sql->select('user');
+        try {
+            $select = $this->sql->select('user');
 
-        $select->where([
-            'email' => $where['username'],
-            'username' => $where['username']
-        ], 
-        PredicateSet::OP_OR);
+            $select->where([
+                'email' => $where['username'],
+                'username' => $where['username']
+            ], 
+            PredicateSet::OP_OR);
 
-        $select->where([
-            'is_deleted' => false
-        ]);
+            $select->where([
+                'is_disasled' => false
+            ]);
 
-        $select = $this->sql->buildSqlString($select);        
-        return $this->adapter->query($select, Adapter::QUERY_MODE_EXECUTE)->toArray();
+            $select = $this->sql->buildSqlString($select);
+            $result = $this->adapter->query($select, Adapter::QUERY_MODE_EXECUTE)->toArray();
+
+            return $result;
+        } catch (Throwable $th) {
+            return false;
+        }
     }
 
     public function getLinks(array $where)
@@ -266,14 +188,14 @@ class User
         $update = $this->sql->update('temp');
 
         $update->set([
-            'is_deleted' => true,
-            'deleted_at' => Carbon::now()->format('Y-m-d H:i:s')
+            'is_disabled' => true,
+            'disabled_at' => Carbon::now()->format('Y-m-d H:i:s')
         ]);
 
         $update->where([
             'type' => 'reset',
             'link' => $link,
-            'is_deleted' => false
+            'is_disabled' => false
         ]);
 
         $statement = $this->sql->prepareStatementForSqlObject($update);
@@ -283,44 +205,61 @@ class User
 
     public function getNewUserLink(string $link)
     {
-        $update = $this->sql->update('temp');
+        try {
+            $update = $this->sql->update('temp');
 
-        $update->set([
-            'is_deleted' => true,
-            'deleted_at' => Carbon::now()->format('Y-m-d H:i:s')
-        ]);
+            $update->set([
+                'is_disabled' => true,
+                'disabled_at' => Carbon::now()->format('Y-m-d H:i:s')
+            ]);
 
-        $update->where([
-            'type' => 'user',
-            'link' => $link,
-            'is_deleted' => false
-        ]);
+            $update->where([
+                'type' => 'user',
+                'link' => $link,
+                'is_disabled' => false
+            ]);
 
-        $statement = $this->sql->prepareStatementForSqlObject($update);
-        $results = $statement->execute();
-        return $results->getAffectedRows() > 0;
+            $statement = $this->sql->prepareStatementForSqlObject($update);
+            $results = $statement->execute();
+            return $results->getAffectedRows() > 0;
+        } catch (Throwable $th) {
+            return false;
+        }
     }
 
     public function deletePasswordLink(string $id)
     {
-        $delete = $this->sql->delete('temp');
-        $delete->where([
-            'type' => 'reset',
-            'id' => $id
-        ]);
-        $statement = $this->sql->prepareStatementForSqlObject($delete);
-        $results = $statement->execute();
-        return $results->getAffectedRows() > 0;
+        try {
+            $delete = $this->sql->delete('temp');
+            $delete->where([
+                'type' => 'reset',
+                'id' => $id
+            ]);
+            $statement = $this->sql->prepareStatementForSqlObject($delete);
+            $results = $statement->execute();
+            return $results->getAffectedRows() > 0;
+        } catch (Throwable $th) {
+            return false;
+        }
     }
 
     public function createUser(array $data)
     {
-        $insert = new Insert();
-        $insert->into('user');
-        $insert->values($data);
-        
-        $statement = $this->sql->prepareStatementForSqlObject($insert);
-        $results = $statement->execute();
-        return $results->getAffectedRows() > 0;
+        try {
+            $insert = new Insert();
+            $insert->into('user');
+            $insert->values($data);
+            
+            $statement = $this->sql->prepareStatementForSqlObject($insert);
+            $results = $statement->execute();
+
+            if ($results->getAffectedRows() === 0) {
+                return false;
+            }
+
+            return $results->getGeneratedValue();
+        } catch (Throwable $th) {
+            return false;
+        }
     }
 }

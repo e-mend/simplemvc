@@ -30,16 +30,16 @@ const app = new Vue({
                 'can_read_post': false,
                 'can_create_post': false,
                 'can_update_post': false,
-                'can_delete_post': false,
-                'can_see_deleted_posts': false,
+                'can_disable_post': false,
+                'can_see_disabled_post': false,
                 'post_1': false,
                 'post_2': false,
                 'post_3': false,
                 'can_read_inventory': false,              
                 'can_create_inventory': false,
                 'can_update_inventory': false,
-                'can_delete_inventory': false,
-                'can_see_deleted_inventory': false,
+                'can_disable_inventory': false,
+                'can_see_disabled_inventory': false,
                 'user': true,
                 'admin': false
             },
@@ -72,16 +72,16 @@ const app = new Vue({
                     'can_read_post': false,
                     'can_create_post': false,
                     'can_update_post': false,
-                    'can_delete_post': false,
-                    'can_see_deleted_posts': false,
+                    'can_disable_post': false,
+                    'can_see_disabled_post': false,
                     'post_1': false,
                     'post_2': false,
                     'post_3': false,
                     'can_read_inventory': false,              
                     'can_create_inventory': false,
                     'can_update_inventory': false,
-                    'can_delete_inventory': false,
-                    'can_see_deleted_inventory': false,
+                    'can_disable_inventory': false,
+                    'can_see_disabled_inventory': false,
                     'user': true,
                     'admin': false
                 }
@@ -91,18 +91,19 @@ const app = new Vue({
                     'can_read_post': false,
                     'can_create_post': false,
                     'can_update_post': false,
-                    'can_delete_post': false,
-                    'can_see_deleted_posts': false,
+                    'can_disable_post': false,
+                    'can_see_disabled_post': false,
                     'post_1': false,
                     'post_2': false,
                     'post_3': false,
                     'can_read_inventory': false,              
                     'can_create_inventory': false,
                     'can_update_inventory': false,
-                    'can_delete_inventory': false,
+                    'can_disable_inventory': false,
+                    'can_see_disabled_inventory': false,
                     'user': true,
                     'admin': false,
-                    'can_see_deleted_inventory': false,
+                    'can_see_disabled_inventory': false,
                 },
                 email: '',
             },
@@ -206,15 +207,16 @@ const app = new Vue({
                     'can_read_post': false,
                     'can_create_post': false,
                     'can_update_post': false,
-                    'can_delete_post': false,
-                    'can_see_deleted_posts': false,
+                    'can_disable_post': false,
+                    'can_see_disabled_post': false,
                     'post_1': false,
                     'post_2': false,
                     'post_3': false,
                     'can_read_inventory': false,              
                     'can_create_inventory': false,
                     'can_update_inventory': false,
-                    'can_delete_inventory': false,
+                    'can_disabled_inventory': false,
+                    'can_see_disabled_inventory': false,
                     'user': true,
                     'admin': false
                 };
@@ -887,9 +889,24 @@ const app = new Vue({
         },
         addItemModal() {
             $('#inventory-modal').modal('show');
+            
         },
-        itemModal(id) {
-            $('#add-inventory-modal').modal('show');  
+        async itemModal(id) {
+            $('#edit-inventory-modal').modal('show');  
+
+            try {
+                const response = await fetch('/getitems?id='+id);
+                const json = await response.json();
+
+                if(!json.success) {
+                    throw new Error(json['message']);
+                }
+
+                this.itemToEdit = json['items'][0];
+
+            } catch (error) {
+                this.throwWarning(error.message, ['alert-danger']);
+            }
         },
         imageModal(id) {
             const item = this.items.find(item => item.id === id);
@@ -929,21 +946,40 @@ const app = new Vue({
 
             return formatter.format(value);
         },
-        removeImage(imageKey) {
-            this.itemToAdd[imageKey] = null;
-            this.itemToAdd[imageKey+'Link'] = null;
+        removeImage(imageKey, type = 1) {
+            if(type == 1){
+                this.itemToAdd[imageKey] = null;
+                this.itemToAdd[imageKey+'Link'] = null;
+            }
+
+            if(type == 2){
+                this.itemToEdit[imageKey] = null;
+                this.itemToEdit[imageKey+'Link'] = null;
+            }
         },
-        onFileChange(event, imageKey) {
+        onFileChange(event, imageKey, type = 1) {
             const file = event.target.files[0];
 
             if (file && file.type.startsWith('image/')) {
                 const reader = new FileReader();
-                this.itemToAdd[imageKey] = file;
-                this.itemToAdd[imageKey+'Link'] = event.target.result;
+                
+                if(type == 1){
+                    this.itemToAdd[imageKey] = file;
+                    this.itemToAdd[imageKey+'Link'] = event.target.result;
+    
+                    reader.onload = (e) => {
+                        this.itemToAdd[imageKey+'Link'] = e.target.result;
+                    };
+                }
 
-                reader.onload = (e) => {
-                    this.itemToAdd[imageKey+'Link'] = e.target.result;
-                };
+                if(type == 2){
+                    this.itemToEdit[imageKey] = file;
+                    this.itemToEdit[imageKey+'Link'] = event.target.result;
+    
+                    reader.onload = (e) => {
+                        this.itemToEdit[imageKey+'Link'] = e.target.result;
+                    };
+                }
 
                 reader.readAsDataURL(file);
               }

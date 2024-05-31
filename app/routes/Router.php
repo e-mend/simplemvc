@@ -21,8 +21,6 @@ final class Router
             $controller = new $controllerNamespace();
             $controller->$method();
         } catch (\Throwable $th) {
-            // echo $th->getMessage();
-
             $_SESSION['premature'] = true;
             header('Location: /');
         }
@@ -59,8 +57,8 @@ final class Router
                 '/sendpasswordemail' => fn() => self::load('DashboardController', 'sendPasswordApi'),
                 '/changepassword' => fn() => self::load('NewUserController', 'changePasswordApi'),
                 '/createlink' => fn() => self::load('NewUserController', 'createNewUserLinkApi'),
-                '/newuser' => fn() => self::load('NewUserController', 'validateNewUserApi'),
-                '/validatenewemail' => fn() => self::load('NewUserController', 'validateNewUserEmailApi'),
+                '/newuser' => fn() => self::load('NewUserController', 'newUserApi'),
+                '/validatenewemail' => fn() => self::load('NewUserController', 'validateNewEmailApi'),
                 '/changepermissions' => fn() => self::load('NewUserController', 'changePermissionApi'),
                 '/additem' => fn() => self::load('InventoryController', 'addItemApi'),
                 '/uploadimage' => fn() => self::load('InventoryController', 'uploadImageApi'),
@@ -89,8 +87,6 @@ final class Router
             $router();
 
         } catch (\Throwable $th) {
-            //echo $th->getMessage();
-            
             $_SESSION['premature'] = true;
             header('Location: /');
         }

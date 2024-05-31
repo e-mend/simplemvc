@@ -232,15 +232,13 @@
                         });
 
                         if (!response.ok) {
-                            throw new Error('Network response was not ok');
+                            throw new Error('Algo deu errado');
                         }
 
                         const json = await response.json();
                         
                         if(json['success'] === false) {
-                            this.throwWarning(
-                            json['message']+`
-                            <i class="fa-solid fa-circle-exclamation"></i>`);
+                            throw new Error(json['message']);
                         }else{
                             this.throwWarning(
                             json['message']+`
@@ -248,15 +246,13 @@
                             ['alert-success']);
 
                             window.location.href = json['redirect'];
+                            return;
                         }
 
                         this.blocked = false;
-
                     } catch (error) {
-                        console.error('There was a problem with the fetch operation:', error);
-
-                        this.throwWarning(`Algo deu errado
-                        <i class="fa-solid fa-circle-exclamation"></i>`);
+                        this.throwWarning(error.message+
+                        `<i class="fa-solid fa-circle-exclamation"></i>`);
 
                         this.blocked = false;
                     }
@@ -280,9 +276,7 @@
                         const json = await response.json();
                         
                         if(json['success'] === false) {
-                            this.throwWarning(
-                            json['message']+`
-                            <i class="fa-solid fa-circle-exclamation"></i>`);
+                            throw new Error(json['message']);
                         }else{
                             this.throwWarning(
                             json['message']+`
@@ -295,10 +289,8 @@
 
                         this.blocked = false;
                     } catch (error) {
-                        console.error('There was a problem with the fetch operation:', error);
-
-                        this.throwWarning(`Algo deu errado
-                        <i class="fa-solid fa-circle-exclamation"></i>`);
+                        this.throwWarning(error.message+
+                        `<i class="fa-solid fa-circle-exclamation"></i>`);
 
                         this.blocked = false;
                     }

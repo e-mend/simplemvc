@@ -27,7 +27,7 @@ class InventoryController extends Controller
     public function disableItemApi()
     {
         try {
-            if(!$this->secure->isLoggedIn() || !$this->secure->hasPermission(AclRole::CAN_DELETE_INVENTORY->value)) {
+            if(!$this->secure->isLoggedIn() || !$this->secure->hasPermission(AclRole::can_disable_inventory->value)) {
                 throw new Exception("Não autorizado");
             }
 
@@ -48,7 +48,7 @@ class InventoryController extends Controller
             }
 
             $update = $this->inventory->update([
-                'is_deleted' => $item['is_deleted'] === 1 ? false : true
+                'is_disabled' => $item['is_disabled'] === 1 ? false : true
             ], $params['id']);
 
             if(!$update){
@@ -57,8 +57,8 @@ class InventoryController extends Controller
 
             Json::send([
                 'success' => true,
-                'message' => $item['is_deleted'] === 1 ? 'Item reativado com sucesso' : 'Item desativado com sucesso',
-                'is_disabled' => $item['is_deleted'] === 1
+                'message' => $item['is_disabled'] === 1 ? 'Item reativado com sucesso' : 'Item desativado com sucesso',
+                'is_disabled' => $item['is_disabled'] === 1
             ]);
 
         } catch (\Throwable $th) {
@@ -88,10 +88,10 @@ class InventoryController extends Controller
                     $query['days'] = Carbon::now()->subDays(self::NEW_ITEM_DAYS)->format('Y-m-d H:i:s');
                 }
     
-                if($params['deleted'] && $this->secure->hasPermission(AclRole::CAN_SEE_DELETED_INVENTORY->value)){
-                    $query['is_deleted'] = 1; 
+                if($params['deleted'] && $this->secure->hasPermission(AclRole::can_see_disabled_inventory->value)){
+                    $query['is_disabled'] = 1; 
                 }else{
-                    $query['is_deleted'] = 0;
+                    $query['is_disabled'] = 0;
                 }
 
                 if($params['from']){
@@ -114,7 +114,7 @@ class InventoryController extends Controller
                 }
             }else{
                 $query['where'] = [
-                    'id' => $params['id']
+                    'inventory.id' => $params['id']
                 ];
             }
 
@@ -124,8 +124,15 @@ class InventoryController extends Controller
             foreach ($items as &$item) {
                 $item['created_at_formatted'] = Carbon::createFromFormat('Y-m-d H:i:s', $item['created_at'])
                                                 ->format('d/m/Y H:i:s');
+
+                if($item['updated_at']){
+                    $item['updated_at_formatted'] = Carbon::createFromFormat('Y-m-d H:i:s', $item['updated_at'])
+                    ->format('d/m/Y H:i:s');
+                }
+
                 $item['isNew'] = Carbon::createFromFormat('Y-m-d H:i:s', $item['created_at'])
                                 ->diffInDays(Carbon::now()) <= Inventory::NEW_ITEM_DAYS;
+                
                 if($item['image']){
                     $item['image'] = json_decode($item['image'], true);
                 }

@@ -131,7 +131,7 @@ class Secure
 
     public function hasPermission(string $permission)
     {
-        return $_SESSION['user']['permission'][$permission];
+        return $_SESSION['user']['option']['permission'][$permission] === true;
     }
 
     public function generatePasswordToken(?array $data = null)

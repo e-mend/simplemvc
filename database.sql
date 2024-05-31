@@ -8,14 +8,18 @@ CREATE TABLE `InventoryApp`.`user`(
     `id` INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
     `username` VARCHAR(255) NOT NULL UNIQUE,
     `password` VARCHAR(255) NOT NULL,
-    `permission` JSON NOT NULL,
+    `option` JSON NOT NULL,
     `first_name` VARCHAR(255) NOT NULL,
     `last_name` VARCHAR(255) NOT NULL,
-    `created_at` DATETIME NOT NULL,
     `email` VARCHAR(255) NOT NULL UNIQUE,
-    `is_deleted` BOOLEAN NOT NULL DEFAULT 0,
-    `image` VARCHAR(255)
+    `image` JSON,
+    `created_at` DATETIME NOT NULL,
+    `updated_at` DATETIME,
+    `disabled_at` DATETIME,
+    `disabled_by` INT,
+    `is_disabled` BOOLEAN NOT NULL DEFAULT 0,
     `favorite` BOOLEAN NOT NULL DEFAULT 0,
+    FOREIGN KEY (disabled_by) REFERENCES user(id)
 );
 
 CREATE TABLE `InventoryApp`.`permission`(
@@ -35,19 +39,19 @@ CREATE TABLE `InventoryApp`.`inventory`(
     `name` VARCHAR(255) NOT NULL,
     `quantity` INT NOT NULL,
     `description` VARCHAR(255),
-    `price` VARCHAR(255) NOT NULL,
+    `price` FLOAT NOT NULL,
     `created_at` DATETIME NOT NULL,
-    `is_deleted` BOOLEAN NOT NULL DEFAULT 0,
-    `deleted_by` INT,
-    `deleted_at` DATETIME,
     `created_by` INT,
+    `is_disabled` BOOLEAN NOT NULL DEFAULT 0,
+    `disabled_by` INT,
+    `disabled_at` DATETIME,
     `favorite` BOOLEAN NOT NULL DEFAULT 0,
     `image` JSON,
     `updated_at` DATETIME,
     `updated_by` INT,
     FOREIGN KEY (updated_by) REFERENCES user(id),
     FOREIGN KEY (created_by) REFERENCES user(id),
-    FOREIGN KEY (deleted_by) REFERENCES user(id)
+    FOREIGN KEY (disabled_by) REFERENCES user(id)
 );
 
 CREATE TABLE `InventoryApp`.`throttle`(
@@ -55,7 +59,8 @@ CREATE TABLE `InventoryApp`.`throttle`(
     `ip` VARCHAR(255) NOT NULL,
     `device` VARCHAR(255) NOT NULL,
     `created_at` DATETIME NOT NULL,
-    `success` BOOLEAN NOT NULL
+    `success` BOOLEAN NOT NULL,
+    `details` JSON
 );
 
 CREATE TABLE `InventoryApp`.`post`(
@@ -63,26 +68,36 @@ CREATE TABLE `InventoryApp`.`post`(
     `title` VARCHAR(255) NOT NULL,
     `body` VARCHAR(255) NOT NULL,
     `created_at` DATETIME NOT NULL,
-    `is_deleted` BOOLEAN NOT NULL DEFAULT 0,
     `created_by` INT,
-    `deleted_by` INT,
-    `deleted_at` DATETIME,
+    `disabled_by` INT,
+    `disabled_at` DATETIME,
     `favorite` BOOLEAN NOT NULL DEFAULT 0,
-    FOREIGN KEY (deleted_by) REFERENCES user(id),
+    `is_disabled` BOOLEAN NOT NULL DEFAULT 0,
+    FOREIGN KEY (disabled_by) REFERENCES user(id),
+    FOREIGN KEY (created_by) REFERENCES user(id)
+);
+
+CREATE TABLE `InventoryApp`.`comment`(
+    `id` INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
+    `body` VARCHAR(255) NOT NULL,
+    `created_at` DATETIME NOT NULL,
+    `created_by` INT,
+    `post_id` INT,
+    FOREIGN KEY (post_id) REFERENCES post(id),
     FOREIGN KEY (created_by) REFERENCES user(id)
 );
 
 CREATE TABLE `InventoryApp`.`temp`(
     `id` INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
     `link` VARCHAR(255) NOT NULL,
-    `created_at` DATETIME NOT NULL,
-    `permission` JSON,
+    `option` JSON,
     `type` VARCHAR(255) NOT NULL,
-    `is_deleted` BOOLEAN NOT NULL DEFAULT 0,
     `created_by` INT,
-    `deleted_by` INT,
-    `deleted_at` DATETIME,
-    FOREIGN KEY (deleted_by) REFERENCES user(id),
+    `created_at` DATETIME NOT NULL,
+    `is_disabled` BOOLEAN NOT NULL DEFAULT 0,
+    `disabled_by` INT,
+    `disabled_at` DATETIME,
+    FOREIGN KEY (disabled_by) REFERENCES user(id),
     FOREIGN KEY (created_by) REFERENCES user(id)
 );
 
@@ -98,16 +113,8 @@ CREATE TABLE `InventoryApp`.`log`(
 
 # Part 3
 
-INSERT INTO 
-    `InventoryApp`.`permission` (name) 
-VALUES 
-    ('can_read_post'), ('can_create_post'), ('can_update_post'), ('can_delete_post'), ('can_see_deleted_posts'),
-    ('post_1'), ('post_2'), ('post_3'), 
-    ('can_read_inventory'), ('can_create_inventory'), ('can_update_inventory'), ('can_delete_inventory'),
-    ('developer'), ('admin'), ('normal_user');
-
 INSERT INTO
-    `InventoryApp`.`user` (username, password, permission, created_at, email, first_name, last_name)
+    `InventoryApp`.`user` (username, password, option, created_at, email, first_name, last_name)
 VALUES
     ('admin', 'Padrao@123', 
 '{
@@ -115,15 +122,16 @@ VALUES
     "can_read_post": true,
     "can_create_post": true,
     "can_update_post": true,
-    "can_delete_post": true,
-    "can_see_deleted_posts": true,
+    "can_disable_post": true,
+    "can_see_disabled_post": true,
     "post_1": true,
     "post_2": true,
     "post_3": true,
     "can_read_inventory": true,
     "can_create_inventory": true,
     "can_update_inventory": true,
-    "can_delete_inventory": true,
+    "can_disable_inventory": true,
+    "can_see_disabled_inventory": true,
     "user": true,
     "admin": true,
     "super_admin": true
@@ -133,26 +141,28 @@ VALUES
 'Rafael', 'Camargo Silva');
 
 INSERT INTO
-    `InventoryApp`.`user` (username, password, permission, created_at, email, first_name, last_name)
+    `InventoryApp`.`user` (username, password, option, created_at, email, first_name, last_name)
 VALUES
-    ('XSSmadrake', 'Padrao@123', 
+    ('MadAdmin', 'Padrao@123',
 '{
-    "permissions": [
-    "can_read_post",
-    "can_create_post",
-    "can_update_post",
-    "can_delete_post",
-    "can_see_deleted_posts",
-    "post_1",
-    "post_2",
-    "post_3",
-    "can_read_inventory",
-    "can_create_inventory",
-    "can_update_inventory",
-    "can_delete_inventory",
-    "admin",
-    "developer",
-    "normal_user"
-  ]
+    "permissions": {
+        "can_read_post": true,
+        "can_create_post": true,
+        "can_update_post": true,
+        "can_disable_post": true,
+        "can_see_disabled_post": true,
+        "post_1": true,
+        "post_2": true,
+        "post_3": true,
+        "can_read_inventory": true,
+        "can_create_inventory": true,
+        "can_update_inventory": true,
+        "can_disable_inventory": true,
+        "can_see_disabled_inventory": true,
+        "user": true,
+        "admin": true,
+        "super_admin": true,
+        "developer": true
+    }
 }', NOW(), 'gabrielcamargodepaiva@gmail.com',
 'Gabriel', 'Camargo de Paiva');

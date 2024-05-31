@@ -100,7 +100,7 @@
                     message: '',
                     loginForm: {
                         username: 'ADsense12',
-                        password: 'CocaG3lada@'
+                        password: 'Padrao@123'
                     },
                     warnings: [],
                     nextId: 0,
@@ -150,15 +150,13 @@
                         });
 
                         if (!response.ok) {
-                            throw new Error('Network response was not ok');
+                            throw new Error('Algo deu errado');
                         }
 
                         const json = await response.json();
                         
                         if(json['success'] === false) {
-                            this.throwWarning(
-                            json['message']+`
-                            <i class="fa-solid fa-circle-exclamation"></i>`);
+                            throw new Error(json['message']);
                         }else{
                             this.throwWarning(
                             json['message']+`
@@ -171,11 +169,7 @@
                         this.blocked = false;
 
                     } catch (error) {
-                        console.error('There was a problem with the fetch operation:', error);
-
-                        this.throwWarning(`Algo deu errado
-                        <i class="fa-solid fa-circle-exclamation"></i>`);
-
+                        this.throwWarning(error.message+`<i class="fa-solid fa-circle-exclamation"></i>`);
                         this.blocked = false;
                     }
                 },
@@ -192,18 +186,18 @@
                         });
 
                         if (!response.ok) {
-                            throw new Error('Network response was not ok');
+                            throw new Error('Algo deu errado ao fazer login');
                         }
 
                         const json = await response.json();
 
                         if(!json.success) {
-                            throw new Error('Server response was not ok');
+                            throw new Error(json['message']);
                         }
 
                         if(json['redirect'] !== false){
                             this.throwWarning(
-                            `Redirecionando...
+                                json['message']+`
                             <i class="fa-solid fa-check"></i>`, 
                             ['alert-success']);
 
@@ -216,13 +210,13 @@
                         const pinSend = await fetch('/sendcode');
 
                         if (!response.ok) {
-                            throw new Error('Network response was not ok');
+                            throw new Error('Algo deu errado ao enviar o código');
                         }
 
                         const json2 = await pinSend.json();
 
                         if(!json2.success) {
-                            throw new Error('Server response was not ok');
+                            throw new Error(json2['message']);
                         }
 
                         this.throwWarning(
@@ -231,12 +225,9 @@
                         ['alert-success']);
 
                         this.blocked = false;
-
                     } catch (error) {
-                        console.error('There was a problem with the fetch operation:', error);
-
-                        this.throwWarning(`Ocorreu um erro ao realizar o login 
-                        <i class="fa-solid fa-circle-exclamation"></i>`);
+                        this.throwWarning(error.message+
+                        `<i class="fa-solid fa-circle-exclamation"></i>`);
 
                         this.validateEmail = false;
                         this.blocked = false;

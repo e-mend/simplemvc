@@ -161,7 +161,7 @@
                 </div>
                 <div class="btn btn-danger col-6 col-md-3 text-center py-3 fs-5" 
                 @click="getItems('deleted', false)"
-                v-if="this.permission['can_see_deleted_inventory']"
+                v-if="this.permission['can_see_disabled_inventory']"
                 :class="{'opacity-25': this.itemSearch.deleted}">
                     Apagados
                     <i class="fa-solid fa-circle-minus"></i>
@@ -234,7 +234,7 @@
                                     Item Novo
                                 </div>
                                 <div class="col-md-12 col-12 text-black fs-5 btn btn-light" 
-                                v-if="item.is_deleted">
+                                v-if="item.is_disabled">
                                     <i class="fa-solid fa-trash fs-4"></i>
                                     Item Apagado
                                 </div>
@@ -252,10 +252,10 @@
                                     <i class="fa-solid fa-pencil"></i>
                                 </div>
                                 <div class="btn text-center p-3 fs-5"
-                                :class="{'btn-danger': item.is_deleted, 'btn-outline-success': !item.is_deleted}"
+                                :class="{'btn-danger': item.is_disabled, 'btn-outline-success': !item.is_disabled}"
                                 @click="disableItem(item.id)" 
-                                v-if="permission['can_delete_inventory']">
-                                    <i class="fa-solid" :class="{'fa-toggle-on': item.is_deleted, 'fa-toggle-off': !item.is_deleted}"></i></i>
+                                v-if="permission['can_disable_inventory']">
+                                    <i class="fa-solid" :class="{'fa-toggle-on': item.is_disabled, 'fa-toggle-off': !item.is_disabled}"></i></i>
                                 </div>
                             </div>
                         </div>
@@ -393,7 +393,7 @@
                     </div>
                 </div>
             </div>
-            <div id="add-inventory-modal" class="modal fade" id="staticBackdrop"
+            <div id="edit-inventory-modal" class="modal fade" id="staticBackdrop"
             data-bs-backdrop="static" data-bs-keyboard="false" 
             tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true"
             v-if="this.permission['can_update_inventory']">
@@ -416,21 +416,21 @@
                                     </div>
                                     <div class="col-md-6 col-12 form-group fs-5 mb-2">
                                         <i class="fa-solid fa-user"></i>
-                                        Criado em: {{ itemToEdit.created_at }}
+                                        Criado em: {{ itemToEdit.created_at_formatted }}
                                     </div>
                                     <div class="col-md-6 col-12 form-group fs-5 mb-2">
                                         <i class="fa-solid fa-user"></i>
-                                        Criado por: {{ itemToEdit.created_by }}
+                                        Criado por: {{ itemToEdit.created_by_name }}
                                     </div>
                                     <div class="col-md-6 col-12 form-group fs-5 mb-2" 
-                                    v-if="!itemToEdit.updated_at">
+                                    v-if="itemToEdit.updated_at">
                                         <i class="fa-regular fa-clock"></i>
-                                        Atualizado em: {{ itemToEdit.updated_at }}
+                                        Atualizado em: {{ itemToEdit.updated_at_formatted }}
                                     </div>
                                     <div class="col-md-6 col-12 form-group fs-5 mb-2" 
-                                    v-if="!itemToEdit.updated_by">
+                                    v-if="itemToEdit.updated_by">
                                         <i class="fa-regular fa-user"></i>
-                                        Atualizado por: {{ itemToEdit.updated_by }}
+                                        Atualizado por: {{ itemToEdit.updated_by_name }}
                                     </div>
                                     <div class="col-md-12 col-12 form-group fs-5 mb-2">
                                         <label for="edit-product-description">Descrição</label>
@@ -450,8 +450,7 @@
                                     </div>
                                     <div class="col-md-3 col-12 form-group fs-5 mb-2">
                                         <label for="edit-product-total">Total</label>
-                                        <input type="text" class="form-control disabled fs-5" 
-                                        id="edit-product-total" v-model="itemToEdit.total">
+                                        {{ itemToEdit.total }}
                                     </div>
                                     <div class="mt-auto mb-2 text-center fs-5 col-md-12 col-12">
                                         <button class="btn btn-primary fs-5 col-md-4 col-12"
@@ -460,6 +459,91 @@
                                             <i class="fa-regular fa-thumbs-up"></i>
                                         </button>
                                     </div>
+                                </div>
+                                <div class="row d-flex justify-content-center mb-2">
+                                    <div class="col-12 form-group fs-5 
+                                    position-relative text-center">
+                                        <div class="">
+                                            Imagem Principal
+                                        </div>
+                                        <div class="btn btn-danger position-absolute end-0"
+                                        v-if="itemToEdit.image1"
+                                        @click="removeImage('image1', 2)">
+                                            <i class="fa-solid fa-xmark"></i>
+                                        </div>
+                                    </div>
+                                    <div class="col-12 form-group fs-5 rounded 
+                                        btn border shadow">
+                                        <label for="image1">
+                                        <div v-if="!itemToEdit.image1" class="mt-2">
+                                            <i class="fa-solid fa-file-image fs-1"></i>
+                                        </div>
+                                        <div class="img-container2" v-else>
+                                            <img :src="itemToEdit.image1Link" class="w-100">
+                                        </div>
+                                        <input type="file" class="d-none" 
+                                        id="image1" @change="onFileChange($event, 'image1', 2)"
+                                        accept="image/*">
+                                        </label>
+                                    </div>
+                                    <div class="col-12 form-group fs-5 position-relative text-center">
+                                        <div class="">
+                                            Imagem 2
+                                        </div>
+                                        <div class="btn btn-danger position-absolute end-0"
+                                        v-if="itemToAdd.image2"
+                                        @click="removeImage('image2', 2)">
+                                            <i class="fa-solid fa-xmark"></i>
+                                        </div>
+                                    </div>
+                                    <div class="col-12 form-group fs-5 mb-2 rounded 
+                                    btn border shadow">
+                                        <label for="image2">
+                                        <div v-if="!itemToEdit.image2" class="mt-2">
+                                            <i class="fa-solid fa-file-image fs-1"></i>
+                                        </div>
+                                        <div class="img-container2" v-else>
+                                            <img :src="itemToEdit.image2Link" class="w-100">
+                                        </div>
+                                        <input type="file" class="d-none" 
+                                        id="image2" @change="onFileChange($event, 'image2', 2)"
+                                        accept="image/*">
+                                        </label>
+                                    </div>
+                                    <div class="col-12 form-group fs-5 position-relative 
+                                    text-center">
+                                        <div class="">
+                                            Imagem 3
+                                        </div>
+                                        <div class="btn btn-danger position-absolute end-0"
+                                        v-if="itemToEdit.image3"
+                                        @click="removeImage('image3', 2)">
+                                            <i class="fa-solid fa-xmark"></i>
+                                        </div>
+                                    </div>
+                                    <div class="col-12 form-group fs-5 mb-2 rounded 
+                                    btn border shadow">
+                                        <label for="image3">
+                                        <div v-if="!itemToEdit.image3" class="mt-2">
+                                            <i class="fa-solid fa-file-image fs-1"></i>
+                                        </div>
+                                        <div class="img-container2" v-else>
+                                            <img :src="itemToEdit.image3Link" class="w-100 rounded">
+                                        </div>
+                                        <input type="file" class="d-none" 
+                                        id="image3" @change="onFileChange($event, 'image3', 2)"
+                                        accept="image/*">
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="row d-flex justify-content-between py-3 py-md-3 rounded
+                                z-3">
+                                    <div class="mt-auto mb-2 text-center fs-5 col-md-12 col-12">
+                                        <button class="btn btn-primary fs-5 col-md-4 col-12"
+                                        @click="alert">
+                                            Atualizar imagens
+                                            <i class="fa-solid fa-image"></i>
+                                        </button>
                                 </div>
                             </div>
                         </div>
@@ -605,7 +689,7 @@
                                     <i class="fa-solid fa-fire"></i>
                                 </div>
                                 <div class="btn btn-danger disabled text-center my-auto p-3 fs-5" 
-                                v-if="user.is_deleted">
+                                v-if="user.is_disabled">
                                     <i class="fa-solid fa-circle-minus"></i>
                                 </div> 
                             </div>
@@ -657,7 +741,7 @@
                                 <div class="text-center fs-5 col-md-6 col-12">
                                     <div class="form-check form-switch">
                                         <input class="form-check-input" type="checkbox" role="switch" 
-                                        v-model="createNewUser.permission['can_delete_post']">
+                                        v-model="createNewUser.permission['can_disable_post']">
                                         <label class="form-check-label">
                                             Apagar item
                                         </label>
@@ -666,7 +750,7 @@
                                 <div class="text-center fs-5 col-md-6 col-12">
                                     <div class="form-check form-switch">
                                         <input class="form-check-input" type="checkbox" role="switch" 
-                                        v-model="createNewUser.permission['can_see_deleted_posts']">
+                                        v-model="createNewUser.permission['can_see_disabled_posts']">
                                         <label class="form-check-label">
                                             Ver item apagado
                                         </label>
@@ -727,7 +811,7 @@
                                 <div class="text-center fs-5 col-md-6 col-12">
                                     <div class="form-check form-switch">
                                         <input class="form-check-input" type="checkbox" role="switch"
-                                        v-model="createNewUser.permission['can_delete_inventory']">
+                                        v-model="createNewUser.permission['can_disable_inventory']">
                                         <label class="form-check-label" for="flexSwitchCheckDefault">
                                             Apagar item
                                         </label>
@@ -745,7 +829,7 @@
                                 <div class="text-center fs-5 col-md-6 col-12">
                                     <div class="form-check form-switch">
                                         <input class="form-check-input" type="checkbox" role="switch"
-                                        v-model="createNewUser.permission['can_see_deleted_inventory']">
+                                        v-model="createNewUser.permission['can_see_disabled_inventory']">
                                         <label class="form-check-label" for="flexSwitchCheckDefault">
                                             Ver item apagado
                                         </label>
@@ -821,7 +905,7 @@
                                 </div>
                                 <div class="btn text-center row d-flex fs-5 btn-primary"
                                 v-for="link in links" @click="copyLink(link.id)"
-                                :class="link.deleted_at === null ? 'btn-primary' : 'btn-secondary'">
+                                :class="link.disabled_at === null ? 'btn-primary' : 'btn-secondary'">
                                     <div class="col col my-auto">
                                         <i class="fa-solid fa-link fs-5"></i>
                                     </div>
@@ -999,7 +1083,7 @@
                                 <div class="text-center fs-5 col-md-6 col-12">
                                     <div class="form-check form-switch">
                                         <input class="form-check-input" type="checkbox" role="switch" 
-                                        v-model="userToEdit.permission['can_delete_post']"
+                                        v-model="userToEdit.permission['can_disable_post']"
                                         :disabled="userToEdit.permission['super_admin']">
                                         <label class="form-check-label">
                                             Apagar item
@@ -1009,7 +1093,7 @@
                                 <div class="text-center fs-5 col-md-6 col-12">
                                     <div class="form-check form-switch">
                                         <input class="form-check-input" type="checkbox" role="switch" 
-                                        v-model="userToEdit.permission['can_see_deleted_posts']"
+                                        v-model="userToEdit.permission['can_see_disabled_posts']"
                                         :disabled="userToEdit.permission['super_admin']">
                                         <label class="form-check-label">
                                             Ver item apagado
@@ -1076,7 +1160,7 @@
                                 <div class="text-center fs-5 col-md-6 col-12">
                                     <div class="form-check form-switch">
                                         <input class="form-check-input" type="checkbox" role="switch"
-                                        v-model="userToEdit.permission['can_delete_inventory']"
+                                        v-model="userToEdit.permission['can_disable_inventory']"
                                         :disabled="userToEdit.permission['super_admin']">
                                         <label class="form-check-label" for="flexSwitchCheckDefault">
                                             Apagar item
@@ -1096,7 +1180,7 @@
                                 <div class="text-center fs-5 col-md-6 col-12">
                                     <div class="form-check form-switch">
                                         <input class="form-check-input" type="checkbox" role="switch"
-                                        v-model="userToEdit.permission['can_see_deleted_inventory']"
+                                        v-model="userToEdit.permission['can_see_disabled_inventory']"
                                         :disabled="userToEdit.permission['super_admin']">
                                         <label class="form-check-label" for="flexSwitchCheckDefault">
                                             Ver item apagado
@@ -1140,7 +1224,7 @@
                                 </div> 
                             </div>
                             <div class="row d-flex justify-content-between mb-2">
-                                <div v-if="!userToEdit.is_deleted" class="col-md-6 col-12">
+                                <div v-if="!userToEdit.is_disabled" class="col-md-6 col-12">
                                     <div class="btn btn-danger text-center fs-5 w-100"
                                     :class="{'disabled': userToEdit.permission['super_admin']}"
                                     @click="disableUser(userToEdit.id)">

@@ -9,6 +9,7 @@ use App\Requests\Json;
 use App\Requests\Req;
 use Exception;
 use Carbon\Carbon;
+use App\Helpers\Routines;
 use App\Helpers\Mailer;
 use App\enum\AclRole;
 
@@ -16,7 +17,6 @@ class DashboardController extends Controller
 {
     private User $user;
     private Secure $secure;
-    private const NEW_USER_DAYS = 7;
 
     public function __construct()
     {
@@ -97,19 +97,19 @@ class DashboardController extends Controller
             }
 
             $update = $this->user->update([
-                'is_deleted' => $user['is_deleted'] === 1 ? false : true
+                'is_disabled' => $user['is_disabled'] === 1 ? false : true
             ], $params['id']);
 
             if(!$update){
                 throw new Exception("Erro ao processar a requisição");
             }
 
-            User::foresightCoroutine($params['id'], 'death');
+            Routines::foresightCoroutine($params['id'], 'death');
 
             Json::send([
                 'success' => true,
-                'message' => $user['is_deleted'] === 0 ? 'Conta desabilitada com sucesso' : 'Conta habilitada com sucesso',
-                'is_disabled' => $user['is_deleted'] === 1
+                'message' => $user['is_disabled'] === 0 ? 'Conta desabilitada com sucesso' : 'Conta habilitada com sucesso',
+                'is_disabled' => $user['is_disabled'] === 1
             ]);
 
         } catch (\Throwable $th) {
@@ -127,7 +127,7 @@ class DashboardController extends Controller
                 throw new Exception("Sessão expirada");
             }
 
-            $isWaiting = User::isWaitingCoroutine();
+            $isWaiting = Routines::isWaitingCoroutine();
 
             if($isWaiting === 'death'){
                 Json::send([
@@ -142,7 +142,7 @@ class DashboardController extends Controller
                     'success' => true,
                     'redirect' => false,
                     'type' => 'reset',
-                    'permission' => $_SESSION['user']['permission'],
+                    'permission' => $_SESSION['user']['option']['permission'],
                     'message' => 'Permissões alteradas com sucesso',
                 ]);
             }
@@ -199,13 +199,13 @@ class DashboardController extends Controller
                 }
 
                 if($params['new']){
-                    $query['days'] = Carbon::now()->subDays(self::NEW_USER_DAYS)->format('Y-m-d H:i:s');
+                    $query['days'] = Carbon::now()->subDays(User::NEW_USER_DAYS)->format('Y-m-d H:i:s');
                 }
     
                 if($params['deleted']){
-                    $query['is_deleted'] = 1; 
+                    $query['is_disabled'] = 1; 
                 }else{
-                    $query['is_deleted'] = 0;
+                    $query['is_disabled'] = 0;
                 }
     
                 if($params['favorites']){
@@ -229,7 +229,7 @@ class DashboardController extends Controller
                 'username',
                 'email',
                 'created_at',
-                'is_deleted',
+                'is_disabled',
                 'favorite',
                 'permission'
             ];
@@ -443,7 +443,7 @@ class DashboardController extends Controller
                     'first_name' => $_SESSION['user']['first_name'],
                     'last_name' => $_SESSION['user']['last_name'],
                     'username' => $_SESSION['user']['username'],
-                    'permission' => $_SESSION['user']['permission'],
+                    'permission' => $_SESSION['user']['option']['permission'],
                     'days' => Carbon::createFromFormat('Y-m-d H:i:s', $_SESSION['user']['created_at'])
                             ->diffInDays(Carbon::now()),
                     'image' => false
