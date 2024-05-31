@@ -125,7 +125,7 @@
             <div class="row d-flex justify-content-between rounded z-3 text-center" v-if="searchModalOpen">
                 <div class="rounded col-12 col-md-6 text-center py-3 fs-5">
                     <div class="input-group d-flex justify-content-center">
-                        <input @input="getItems('search', 1, true)" type="text" 
+                        <input @input="getItems('search', true, 1)" type="text" 
                         class="form-control fs-5 rounded" 
                         v-model="itemSearch.search">
                         <i class="fa-solid fa-magnifying-glass mx-2 my-auto"></i>
@@ -136,19 +136,19 @@
                         <div class="mx-2 my-auto">
                         De:
                         </div>
-                        <input @input="getItems('search', 1, true)" type="date"
+                        <input @input="getItems('search', false, 1)" type="date"
                         class="form-control fs-5 rounded"
                         v-model="itemSearch.from">
                         <div class="mx-2 my-auto">
                         Até:
                         </div>
-                        <input @input="getItems('search', 1, true)" type="date"
+                        <input @input="getItems('search', false, 1)" type="date"
                         class="form-control fs-5 rounded"
                         v-model="itemSearch.to">
                     </div>
                 </div>
                 <div class="btn btn-primary col text-center py-3 fs-5" 
-                @click="getItems('all')"
+                @click="getItems('all', false)"
                 :class="{'opacity-25': this.itemSearch.all}">
                     Todos
                     <i class="fa-solid fa-xmark"></i>
@@ -160,14 +160,14 @@
                     <i class="fa-solid fa-fire"></i>
                 </div>
                 <div class="btn btn-danger col-6 col-md-3 text-center py-3 fs-5" 
-                @click="getItems('deleted')"
+                @click="getItems('deleted', false)"
                 v-if="this.permission['can_see_deleted_inventory']"
                 :class="{'opacity-25': this.itemSearch.deleted}">
                     Apagados
                     <i class="fa-solid fa-circle-minus"></i>
                 </div>
                 <div class="btn btn-dark col-6 col-md-3 text-center py-3 fs-5"
-                @click="getItems('favorites')"
+                @click="getItems('favorites', false)"
                 :class="{'opacity-25': this.itemSearch.favorites}">
                     Favoritos
                     <i class="fa-solid fa-star"></i>
@@ -251,10 +251,11 @@
                                 v-if="permission['can_update_inventory']">
                                     <i class="fa-solid fa-pencil"></i>
                                 </div>
-                                <div class="btn text-center p-3 fs-5" 
-                                :class="{'btn-danger': !item.is_deleted, 'btn-outline-success': item.is_deleted}"
-                                @click="disableItem(item.id)" v-if="permission['can_delete_inventory']">
-                                    <i class="fa-solid" :class="{'fa-trash': !item.is_deleted, 'fa-circle-minus': item.is_deleted}"></i></i>
+                                <div class="btn text-center p-3 fs-5"
+                                :class="{'btn-danger': item.is_deleted, 'btn-outline-success': !item.is_deleted}"
+                                @click="disableItem(item.id)" 
+                                v-if="permission['can_delete_inventory']">
+                                    <i class="fa-solid" :class="{'fa-toggle-on': item.is_deleted, 'fa-toggle-off': !item.is_deleted}"></i></i>
                                 </div>
                             </div>
                         </div>
@@ -265,7 +266,7 @@
                 <ul class="pagination justify-content-center">
                     <button v-for="page in this.itemSearch.pagination"
                     class="btn btn-primary fs-4"
-                    @click="getItems('reload', page)" :key="page">
+                    @click="getItems('reload', false, page)" :key="page">
                         {{ page }}
                     </button>
                 </ul>
@@ -414,21 +415,21 @@
                                         id="edit-product-name" v-model="itemToEdit.name">
                                     </div>
                                     <div class="col-md-6 col-12 form-group fs-5 mb-2">
-                                        <i class="fa-solid fa-circle"></i>
+                                        <i class="fa-solid fa-user"></i>
                                         Criado em: {{ itemToEdit.created_at }}
                                     </div>
                                     <div class="col-md-6 col-12 form-group fs-5 mb-2">
-                                        <i class="fa-solid fa-circle"></i>
+                                        <i class="fa-solid fa-user"></i>
                                         Criado por: {{ itemToEdit.created_by }}
                                     </div>
                                     <div class="col-md-6 col-12 form-group fs-5 mb-2" 
-                                    v-if="itemToEdit.updated_at">
-                                        <i class="fa-regular fa-circle"></i>
+                                    v-if="!itemToEdit.updated_at">
+                                        <i class="fa-regular fa-clock"></i>
                                         Atualizado em: {{ itemToEdit.updated_at }}
                                     </div>
                                     <div class="col-md-6 col-12 form-group fs-5 mb-2" 
-                                    v-if="itemToEdit.updated_by">
-                                        <i class="fa-regular fa-circle"></i>
+                                    v-if="!itemToEdit.updated_by">
+                                        <i class="fa-regular fa-user"></i>
                                         Atualizado por: {{ itemToEdit.updated_by }}
                                     </div>
                                     <div class="col-md-12 col-12 form-group fs-5 mb-2">
@@ -437,15 +438,20 @@
                                         id="edit-product-description" v-model="itemToEdit.description">
                                         </textarea>
                                     </div>
-                                    <div class="col-md-3 col-12 form-group fs-5 mb-2">
+                                    <div class="col-md-4 col-12 form-group fs-5 mb-2">
                                         <label for="edit-product-quantity">Estoque</label>
                                         <input type="text" class="form-control disabled fs-5" 
                                         id="edit-product-quantity" v-model="itemToEdit.quantity">
                                     </div>
-                                    <div class="col-md-3 col-12 form-group fs-5 mb-2">
+                                    <div class="col-md-4 col-12 form-group fs-5 mb-2">
                                         <label for="edit-product-price">Valor</label>
                                         <input type="text" class="form-control disabled fs-5" 
                                         id="edit-product-price" v-model="itemToEdit.price">
+                                    </div>
+                                    <div class="col-md-3 col-12 form-group fs-5 mb-2">
+                                        <label for="edit-product-total">Total</label>
+                                        <input type="text" class="form-control disabled fs-5" 
+                                        id="edit-product-total" v-model="itemToEdit.total">
                                     </div>
                                     <div class="mt-auto mb-2 text-center fs-5 col-md-12 col-12">
                                         <button class="btn btn-primary fs-5 col-md-4 col-12"
@@ -458,6 +464,10 @@
                             </div>
                         </div>
                         <div class="modal-footer">
+                            <button type="button" class="btn btn-danger"
+                            v-if="this.permission['admin']">
+                                Apagar permanentemente <i class="fa-regular fa-trash-can"></i>
+                            </button>
                             <button type="button" class="btn btn-secondary" 
                             data-bs-dismiss="modal">Fechar</button>
                         </div>
@@ -1086,7 +1096,7 @@
                                 <div class="text-center fs-5 col-md-6 col-12">
                                     <div class="form-check form-switch">
                                         <input class="form-check-input" type="checkbox" role="switch"
-                                        v-model="userToEdit.permission['can_delete_inventory']"
+                                        v-model="userToEdit.permission['can_see_deleted_inventory']"
                                         :disabled="userToEdit.permission['super_admin']">
                                         <label class="form-check-label" for="flexSwitchCheckDefault">
                                             Ver item apagado

@@ -57,7 +57,7 @@ class InventoryController extends Controller
 
             Json::send([
                 'success' => true,
-                'message' => $item['is_deleted'] === 1 ? 'Item desativado com sucesso' : 'Item reativado com sucesso',
+                'message' => $item['is_deleted'] === 1 ? 'Item reativado com sucesso' : 'Item desativado com sucesso',
                 'is_disabled' => $item['is_deleted'] === 1
             ]);
 

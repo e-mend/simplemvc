@@ -371,7 +371,7 @@ class DashboardController extends Controller
             }
             
             $this->user->update([
-                'password' => $this->secure->hash($json['new_password'])
+                'password' => $this->secure->hash($json['password'])
             ], $json['id']);
             
             Json::send([

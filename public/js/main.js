@@ -584,7 +584,7 @@ const app = new Vue({
 
             this.loadingUsers = false;
         },
-        async getItems(type = 'all', pagination = 1, noAlert = false) {
+        async getItems(type = 'all', noAlert = true, pagination = 1) {
             this.loadingItems = true;
             this.loadingR();
 
@@ -743,6 +743,8 @@ const app = new Vue({
                 if(json['redirect'] === false) {
                     if(json['type'] === 'reset'){
                         Vue.set(this, 'permission', json['permission']);
+                        this.throwWarning(json['message'], ['alert-secondary']);
+                        return;
                     }
                     this.throwWarning('Nada aconteceu', ['alert-secondary']);
                     return;
@@ -986,7 +988,7 @@ const app = new Vue({
                     image3: null
                 };
 
-                this.getItems('reload', 1, true);
+                this.getItems('reload', true, 1);
             } catch (error) {
                 this.formatPriceInput();
                 this.throwWarning(error.message, ['alert-danger']);
@@ -1031,7 +1033,7 @@ const app = new Vue({
                     throw new Error(json['message']);
                 }
 
-                this.getItems('reload', 1, true);
+                this.getItems('reload');
 
                 this.throwWarning(json['message'], ['alert-success']);
                 this.itemToAdd = {
@@ -1089,7 +1091,7 @@ const app = new Vue({
 
         setInterval(() => { 
             this.secs += 1;
-            this.throwWarning('Próxima tentativa em ' + (20 - this.secs) + ' segundos', ['alert-danger']);
+            //this.throwWarning('Próxima tentativa em ' + (20 - this.secs) + ' segundos', ['alert-danger']);
 
             if(this.secs === 20) {
                 this.secs = 0;
