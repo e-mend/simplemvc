@@ -120,8 +120,24 @@ const app = new Vue({
                 price: 'R$ 1000,00',
                 image1: null,
                 image2: null,
-                image3: null
-            }
+                image3: null,
+                image1Link: null,
+                image2Link: null,
+                image3Link: null
+            },
+            itemToEdit: {
+                name: '',
+                description: '',
+                quantity: '',
+                price: '',
+                image1: null,
+                image2: null,
+                image3: null,
+                image1Link: null,
+                image2Link: null,
+                image3Link: null
+            },
+            imageModalContent: {}
         }
     },
     methods: {
@@ -870,6 +886,20 @@ const app = new Vue({
         addItemModal() {
             $('#inventory-modal').modal('show');
         },
+        itemModal(id) {
+            $('#add-inventory-modal').modal('show');  
+        },
+        imageModal(id) {
+            const item = this.items.find(item => item.id === id);
+
+            if (item == null) {
+                return;
+            }
+
+            this.imageModalContent = item['image'];
+
+            $('#image-modal').modal('show');
+        },
         formatPriceInput(){
             this.itemToAdd.price = this.formatPrice(this.itemToAdd.price);
         },
@@ -897,9 +927,24 @@ const app = new Vue({
 
             return formatter.format(value);
         },
+        removeImage(imageKey) {
+            this.itemToAdd[imageKey] = null;
+            this.itemToAdd[imageKey+'Link'] = null;
+        },
         onFileChange(event, imageKey) {
             const file = event.target.files[0];
-            this.itemToAdd[imageKey] = file;
+
+            if (file && file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                this.itemToAdd[imageKey] = file;
+                this.itemToAdd[imageKey+'Link'] = event.target.result;
+
+                reader.onload = (e) => {
+                    this.itemToAdd[imageKey+'Link'] = e.target.result;
+                };
+
+                reader.readAsDataURL(file);
+              }
         },
         async addItem() {
             this.itemToAdd.price = this.itemToAdd.price.replace(/[^0-9]/g, '');
@@ -941,7 +986,7 @@ const app = new Vue({
                     image3: null
                 };
 
-                this.getItems('reload');
+                this.getItems('reload', 1, true);
             } catch (error) {
                 this.formatPriceInput();
                 this.throwWarning(error.message, ['alert-danger']);
@@ -986,7 +1031,7 @@ const app = new Vue({
                     throw new Error(json['message']);
                 }
 
-                this.getItems('reload');
+                this.getItems('reload', 1, true);
 
                 this.throwWarning(json['message'], ['alert-success']);
                 this.itemToAdd = {

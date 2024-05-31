@@ -181,9 +181,11 @@
                 py-1 fs-5 pt-0">
                     <div class="row d-flex rounded">
                         <div :id="'carouselId' + item.id" 
-                        class="card-img-top px-0 img-container carousel slide w-100">
+                        class="card-img-top px-0 img-container border-none py-0 carousel slide w-100 btn">
                             <div class="carousel-inner rounded" v-if="item.image">
-                                <div class="carousel-item" v-for="(image, index) in item.image" 
+                                <div class="carousel-item" 
+                                @click="imageModal(item.id)"
+                                v-for="(image, index) in item.image" 
                                 :class="{active: index === 0}">
                                     <img :src="'data:image/' + image['extension'] + ';base64,' + image['base64']" 
                                     class="d-block w-100 rounded" alt="...">
@@ -245,7 +247,7 @@
                                     :class="{'fa-solid': item.favorite, 'fa-regular': !item.favorite}"></i>
                                 </div>
                                 <div class="btn btn-primary text-center p-3 fs-5" 
-                                @click="itemModal(item.id, true)"
+                                @click="itemModal(item.id)"
                                 v-if="permission['can_update_inventory']">
                                     <i class="fa-solid fa-pencil"></i>
                                 </div>
@@ -268,74 +270,235 @@
                     </button>
                 </ul>
             </div>
-                <div id="inventory-modal" class="modal fade" id="staticBackdrop"
-                data-bs-backdrop="static" data-bs-keyboard="false" 
-                tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true"
-                v-if="this.permission['can_create_inventory']">
-                    <div class="modal-dialog modal-lg">
-                        <div class="modal-content">
-                        <div class="modal-header">
-                            <h1 class="modal-title fs-5" id="staticBackdropLabel">Adicionar Item</h1>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <div id="inventory-modal" class="modal fade" id="staticBackdrop"
+            data-bs-backdrop="static" data-bs-keyboard="false" 
+            tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true"
+            v-if="this.permission['can_create_inventory']">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="staticBackdropLabel">Adicionar Item</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="row d-flex justify-content-between mb-2">
+                        
+                    </div>
+                    <div class="modal-body">
+                        <div class="row d-flex justify-content-center mb-2">
+                            <div class="col-md-6 col-12 form-group fs-5 mb-2">
+                                <label for="item-name">Nome do produto</label>
+                                <input type="text" class="form-control disabled fs-5" 
+                                id="item-name" v-model="itemToAdd.name">
+                            </div>
+                            <div class="col-md-3 col-12 form-group fs-5 mb-2">
+                                <label for="price">Preço</label>
+                                <input type="text" class="form-control fs-5" 
+                                id="price" v-model="itemToAdd.price"
+                                @input="formatPriceInput">
+                            </div>
+                            <div class="col-md-3 col-12 form-group fs-5 mb-2">
+                                <label for="quantity">Quantidade</label>
+                                <input type="text" class="form-control fs-5" 
+                                id="quantity" v-model="itemToAdd.quantity">
+                            </div>
+                            <div class="col-md-12 col-12 form-group fs-5 mb-2">
+                                <label for="description">Descrição</label>
+                                <textarea class="form-control fs-5"
+                                id="description" v-model="itemToAdd.description"></textarea>
+                            </div>
+                            <div class="col-md-12 col-12 form-group fs-3 mt-3 text-center">
+                                Total: {{ totalPrice }}
+                            </div>
                         </div>
-                        <div class="row d-flex justify-content-between mb-2">
-                            
-                        </div>
-                        <div class="modal-body">
-                            <div class="row d-flex justify-content-center mb-2">
-                                <div class="col-md-6 col-12 form-group fs-5 mb-2">
-                                    <label for="item-name">Nome do produto</label>
-                                    <input type="text" class="form-control disabled fs-5" 
-                                    id="item-name" v-model="itemToAdd.name">
+                        <div class="row d-flex justify-content-center mb-2">
+                            <div class="col-12 form-group fs-5 position-relative text-center">
+                                <div class="">
+                                    Imagem Principal
                                 </div>
-                                <div class="col-md-3 col-12 form-group fs-5 mb-2">
-                                    <label for="price">Preço</label>
-                                    <input type="text" class="form-control fs-5" 
-                                    id="price" v-model="itemToAdd.price"
-                                    @input="formatPriceInput">
-                                </div>
-                                <div class="col-md-3 col-12 form-group fs-5 mb-2">
-                                    <label for="quantity">Quantidade</label>
-                                    <input type="text" class="form-control fs-5" 
-                                    id="quantity" v-model="itemToAdd.quantity">
-                                </div>
-                                <div class="col-md-12 col-12 form-group fs-5 mb-2">
-                                    <label for="description">Descrição</label>
-                                    <textarea class="form-control fs-5"
-                                    id="description" v-model="itemToAdd.description"></textarea>
-                                </div>
-                                <div class="col-md-12 col-12 form-group fs-3 mt-3 text-center">
-                                    Total: {{ totalPrice }}
+                                <div class="btn btn-danger position-absolute end-0"
+                                v-if="itemToAdd.image1"
+                                @click="removeImage('image1')">
+                                    <i class="fa-solid fa-xmark"></i>
                                 </div>
                             </div>
-                            <div class="row d-flex justify-content-center mb-2">
-                                <div class="col-md-12 col-12 form-group fs-5 mb-2">
-                                    <label for="image1">Imagem 1</label>
-                                    <input type="file" class="form-control fs-5" 
-                                    id="image1" @change="onFileChange($event, 'image1')"
-                                    accept="image/*">
+                            <div class="col-12 form-group fs-5 rounded 
+                                btn border shadow">
+                                <label for="image1">
+                                <div v-if="!itemToAdd.image1" class="mt-2">
+                                    <i class="fa-solid fa-file-image fs-1"></i>
                                 </div>
-                                <div class="col-md-12 col-12 form-group fs-5 mb-2">
-                                    <label for="image2">Imagem 2</label>
-                                    <input type="file" class="form-control fs-5" 
-                                    id="image2" @change="onFileChange($event, 'image2')"
-                                    accept="image/*">
+                                <div class="img-container2" v-else>
+                                    <img :src="itemToAdd.image1Link" class="w-100">
                                 </div>
-                                <div class="col-md-12 col-12 form-group fs-5 mb-2">
-                                    <label for="image3">Imagem 3</label>
-                                    <input type="file" class="form-control fs-5" 
-                                    id="image3" @change="onFileChange($event, 'image3')"
-                                    accept="image/*">
+                                <input type="file" class="d-none" 
+                                id="image1" @change="onFileChange($event, 'image1')"
+                                accept="image/*">
+                                </label>
+                            </div>
+                            <div class="col-12 form-group fs-5 position-relative text-center">
+                                <div class="">
+                                    Imagem 2
+                                </div>
+                                <div class="btn btn-danger position-absolute end-0"
+                                v-if="itemToAdd.image2"
+                                @click="removeImage('image2')">
+                                    <i class="fa-solid fa-xmark"></i>
+                                </div>
+                            </div>
+                            <div class="col-12 form-group fs-5 mb-2 rounded 
+                            btn border shadow">
+                                <label for="image2">
+                                <div v-if="!itemToAdd.image2" class="mt-2">
+                                    <i class="fa-solid fa-file-image fs-1"></i>
+                                </div>
+                                <div class="img-container2" v-else>
+                                    <img :src="itemToAdd.image2Link" class="w-100">
+                                </div>
+                                <input type="file" class="d-none" 
+                                id="image2" @change="onFileChange($event, 'image2')"
+                                accept="image/*">
+                                </label>
+                            </div>
+                            <div class="col-12 form-group fs-5 position-relative text-center">
+                                <div class="">
+                                    Imagem 3
+                                </div>
+                                <div class="btn btn-danger position-absolute end-0"
+                                v-if="itemToAdd.image3"
+                                @click="removeImage('image3')">
+                                    <i class="fa-solid fa-xmark"></i>
+                                </div>
+                            </div>
+                            <div class="col-12 form-group fs-5 mb-2 rounded 
+                            btn border shadow">
+                                <label for="image3">
+                                <div v-if="!itemToAdd.image3" class="mt-2">
+                                    <i class="fa-solid fa-file-image fs-1"></i>
+                                </div>
+                                <div class="img-container2" v-else>
+                                    <img :src="itemToAdd.image3Link" class="w-100 rounded">
+                                </div>
+                                <input type="file" class="d-none" 
+                                id="image3" @change="onFileChange($event, 'image3')"
+                                accept="image/*">
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" @click="addItem()" class="btn btn-primary">Adicionar</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                    </div>
+                    </div>
+                </div>
+            </div>
+            <div id="add-inventory-modal" class="modal fade" id="staticBackdrop"
+            data-bs-backdrop="static" data-bs-keyboard="false" 
+            tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true"
+            v-if="this.permission['can_update_inventory']">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="staticBackdropLabel">
+                                Editar item
+                            </h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="row d-flex justify-content-between py-3 py-md-3 rounded
+                                z-3">
+                                <div class="row d-flex justify-content-center mb-2">
+                                    <div class="col-md-12 col-12 form-group fs-5 mb-2">
+                                        <label for="edit-product-name">Nome</label>
+                                        <input type="text" class="form-control disabled fs-5" 
+                                        id="edit-product-name" v-model="itemToEdit.name">
+                                    </div>
+                                    <div class="col-md-6 col-12 form-group fs-5 mb-2">
+                                        <i class="fa-solid fa-circle"></i>
+                                        Criado em: {{ itemToEdit.created_at }}
+                                    </div>
+                                    <div class="col-md-6 col-12 form-group fs-5 mb-2">
+                                        <i class="fa-solid fa-circle"></i>
+                                        Criado por: {{ itemToEdit.created_by }}
+                                    </div>
+                                    <div class="col-md-6 col-12 form-group fs-5 mb-2" 
+                                    v-if="itemToEdit.updated_at">
+                                        <i class="fa-regular fa-circle"></i>
+                                        Atualizado em: {{ itemToEdit.updated_at }}
+                                    </div>
+                                    <div class="col-md-6 col-12 form-group fs-5 mb-2" 
+                                    v-if="itemToEdit.updated_by">
+                                        <i class="fa-regular fa-circle"></i>
+                                        Atualizado por: {{ itemToEdit.updated_by }}
+                                    </div>
+                                    <div class="col-md-12 col-12 form-group fs-5 mb-2">
+                                        <label for="edit-product-description">Descrição</label>
+                                        <textarea class="form-control fs-5"
+                                        id="edit-product-description" v-model="itemToEdit.description">
+                                        </textarea>
+                                    </div>
+                                    <div class="col-md-3 col-12 form-group fs-5 mb-2">
+                                        <label for="edit-product-quantity">Estoque</label>
+                                        <input type="text" class="form-control disabled fs-5" 
+                                        id="edit-product-quantity" v-model="itemToEdit.quantity">
+                                    </div>
+                                    <div class="col-md-3 col-12 form-group fs-5 mb-2">
+                                        <label for="edit-product-price">Valor</label>
+                                        <input type="text" class="form-control disabled fs-5" 
+                                        id="edit-product-price" v-model="itemToEdit.price">
+                                    </div>
+                                    <div class="mt-auto mb-2 text-center fs-5 col-md-12 col-12">
+                                        <button class="btn btn-primary fs-5 col-md-4 col-12"
+                                        @click="alert">
+                                            Atualizar
+                                            <i class="fa-regular fa-thumbs-up"></i>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                         <div class="modal-footer">
-                            <button type="button" @click="addItem()" class="btn btn-primary">Adicionar</button>
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                            <button type="button" class="btn btn-secondary" 
+                            data-bs-dismiss="modal">Fechar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="image-modal" class="modal fade" id="staticBackdrop"
+            data-bs-backdrop="static" data-bs-keyboard="false" 
+            tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                <div class="modal-dialog modal-xl">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="staticBackdropLabel"></h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                        <div id="image-carousel" 
+                            class="card-img-top px-0 img-container h-100 carousel slide w-100">
+                            <div class="carousel-inner rounded">
+                                <div class="carousel-item" 
+                                v-for="(image, index) in imageModalContent" 
+                                :class="{active: index === 0}">
+                                    <img :src="'data:image/' + image['extension'] + ';base64,' + image['base64']" 
+                                    class="d-block w-100 rounded" alt="...">
+                                </div>
+                            </div>
+                            <button class="carousel-control-prev" type="button" data-bs-target="#image-carousel"
+                            data-bs-slide="prev">
+                                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                <span class="visually-hidden">Previous</span>
+                            </button>
+                            <button class="carousel-control-next" type="button" data-bs-target="#image-carousel"
+                            data-bs-slide="next">
+                                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                <span class="visually-hidden">Next</span>
+                            </button>
                         </div>
                         </div>
                     </div>
                 </div>
+            </div>
             </div>
             <!-- Safe -->
             <div class="container-margin" v-if="option === 'safe'">
@@ -689,7 +852,6 @@
                         </div>
                     </div>
                 </div>  
-
                 <div id="user-modal" class="modal fade" id="staticBackdrop"
                 data-bs-backdrop="static" data-bs-keyboard="false" 
                 tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">

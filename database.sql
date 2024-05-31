@@ -43,6 +43,9 @@ CREATE TABLE `InventoryApp`.`inventory`(
     `created_by` INT,
     `favorite` BOOLEAN NOT NULL DEFAULT 0,
     `image` JSON,
+    `updated_at` DATETIME,
+    `updated_by` INT,
+    FOREIGN KEY (updated_by) REFERENCES user(id),
     FOREIGN KEY (created_by) REFERENCES user(id),
     FOREIGN KEY (deleted_by) REFERENCES user(id)
 );
