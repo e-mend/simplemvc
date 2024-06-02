@@ -102,7 +102,7 @@ class InventoryController extends Controller
                 }
     
                 if($params['deleted'] 
-                && $this->secure->hasPermission(AclRole::can_see_disabled_inventory->value)){
+                && $this->secure->hasPermission(AclRole::CAN_SEE_DISABLED_INVENTORY->value)){
                     $query['is_disabled'] = 1; 
                 }else{
                     $query['is_disabled'] = 0;
@@ -118,7 +118,7 @@ class InventoryController extends Controller
     
                 if($params['favorites']){
                     $query['favorite'] = 1;
-                    $query['order'] = 'favorite DESC, created_at DESC';
+                    $query['order'] = 'inventory.favorite DESC, inventory.created_at DESC';
                 }
 
                 if($params['pagination']){
@@ -177,14 +177,19 @@ class InventoryController extends Controller
     public function toggleFavoriteApi()
     {
         try {
-            if(!$this->secure->isLoggedIn() || !$this->secure->hasPermission(AclRole::ADMIN->value)){
-                throw new Exception("Não autorizado");
+            if(!$this->secure->isLoggedIn()
+            || !$this->secure->hasPermission(AclRole::ADMIN->value)){
+                throw new PermissionException();
             }
 
             $json = Json::getJson();
 
+            if (!$json){
+                throw new RequestException();
+            }
+
             if(!$json['id']){
-                throw new Exception("Id inválido");
+                throw new ReachableException("Id inválido");
             }
 
             $toUpdate = $this->inventory->update([
@@ -192,17 +197,22 @@ class InventoryController extends Controller
             ], $json['id']);
 
             if(!$toUpdate){
-                throw new Exception("Erro ao processar a requisição");
+                throw new ReachableException("Erro ao processar a requisição");
             }
 
             Json::send([
                 'success' => true,
                 'message' => $json['favorite'] ? 'Favorito adicionado com sucesso' : 'Favorito removido com sucesso'
             ]);
-        } catch (\Throwable $th) {
+        } catch (ReachableException $e) {
             Json::send([
                 'success' => false,
-                'message' => $th->getMessage()
+                'message' => $e->getMessage(),
+            ]); 
+        } catch (Throwable $th) {
+            Json::send([
+                'success' => false,
+                'message' => 'Erro ao processar a requisição',
             ]);
         }
     }
@@ -210,16 +220,21 @@ class InventoryController extends Controller
     public function uploadImageApi()
     {
         try {
-            if(!$this->secure->isLoggedIn() || !$this->secure->hasPermission(AclRole::CAN_CREATE_INVENTORY->value)){
-                throw new Exception("Não autorizado");
+            if(!$this->secure->isLoggedIn()
+            || !$this->secure->hasPermission(AclRole::CAN_CREATE_INVENTORY->value)){
+                throw new PermissionException();
             }
 
             $files = Req::getFiles();
 
+            if (!$files){
+                throw new RequestException();
+            }
+
             if(count($files) <= Req::MAX_IMAGES){
                 foreach ($files as $file) {
                     if(!Req::validateFile($file)){
-                        throw new Exception("Imagem inválida");
+                        throw new ReachableException("Imagem inválida");
                     }
                 }
             }
@@ -229,18 +244,22 @@ class InventoryController extends Controller
             ], $_POST['id']);
 
             if(!$insert){
-                throw new Exception("Erro ao processar a requisição");
+                throw new ReachableException("Algo deu errado");
             }
 
             Json::send([
                 'success' => true,
                 'message' => 'Imagem enviada com sucesso'
             ]);
-        } catch (\Throwable $th) {
+        } catch (ReachableException $e) {
             Json::send([
                 'success' => false,
-                'message' => $th->getMessage(),
-                'insert' => $insert
+                'message' => $e->getMessage(),
+            ]); 
+        } catch (Throwable $th) {
+            Json::send([
+                'success' => false,
+                'message' => 'Erro ao processar a requisição',
             ]);
         }
     }
@@ -248,27 +267,31 @@ class InventoryController extends Controller
     public function addItemApi()
     {
         try {
-            if(!$this->secure->isLoggedIn() || !$this->secure->hasPermission(AclRole::CAN_CREATE_INVENTORY->value)){
-                throw new Exception("Não autorizado");
+            if(!$this->secure->isLoggedIn()
+            || !$this->secure->hasPermission(AclRole::CAN_CREATE_INVENTORY->value)){
+                throw new PermissionException();
             }
 
             $json = Json::getJson();
 
+            if (!$json){
+                throw new RequestException();
+            }
 
             if(!$json['name'] || !$this->secure->isValid('name', $json['name'])){
-                throw new Exception("Revise o nome");
+                throw new ReachableException("Revise o nome");
             }
 
             if(!$json['price'] || !$this->secure->isValid('price', $json['price'])){
-                throw new Exception("Revise o valor");
+                throw new ReachableException("Revise o valor");
             }
 
             if(!$json['quantity'] || !$this->secure->isValid('quantity', $json['quantity'])){
-                throw new Exception("Revise a quantidade");
+                throw new ReachableException("Revise a quantidade");
             }
 
             if($json['description'] != '' && !$this->secure->isValid('description', $json['description'])){
-                throw new Exception("Revise a descrição");
+                throw new ReachableException("Revise a descrição");
             }
 
             $insert = $this->inventory->createItem([
@@ -276,19 +299,26 @@ class InventoryController extends Controller
                 'price' => $json['price'],
                 'quantity' => $json['quantity'],
                 'description' => $json['description'],
-                'created_at' => Carbon::now()->format('Y-m-d H:i:s'),
-                'created_by' => $_SESSION['user']['id'],
             ]);
+
+            if(!$insert){
+                throw new ReachableException("Algo deu errado");
+            }
 
             Json::send([
                 'success' => true,
                 'message' => 'Item adicionado com sucesso',
                 'id' => $insert
             ]);
-        } catch (\Throwable $th) {
+        } catch (ReachableException $e) {
             Json::send([
                 'success' => false,
-                'message' => $th->getMessage()
+                'message' => $e->getMessage(),
+            ]); 
+        } catch (Throwable $th) {
+            Json::send([
+                'success' => false,
+                'message' => 'Erro ao processar a requisição',
             ]);
         }
     }

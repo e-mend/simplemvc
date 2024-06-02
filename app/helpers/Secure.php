@@ -167,11 +167,11 @@ class Secure
 
         if ($data) {
             foreach ($data as &$key) {
-                $key['link'] = 'www.' . $_ENV['BASE_URL'] . '/newuser?token=' . $key['link'];
+                $key['raw'] = $_ENV['BASE_URL'] . '/newuser?token=' . $key['link'];
             }
             return $data;
         }
 
-        return 'www.' . $_ENV['BASE_URL'] . '/newuser?token=' . $this->passwordToken;
+        return $_ENV['BASE_URL'] . '/newuser?token=' . $this->passwordToken;
     }
 }

@@ -62,13 +62,13 @@ class Inventory
             $searchTerm = '%' . $search['search'] . '%';
             $select->where(function ($where) use ($searchTerm) {
                 $where->nest()
-                    ->like('name', $searchTerm)
+                    ->like('inventory.name', $searchTerm)
                     ->or
-                    ->like('description', $searchTerm)
+                    ->like('inventory.description', $searchTerm)
                     ->or
-                    ->like('price', $searchTerm)
+                    ->like('inventory.price', $searchTerm)
                     ->or
-                    ->like('quantity', $searchTerm)
+                    ->like('inventory.quantity', $searchTerm)
                     ->unnest();
                 });
         }
@@ -79,28 +79,28 @@ class Inventory
 
         if($search['days']){
             $select->where([
-                'created_at >= ?' => $search['days']
+                'inventory.created_at >= ?' => $search['days']
             ]);
         }
 
         if($search['from']){
             $select->where([
-                'created_at >= ?' => $search['from']
+                'inventory.created_at >= ?' => $search['from']
             ]);
         }
 
         if($search['to']){
             $select->where([
-                'created_at <= ?' => $search['to']
+                'inventory.created_at <= ?' => $search['to']
             ]);
         }
 
         if($search['favorite']){
-            $select->where(['favorite' => $search['favorite']]);
+            $select->where(['inventory.favorite' => $search['favorite']]);
         }
 
         if($search['is_disabled']){
-            $select->where(['is_disabled' => $search['is_disabled']]); 
+            $select->where(['inventory.is_disabled' => $search['is_disabled']]); 
         }
 
         $select->order($search['order'] ?? 'favorite DESC, id DESC, created_at DESC');
@@ -120,7 +120,10 @@ class Inventory
     {
         $insert = new Insert();
         $insert->into('inventory');
-        $insert->values($data);
+        $insert->values(array_merge($data, [
+            'created_at' => Carbon::now(),
+            'created_by' => $_SESSION['user']['id']
+        ]));
         
         $statement = $this->sql->prepareStatementForSqlObject($insert);
         $results = $statement->execute();

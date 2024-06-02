@@ -346,23 +346,28 @@ class DashboardController extends Controller
     public function getLinksApi()
     {
         try {
-            if(!$this->secure->isLoggedIn() || !$this->secure->hasPermission(AclRole::ADMIN->value)){
-                throw new PermissionException("Não autorizado");
+            if(!$this->secure->isLoggedIn() 
+            || !$this->secure->hasPermission(AclRole::ADMIN->value)){
+                throw new PermissionException();
             }
 
             $links = $this->user->getLinks([
                 'eq' => [
-                    'created_by' => $_SESSION['user']['id'],
+                    'temp.created_by' => $_SESSION['user']['id'],
                     'type' => 'user',
                 ],
                 'limit' => 5,
-                'order' => 'id DESC'
+                'order' => 'temp.id DESC'
             ]);
 
             if ($links){
                 foreach ($links as &$link) {
                     $link['created_at'] = Carbon::createFromFormat('Y-m-d H:i:s', $link['created_at'])
                                                     ->format('d/m/Y H:i:s');
+                    if ($link['disabled_at']){
+                        $link['disabled_at'] = Carbon::createFromFormat('Y-m-d H:i:s', $link['disabled_at'])
+                        ->format('d/m/Y H:i:s');
+                    }
                 }
             }
 

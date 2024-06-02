@@ -115,10 +115,10 @@ const app = new Vue({
             passwordFieldType: 'password',
             links: {},
             itemToAdd: {
-                name: 'Item Teste',
-                description: 'Descrição do item',
-                quantity: 3,
-                price: 'R$ 1000,00',
+                name: '',
+                description: '',
+                quantity: 0,
+                price: 'R$ 0,00',
                 image1: null,
                 image2: null,
                 image3: null,
@@ -131,6 +131,9 @@ const app = new Vue({
                 description: '',
                 quantity: '',
                 price: '',
+                image: [
+
+                ],
                 image1: null,
                 image2: null,
                 image3: null,
@@ -533,7 +536,8 @@ const app = new Vue({
                 if(json['redirect'] === false) {
                     if(json['type'] === 'reset'){
                         Vue.set(this, 'permission', json['permission']);
-                        this.throwWarning(json['message'], ['alert-secondary']);
+                        this.throwWarning(json['message']+ 
+                        `<i class="fa-solid fa-circle-notch"></i>`, ['alert-secondary']);
                         return;
                     }
                     this.throwWarning('Nada aconteceu', ['alert-secondary']);
@@ -542,9 +546,9 @@ const app = new Vue({
 
                 window.location.href = json['redirect'];
 
-                this.throwWarning(json['message'], ['alert-success']);
+                this.throwWarning(json['message']+` <i class="fa-solid fa-location-arrow"></i>`, ['alert-success']);
             } catch (error) {
-                this.throwWarning(error.message, ['alert-danger']);
+                this.throwWarning(error.message+` <i class="fa-solid fa-xmark"></i>`, ['alert-danger']);
                 window.location.href = "/";
             }
         },
@@ -746,7 +750,7 @@ const app = new Vue({
                 this.throwWarning(json['message'], ['alert-success']);
 
             } catch (error) {
-                this.throwWarning(error.message, ['alert-danger']);
+                this.throwWarning(error.message+' <i class="fa-solid fa-xmark"></i>', ['alert-danger']);
                 this.items[index].favorite = !this.items[index].favorite;
             }
         },
@@ -772,7 +776,8 @@ const app = new Vue({
 
                 this.getItems('reload');
             } catch (error) {
-                this.throwWarning(error.message, ['alert-danger']);
+                this.throwWarning(error.message+
+                    ' <i class="fa-solid fa-xmark"></i>', ['alert-danger']);
             }
         },
         async editItemModal(id) {
@@ -787,6 +792,15 @@ const app = new Vue({
                 }
 
                 this.itemToEdit = json['items'][0];
+                this.itemToEdit.price = this.formatPrice(this.itemToEdit['price']);
+
+                if (this.itemToEdit.image) {
+                    this.itemToEdit.image.forEach((image, index) => {
+                        this.itemToEdit['image'+(index+1)] = image;
+                        this.itemToEdit['image'+(index+1)+'Link'] = 
+                        'data:image/'+image['extension']+';base64,'+image['base64'];
+                    })
+                }
 
             } catch (error) {
                 this.throwWarning(error.message, ['alert-danger']);
@@ -808,6 +822,9 @@ const app = new Vue({
         },
         formatPriceInput(){
             this.itemToAdd.price = this.formatPrice(this.itemToAdd.price);
+        },
+        formatEditPrice(){
+            this.itemToEdit.price = this.formatPrice(this.itemToEdit.price);
         },
         formatPrice(price) {
             let value = price;
@@ -845,7 +862,8 @@ const app = new Vue({
 
             if(type == 2){
                 this.itemToEdit[imageKey] = null;
-                this.itemToEdit[imageKey+'Link'] = null;
+                Vue.set(this.itemToEdit, imageKey+'Link', null);
+                this.$forceUpdate();
             }
         },
         onFileChange(event, imageKey, type = 1) {
@@ -855,23 +873,28 @@ const app = new Vue({
                 const reader = new FileReader();
                 
                 if(type == 1){
-                    this.itemToAdd[imageKey] = file;
-                    this.itemToAdd[imageKey+'Link'] = event.target.result;
-    
                     reader.onload = (e) => {
+                        this.itemToAdd[imageKey] = file;
                         this.itemToAdd[imageKey+'Link'] = e.target.result;
                     };
                 }
 
                 if(type == 2){
-                    this.itemToEdit[imageKey] = file;
-                    this.itemToEdit[imageKey+'Link'] = event.target.result;
-    
                     reader.onload = (e) => {
+                        this.itemToEdit[imageKey] = file;
                         this.itemToEdit[imageKey+'Link'] = e.target.result;
                     };
                 }
 
+                const interval = setInterval(() => {
+                    this.$forceUpdate();
+                    console.log('doing...');
+
+                    if (reader.readyState === 2) {
+                        clearInterval(interval);
+                    }
+                }, 1000);
+                
                 reader.readAsDataURL(file);
               }
         },
@@ -1116,6 +1139,30 @@ const app = new Vue({
             });
 
             return formatter.format(value * this.itemToAdd.quantity);
+        },
+        totalEditPrice() {
+            let value = this.itemToEdit.price.replace(/[^0-9]/g, '');
+
+            if(value.substring(0, 1) == '0'){
+                value = value.substring(1);
+            }
+
+            if(value.length <= 3) {
+                let zeros = 3 - value.length;
+                value = '0'.repeat(zeros)+value;
+                value = value.substring(0, 1) + '.' + value.substring(1);
+            }else{
+                value = value.substring(0, value.length - 2) + '.' + 
+                value.substring(value.length - 2);
+            }
+
+            var formatter = new Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL',
+                maximumFractionDigits: 2,
+            });
+
+            return formatter.format(value * this.itemToEdit.quantity);
         },
     },
     async mounted() {

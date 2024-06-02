@@ -209,22 +209,31 @@
                                 <div class="col-md-12 col-12 fs-4">
                                     {{ item.name }}
                                 </div>
-                                <div class="col-md-12 col-12 bg-light rounded text-black text-start">
+                                <div class="py-4 fs-5
+                                col-md-12 col-12 bg-light text-black text-start">
                                     Descrição:
                                     <br>
                                     {{ item.description }}
                                 </div>
-                                <div class="col-md-12 col-12 text-start mb-2">
+                                <div class="col-md-12 col-12 text-start">
                                     <i class="fa-solid fa-box"></i>
                                     Estoque:
                                     <div class="fs-5 btn btn-light">
                                         {{ item.quantity }}
                                     </div>
-                                    <br>
+                                </div>
+                                <div class="col-md-12 col-12 text-start mb-1">
                                     <i class="fa-solid fa-money-bill"></i>
                                     Valor:
                                     <div class="fs-5 btn btn-light">
                                         {{ formatPrice(item.price) }}
+                                    </div>
+                                </div>
+                                <div class="col-md-12 col-12 text-start">
+                                    <i class="fa-solid fa-boxes-stacked"></i>
+                                    ValorBruto:
+                                    <div class="fs-5 btn btn-light">
+                                        {{ formatPrice(item.price * item.quantity) }}
                                     </div>
                                 </div>
                                 <div class="col-md-12 col-12 text-start">
@@ -319,24 +328,26 @@
                                     <div class="btn btn-danger position-absolute end-0"
                                     v-if="itemToAdd.image1"
                                     @click="removeImage('image1')">
-                                        <i class="fa-solid fa-xmark"></i>
+                                        <i class="fa-solid fa-xmark" role="button"></i>
                                     </div>
                                 </div>
-                                <div class="col-12 form-group fs-5 rounded 
-                                    btn border shadow">
-                                    <label for="image1">
-                                    <div v-if="!itemToAdd.image1" class="mt-2">
-                                        <i class="fa-solid fa-file-image fs-1"></i>
-                                    </div>
-                                    <div class="img-container2" v-else>
-                                        <img :src="itemToAdd.image1Link" class="w-100">
-                                    </div>
-                                    <input type="file" class="d-none" 
-                                    id="image1" @change="onFileChange($event, 'image1')"
-                                    accept="image/*">
+                                <div class="form-group mt-2 fs-5 rounded 
+                                    btn border shadow"
+                                    :class="itemToAdd.image1 ? 'col-md-8 col-12' : 'col-md-2 p-0 col-12'">
+                                    <label for="image1" class="w-100 p-3"
+                                            role="button">
+                                        <div v-if="!itemToAdd.image1" class="">
+                                            <i class="fa-solid fa-file-image fs-1"></i>
+                                        </div>
+                                        <div class="img-container2" v-else>
+                                            <img :src="itemToAdd.image1Link" class="w-100">
+                                        </div>
+                                        <input type="file" class="d-none" 
+                                        id="image1" @change="onFileChange($event, 'image1')"
+                                        accept="image/*">
                                     </label>
                                 </div>
-                                <div class="col-12 form-group fs-5 position-relative text-center">
+                                <div class="col-12 form-group mt-4 fs-5 position-relative text-center">
                                     <div class="">
                                         Imagem 2
                                     </div>
@@ -346,10 +357,12 @@
                                         <i class="fa-solid fa-xmark"></i>
                                     </div>
                                 </div>
-                                <div class="col-12 form-group fs-5 mb-2 rounded 
-                                btn border shadow">
-                                    <label for="image2">
-                                    <div v-if="!itemToAdd.image2" class="mt-2">
+                                <div class="form-group mt-2 fs-5 rounded 
+                                    btn border shadow"
+                                    :class="itemToAdd.image2 ? 'col-md-8 col-12' : 'col-md-2 p-0 col-12'">
+                                    <label for="image2" class="w-100 p-3"
+                                            role="button">
+                                    <div v-if="!itemToAdd.image2" class="">
                                         <i class="fa-solid fa-file-image fs-1"></i>
                                     </div>
                                     <div class="img-container2" v-else>
@@ -360,7 +373,7 @@
                                     accept="image/*">
                                     </label>
                                 </div>
-                                <div class="col-12 form-group fs-5 position-relative text-center">
+                                <div class="col-12 form-group mt-4 fs-5 position-relative text-center">
                                     <div class="">
                                         Imagem 3
                                     </div>
@@ -370,10 +383,12 @@
                                         <i class="fa-solid fa-xmark"></i>
                                     </div>
                                 </div>
-                                <div class="col-12 form-group fs-5 mb-2 rounded 
-                                btn border shadow">
-                                    <label for="image3">
-                                    <div v-if="!itemToAdd.image3" class="mt-2">
+                                <div class="form-group mt-2 fs-5 rounded 
+                                    btn border shadow"
+                                    :class="itemToAdd.image3 ? 'col-md-8 col-12' : 'col-md-2 p-0 col-12'">
+                                    <label for="image3" class="w-100 p-3"
+                                            role="button">
+                                    <div v-if="!itemToAdd.image3" class="">
                                         <i class="fa-solid fa-file-image fs-1"></i>
                                     </div>
                                     <div class="img-container2" v-else>
@@ -403,11 +418,11 @@
                                 <h1 class="modal-title fs-5" id="staticBackdropLabel">
                                     Editar item
                                 </h1>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                <button type="button" class="btn-close" 
+                                data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
                             <div class="modal-body">
-                                <div class="row d-flex justify-content-between py-3 py-md-3 rounded
-                                    z-3">
+                                <div class="row d-flex justify-content-center py-3 py-md-3 rounded z-3">
                                     <div class="row d-flex justify-content-center mb-2">
                                         <div class="col-md-12 col-12 form-group fs-5 mb-2">
                                             <label for="edit-product-name">Nome</label>
@@ -440,17 +455,20 @@
                                         </div>
                                         <div class="col-md-4 col-12 form-group fs-5 mb-2">
                                             <label for="edit-product-quantity">Estoque</label>
-                                            <input type="text" class="form-control disabled fs-5" 
+                                            <input type="text" class="form-control fs-5" 
                                             id="edit-product-quantity" v-model="itemToEdit.quantity">
                                         </div>
                                         <div class="col-md-4 col-12 form-group fs-5 mb-2">
                                             <label for="edit-product-price">Valor</label>
-                                            <input type="text" class="form-control disabled fs-5" 
-                                            id="edit-product-price" v-model="itemToEdit.price">
+                                            <input type="text" class="form-control fs-5" 
+                                            id="edit-product-price" v-model="itemToEdit.price"
+                                            @input="formatEditPrice()">
                                         </div>
-                                        <div class="col-md-3 col-12 form-group fs-5 mb-2">
+                                        <div class="col-md-3 col-12 form-group mb-2">
                                             <label for="edit-product-total">Total</label>
-                                            {{ itemToEdit.total }}
+                                            <div class="fs-4 font-weight-bold">
+                                                {{ totalEditPrice }}
+                                            </div>
                                         </div>
                                         <div class="mt-auto mb-2 text-center fs-5 col-md-12 col-12">
                                             <button class="btn btn-primary fs-5 col-md-4 col-12"
@@ -461,77 +479,87 @@
                                         </div>
                                     </div>
                                     <div class="row d-flex justify-content-center mb-2">
-                                        <div class="col-12 form-group fs-5 
+                                        <div class="col-12 form-group fs-5 mt-4
                                         position-relative text-center">
                                             <div class="">
                                                 Imagem Principal
                                             </div>
                                             <div class="btn btn-danger position-absolute end-0"
-                                            v-if="itemToEdit.image1"
+                                            v-if="itemToEdit.image1 != null"
                                             @click="removeImage('image1', 2)">
                                                 <i class="fa-solid fa-xmark"></i>
                                             </div>
                                         </div>
-                                        <div class="col-12 form-group fs-5 rounded 
-                                            btn border shadow">
-                                            <label for="image1">
-                                            <div v-if="!itemToEdit.image1" class="mt-2">
+                                        <div class="form-group fs-5 rounded 
+                                            btn border shadow"
+                                            :class="itemToEdit.image1 ? 'col-md-8 col-12' : 'col-md-2 p-0 col-12'">
+                                            <label for="image1Edit" class="w-100 p-3"
+                                            role="button">
+                                            <div v-if="itemToEdit.image1 == null" class="mt-2">
                                                 <i class="fa-solid fa-file-image fs-1"></i>
                                             </div>
-                                            <div class="img-container2" v-else>
-                                                <img :src="itemToEdit.image1Link" class="w-100">
+                                            <div class="" v-else>
+                                                <img :src="this.itemToEdit.image1Link"
+                                            class="w-100">
                                             </div>
                                             <input type="file" class="d-none" 
-                                            id="image1" @change="onFileChange($event, 'image1', 2)"
+                                            id="image1Edit" @change="onFileChange($event, 'image1', 2)"
                                             accept="image/*">
                                             </label>
                                         </div>
-                                        <div class="col-12 form-group fs-5 position-relative text-center">
+                                        <div class="col-12 form-group mt-4 
+                                        fs-5 position-relative text-center">
                                             <div class="">
                                                 Imagem 2
                                             </div>
                                             <div class="btn btn-danger position-absolute end-0"
-                                            v-if="itemToAdd.image2"
+                                            v-if="itemToEdit.image2 != null"
                                             @click="removeImage('image2', 2)">
                                                 <i class="fa-solid fa-xmark"></i>
                                             </div>
                                         </div>
-                                        <div class="col-12 form-group fs-5 mb-2 rounded 
-                                        btn border shadow">
-                                            <label for="image2">
-                                            <div v-if="!itemToEdit.image2" class="mt-2">
+                                        <div class="form-group fs-5 mb-2 rounded 
+                                        btn border shadow"
+                                        :class="itemToEdit.image2 ? 'col-md-8 col-12' : 'col-md-2 p-0 col-12'">
+                                            <label for="image2Edit" class="w-100 p-3"
+                                            role="button">
+                                            <div v-if="itemToEdit.image2 == null" class="mt-2">
                                                 <i class="fa-solid fa-file-image fs-1"></i>
                                             </div>
-                                            <div class="img-container2" v-else>
-                                                <img :src="itemToEdit.image2Link" class="w-100">
+                                            <div class="" v-else>
+                                                <img :src="itemToEdit.image2Link" 
+                                                 class="w-100">
                                             </div>
                                             <input type="file" class="d-none" 
-                                            id="image2" @change="onFileChange($event, 'image2', 2)"
+                                            id="image2Edit" @change="onFileChange($event, 'image2', 2)"
                                             accept="image/*">
                                             </label>
                                         </div>
-                                        <div class="col-12 form-group fs-5 position-relative 
-                                        text-center">
+                                        <div class="col-12 form-group mt-4 
+                                        fs-5 position-relative text-center">
                                             <div class="">
                                                 Imagem 3
                                             </div>
                                             <div class="btn btn-danger position-absolute end-0"
-                                            v-if="itemToEdit.image3"
+                                            v-if="itemToEdit.image3 != null"
                                             @click="removeImage('image3', 2)">
                                                 <i class="fa-solid fa-xmark"></i>
                                             </div>
                                         </div>
-                                        <div class="col-12 form-group fs-5 mb-2 rounded 
-                                        btn border shadow">
-                                            <label for="image3">
-                                            <div v-if="!itemToEdit.image3" class="mt-2">
+                                        <div class="form-group fs-5 mb-2 rounded 
+                                        btn border shadow"
+                                        :class="itemToEdit.image3 ? 'col-12 col-md-8' : 'col-md-2 p-0 col-12'">
+                                            <label for="image3Edit" class="w-100 p-3"
+                                            role="button">
+                                            <div v-if="itemToEdit.image3 == null" class="mt-2">
                                                 <i class="fa-solid fa-file-image fs-1"></i>
                                             </div>
-                                            <div class="img-container2" v-else>
-                                                <img :src="itemToEdit.image3Link" class="w-100 rounded">
+                                            <div class="" v-else>
+                                                <img :src="itemToEdit.image3Link" 
+                                            class="w-100 rounded">
                                             </div>
                                             <input type="file" class="d-none" 
-                                            id="image3" @change="onFileChange($event, 'image3', 2)"
+                                            id="image3Edit" @change="onFileChange($event, 'image3', 2)"
                                             accept="image/*">
                                             </label>
                                         </div>
@@ -548,7 +576,7 @@
                                 </div>
                             </div>
                             <div class="modal-footer">
-                                <button type="button" class="btn btn-danger"
+                                <button type="button" class="btn btn-danger fs-5"
                                 v-if="this.permission['admin']">
                                     Apagar permanentemente <i class="fa-regular fa-trash-can"></i>
                                 </button>
@@ -593,7 +621,7 @@
                         </div>
                     </div>
                 </div>
-            </div>
+                </div>
             </div>
             <!-- Safe -->
             <div class="container-margin" v-if="option === 'safe'">
@@ -904,26 +932,41 @@
                                 <div class="text-center justify-content-center col-md-12 col-12 d-flex fs-3 mb-2">
                                     Ultimos links criados <i class="fa-regular fa-clipboard mx-2 my-auto"></i>
                                 </div>
-                                <div class="btn text-center row d-flex fs-5 btn-primary"
+                                <div class="text-center row d-flex fs-5 border rounded">
+                                    <div class="col col-1 my-auto">
+                                    </div>
+                                    <div class="col-3 my-auto overflow-hidden">
+                                        url
+                                    </div>
+                                    <div class="col">
+                                        Criado em
+                                    </div>
+                                    <div class="col">
+                                        Usado em
+                                    </div>
+                                </div>
+                                <div class="btn text-center row d-flex fs-5"
                                 v-for="link in links" @click="copyLink(link.id)"
-                                :class="link.disabled_at === null ? 'btn-primary' : 'btn-secondary'">
-                                    <div class="col col my-auto">
+                                :class="link.is_disabled === 1 ? 'border disabled' : 'btn-primary'">
+                                    <div class="col col-1 my-auto">
                                         <i class="fa-solid fa-link fs-5"></i>
                                     </div>
-                                    <div class="col my-auto">
-                                        {{ link.fullname }}
+                                    <div class="col-3 my-auto overflow-hidden">
+                                        {{ link.link }}
                                     </div>
                                     <div class="col">
                                         {{ link.created_at }}
                                     </div>
-                                    <div class="col-12 col-md-6 overflow-hidden">
-                                        {{ link.link }}
+                                    <div class="col">
+                                        {{ link.disabled_at }}
                                     </div>
                                 </div>
                             </div>
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                Fechar
+                            </button>
                         </div>
                         </div>
                     </div>
