@@ -7,7 +7,7 @@ use App\Helpers\View;
 use App\Models\User;
 use App\Requests\Json;
 use App\Helpers\Mailer;
-use App\Exceptions\LoginException;
+use App\Exceptions\ReachableException;
 use App\Exceptions\PermissionException;
 use App\Exceptions\RequestException;
 use App\Helpers\Routines;
@@ -63,7 +63,7 @@ class HomeController extends Controller
                 && !$this->secure->isValid('email', $json['username']))
                 || !$json['password']
             ){
-                throw new LoginException("Usuário ou senha inválidos");
+                throw new ReachableException("Usuário ou senha inválidos");
             }
 
             $user = $this->user->getUserForLogin([
@@ -77,7 +77,7 @@ class HomeController extends Controller
                 || !$this->secure->verify($json['password'], $user[0]['password']))
                 && $user[0]['password'] !== Secure::DEFAULT_PASSWORD)
             ){
-                throw new LoginException("Usuário ou senha inválidos");
+                throw new ReachableException("Usuário ou senha inválidos");
             }
 
             $redirect = false;
@@ -100,7 +100,7 @@ class HomeController extends Controller
                 'redirect' => $redirect,
                 'message' => $redirect ? 'Redirecionando...' : 'Logado com sucesso',
             ]);
-        } catch (LoginException $login) {
+        } catch (ReachableException $login) {
             Json::send([
                 'success' => false,
                 'redirect' => false,
@@ -162,13 +162,13 @@ class HomeController extends Controller
                 !$json['username'] || 
                 !$this->secure->isValid('username', $json['username'])
             ){
-                throw new LoginException("Usuario invalido");
+                throw new ReachableException("Usuario invalido");
             }
 
             if(!$json['email'] ||
             !$this->secure->isValid('email', $json['email'])
             ){
-                throw new LoginException("Email invalido");
+                throw new ReachableException("Email invalido");
             }
 
             $user = $this->user->userExists(
@@ -177,14 +177,14 @@ class HomeController extends Controller
             );
 
             if($user){
-                throw new LoginException("Usuário ja existe");
+                throw new ReachableException("Usuário ja existe");
             }
 
             Json::send([
                 'success' => true,
                 'exists' => false
             ]);
-        } catch (LoginException $login) {
+        } catch (ReachableException $login) {
             Json::send([
                 'success' => false,
                 'exists' => true,
@@ -215,7 +215,7 @@ class HomeController extends Controller
                 !$json['pin'] || 
                 !$this->secure->verifyPin($json['pin'])
             ){
-                throw new LoginException("Pin invalido");
+                throw new ReachableException("Pin invalido");
             }
 
             $redirect = false;
@@ -227,11 +227,17 @@ class HomeController extends Controller
                     'password' => $this->secure->hash($_SESSION['toUpdate']['password'])
                 ], $_SESSION['user']['id']);
     
-                $user = $this->user->get()[0];
+                $user = $this->user->get([
+                    'where' => [
+                        'id' => $_SESSION['user']['id']
+                    ]
+                ])[0];
+
                 $_SESSION['user'] = $user;
+                $_SESSION['user']['option'] = json_decode($user['option'], true);
     
                 if(!$toUpdate){
-                    throw new loginException("Erro ao criar o usuario");
+                    throw new ReachableException("Erro ao criar o usuario");
                 }
 
                 $redirect = '/inventario';
@@ -245,7 +251,7 @@ class HomeController extends Controller
                 'message' => 'Validado com sucesso',
                 'redirect' => $redirect
             ]);
-        } catch (LoginException $login) {
+        } catch (ReachableException $login) {
             Json::send([
                 'success' => false,
                 'message' => $login->getMessage(),
@@ -277,19 +283,19 @@ class HomeController extends Controller
                 !$json['username'] || 
                 !$this->secure->isValid('username', $json['username'])
             ){
-                throw new LoginException("Usuario invalido");
+                throw new ReachableException("Usuario invalido");
             }
 
             if(!$json['email'] ||
             !$this->secure->isValid('email', $json['email'])
             ){
-                throw new LoginException("Email invalido");
+                throw new ReachableException("Email invalido");
             }
 
             if (!$json['password'] ||
                 !$this->secure->isValid('password', $json['password'])
             ){
-                throw new LoginException("Senha invalida");
+                throw new ReachableException("Senha invalida");
             }
 
             $user = $this->user->userExists(
@@ -297,9 +303,16 @@ class HomeController extends Controller
                 $json['username']
             );
 
-            if ($user[0]['username'] != $json['username']
-            && $user[0]['email'] != $json['email']) {
-                throw new LoginException("Usuario já existe");
+            if (($user[0]['username'] === $json['username']
+            || $user[1]['username'] === $json['username'])
+            && $_SESSION['user']['username'] != $json['username']) {
+                throw new ReachableException("Usuario já existe");
+            }
+
+            if (($user[0]['email'] === $json['email']
+            || $user[1]['email'] === $json['email'])
+            && $_SESSION['user']['email'] != $json['email']) {
+                throw new ReachableException("Email já existe");
             }
 
             $isSent = Mailer::sendCode([
@@ -308,7 +321,7 @@ class HomeController extends Controller
             ]);
 
             if(!$isSent){
-                throw new LoginException("Erro ao enviar o email");  
+                throw new ReachableException("Erro ao enviar o email");  
             }
 
             $_SESSION['toUpdate'] = $json;
@@ -317,7 +330,7 @@ class HomeController extends Controller
                 'success' => true,
                 'message' => 'Valide o email para ativar a conta',
             ]);
-        } catch (LoginException $login) {
+        } catch (ReachableException $login) {
             Json::send([
                 'success' => false,
                 'message' => $login->getMessage(),

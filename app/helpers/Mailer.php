@@ -78,7 +78,6 @@ class Mailer
 
             return true;
         } catch (Exception $e) {
-            //return "Message could not be sent. Mailer Error: " . self::$mail->ErrorInfo;
             return false;
         }
     }

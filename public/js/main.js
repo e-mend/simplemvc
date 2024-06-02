@@ -810,19 +810,23 @@ const app = new Vue({
             this.itemToAdd.price = this.formatPrice(this.itemToAdd.price);
         },
         formatPrice(price) {
-            let value = price.replace(/[^0-9]/g, '');
+            let value = price;
 
-            if(value.substring(0, 1) == '0'){
-                value = value.substring(1);
-            }
+            if(typeof price === 'string'){
+                value = price.replace(/[^0-9]/g, '');
 
-            if(value.length <= 3) {
-                let zeros = 3 - value.length;
-                value = '0'.repeat(zeros)+value;
-                value = value.substring(0, 1) + '.' + value.substring(1);
-            }else{
-                value = value.substring(0, value.length - 2) + '.' + 
-                value.substring(value.length - 2);
+                if(value.substring(0, 1) == '0'){
+                    value = value.substring(1);
+                }
+    
+                if(value.length <= 3) {
+                    let zeros = 3 - value.length;
+                    value = '0'.repeat(zeros)+value;
+                    value = value.substring(0, 1) + '.' + value.substring(1);
+                }else{
+                    value = value.substring(0, value.length - 2) + '.' + 
+                    value.substring(value.length - 2);
+                }
             }
 
             var formatter = new Intl.NumberFormat('pt-BR', {

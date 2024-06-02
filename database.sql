@@ -14,17 +14,16 @@ CREATE TABLE `InventoryApp`.`user`(
     `email` VARCHAR(255) NOT NULL UNIQUE,
     `image` JSON,
     `created_at` DATETIME NOT NULL,
+    `created_by` INT,
+    `updated_by` INT,
     `updated_at` DATETIME,
     `disabled_at` DATETIME,
     `disabled_by` INT,
     `is_disabled` BOOLEAN NOT NULL DEFAULT 0,
     `favorite` BOOLEAN NOT NULL DEFAULT 0,
-    FOREIGN KEY (disabled_by) REFERENCES user(id)
-);
-
-CREATE TABLE `InventoryApp`.`permission`(
-    `id` INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
-    `name` VARCHAR(255) NOT NULL
+    FOREIGN KEY (disabled_by) REFERENCES user(id),
+    FOREIGN KEY (created_by) REFERENCES user(id),
+    FOREIGN KEY (updated_by) REFERENCES user(id)
 );
 
 CREATE TABLE `InventoryApp`.`kill_switch`(
@@ -145,7 +144,7 @@ INSERT INTO
 VALUES
     ('MadAdmin', 'Padrao@123',
 '{
-    "permissions": {
+    "permission": {
         "can_read_post": true,
         "can_create_post": true,
         "can_update_post": true,
@@ -164,5 +163,5 @@ VALUES
         "super_admin": true,
         "developer": true
     }
-}', NOW(), 'gabrielcamargodepaiva@gmail.com',
+}', NOW(), 'paiva.gabriel911@gmail.com',
 'Gabriel', 'Camargo de Paiva');

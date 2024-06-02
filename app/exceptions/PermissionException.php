@@ -9,9 +9,11 @@ final class PermissionException extends Exception
 {
     const MESSAGE = 'Permissão negada';
 
-    public function __construct(string $message = self::MESSAGE, int $code = 0, Exception $previous = null)
+    public function __construct(bool $json = true)
     {
-        parent::__construct($message, $code, $previous);
-        Json::sendError(self::MESSAGE);
+        parent::__construct(self::MESSAGE);
+        if ($json) {
+            Json::sendError(self::MESSAGE);
+        }
     }
 }

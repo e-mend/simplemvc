@@ -22,7 +22,7 @@
                         class="toggle-password my-auto 
                          rounded col-1 mx-1" 
                         @click="togglePasswordVisibility">
-                        <i :class="iconClass" class="text-white"></i>
+                        <i :class="iconClass" class="text-white fs-3"></i>
                     </span>
                 </div>
                 <div class="d-flex justify-content-center my-2"

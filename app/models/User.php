@@ -14,13 +14,14 @@ use Carbon\Carbon;
 use Laminas\Db\Sql\Expression;
 use App\Requests\Json;
 use Throwable;
+use Exception;
 
 class User
 {
     public const OFFSET = 30;
     public const NEW_USER_DAYS = 7;
-    private const PASSWORD_LINK_EXPIRE_MINUTES = 60;
-    private const NEW_USER_LINK_EXPIRE_MINUTES = 120;
+    public const PASSWORD_LINK_EXPIRE_MINUTES = 60;
+    public const NEW_USER_LINK_EXPIRE_MINUTES = 120;
     private $db;
     private $sql;
     private $adapter;
@@ -32,11 +33,36 @@ class User
         $this->sql = new Sql($this->adapter);
     }
 
+    public function forceLogin(string $id)
+    {
+        try {
+            $select = $this->sql->select('user');
+            $select->where(['id' => $id]);
+            $select = $this->sql->buildSqlString($select);
+            $result = $this->adapter->query($select, Adapter::QUERY_MODE_EXECUTE)->toArray();
+            if (!$result) {
+                throw new Exception('User not found');
+            }
+
+            $_SESSION['user'] = $result[0];
+            $_SESSION['user']['option'] = 
+            json_decode($result[0]['option'], true);
+            $_SESSION['logged'] = true;
+
+            return true;
+        } catch (Throwable $th) {
+            return false;
+        }
+    }
+
     public function update(array $data, string $id)
     {
         try {
             $update = $this->sql->update('user');
-            $update->set($data);
+            $update->set(array_merge($data, [
+                'updated_at' => Carbon::now()->format('Y-m-d H:i:s'),
+                'updated_by' => $_SESSION['user']['id'],
+            ]));
             $update->where(['id' => $id]);
             $update = $this->sql->buildSqlString($update);
             $this->adapter->query($update, Adapter::QUERY_MODE_EXECUTE);
@@ -262,7 +288,7 @@ class User
 
             return $results->getGeneratedValue();
         } catch (Throwable $th) {
-            return false;
+            return $th;
         }
     }
 }

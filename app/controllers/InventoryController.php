@@ -3,14 +3,16 @@
 namespace App\Controllers;
 
 use App\Helpers\Secure;
-use App\Helpers\View;
 use App\Models\Inventory;
 use App\Requests\Json;
 use App\Requests\Req;
-use Exception;
 use Carbon\Carbon;
-use App\Helpers\Mailer;
 use App\enum\AclRole;
+use App\Exceptions\ReachableException;
+use App\Exceptions\PermissionException;
+use App\Exceptions\RequestException;
+use Throwable;
+use Exception;
 
 class InventoryController extends Controller
 {
@@ -27,24 +29,29 @@ class InventoryController extends Controller
     public function disableItemApi()
     {
         try {
-            if(!$this->secure->isLoggedIn() || !$this->secure->hasPermission(AclRole::can_disable_inventory->value)) {
-                throw new Exception("Não autorizado");
+            if(!$this->secure->isLoggedIn() 
+            || !$this->secure->hasPermission(AclRole::CAN_DISABLE_INVENTORY->value)) {
+                throw new PermissionException();
             }
 
             $params = Req::getParams();
 
+            if(!$params){
+                throw new RequestException("Parametros invalidos");
+            }
+
             if (!$params['id']){
-                throw new Exception("Id invalido");
+                throw new ReachableException("Id invalido");
             }
 
             $item = $this->inventory->get([
                 'where' => [
-                    'id' => $params['id']
+                    'inventory.id' => $params['id']
                 ]
             ])[0];
 
             if(!$item){
-                throw new Exception("Id invalido");
+                throw new ReachableException("Item inexistente");
             }
 
             $update = $this->inventory->update([
@@ -52,7 +59,7 @@ class InventoryController extends Controller
             ], $params['id']);
 
             if(!$update){
-                throw new Exception("Erro ao processar a requisição");
+                throw new ReachableException("Erro ao desativar item");
             }
 
             Json::send([
@@ -61,10 +68,15 @@ class InventoryController extends Controller
                 'is_disabled' => $item['is_disabled'] === 1
             ]);
 
-        } catch (\Throwable $th) {
+        } catch (ReachableException $e) {
             Json::send([
                 'success' => false,
-                'message' => $th->getMessage()
+                'message' => $e->getMessage(),
+            ]);
+        } catch (Throwable $th) {
+            Json::send([
+                'success' => false,
+                'message' => 'Erro ao processar a requisição',
             ]);
         }
     }
@@ -72,8 +84,9 @@ class InventoryController extends Controller
     public function getItemsApi()
     {
         try {
-            if(!$this->secure->isLoggedIn() || !$this->secure->hasPermission(AclRole::CAN_READ_INVENTORY->value)){
-                throw new Exception("Não autorizado");
+            if(!$this->secure->isLoggedIn() 
+            || !$this->secure->hasPermission(AclRole::CAN_READ_INVENTORY->value)){
+                throw new PermissionException(false);
             }
 
             $params = Req::getParams();
@@ -88,7 +101,8 @@ class InventoryController extends Controller
                     $query['days'] = Carbon::now()->subDays(self::NEW_ITEM_DAYS)->format('Y-m-d H:i:s');
                 }
     
-                if($params['deleted'] && $this->secure->hasPermission(AclRole::can_see_disabled_inventory->value)){
+                if($params['deleted'] 
+                && $this->secure->hasPermission(AclRole::can_see_disabled_inventory->value)){
                     $query['is_disabled'] = 1; 
                 }else{
                     $query['is_disabled'] = 0;
@@ -145,10 +159,17 @@ class InventoryController extends Controller
                 'count' => ceil($count / Inventory::OFFSET)
             ]);
             
-        } catch (\Throwable $th) {
+        } catch (PermissionException $e) {
+            Json::send([
+                'success' => true,
+                'items' => [],
+                'message' => 'Pesquisa concluída',
+                'count' => 0
+            ]); 
+        } catch (Throwable $th) {
             Json::send([
                 'success' => false,
-                'message' => $th->getMessage(),
+                'message' => 'Erro ao fazer a busca',
             ]);
         }
     }

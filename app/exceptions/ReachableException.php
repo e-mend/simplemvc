@@ -4,7 +4,7 @@ namespace App\Exceptions;
 
 use Exception;
 
-class LoginException extends Exception
+class ReachableException extends Exception
 {
     public function __construct(string $message = "", int $code = 0, Exception $previous = null)
     {

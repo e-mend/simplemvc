@@ -10,7 +10,7 @@ use App\Requests\Req;
 use Carbon\Carbon;
 use App\Helpers\Mailer;
 use App\enum\AclRole;
-use App\Exceptions\LoginException;
+use App\Exceptions\ReachableException;
 use App\Exceptions\PermissionException;
 use App\Exceptions\RequestException;
 use App\Helpers\Routines;
@@ -72,7 +72,7 @@ class NewUserController extends Controller
             }
 
             if(!$json['token'] || !$this->secure->isValidHex($json['token'])){
-                throw new LoginException("Token invalido");
+                throw new ReachableException("Token invalido");
             }
 
             $token = $this->user->getLinks([
@@ -85,35 +85,35 @@ class NewUserController extends Controller
             if(!$token ||
             Carbon::parse($token['disabled_at'])
             ->diffInHours(Carbon::now()) > User::NEW_USER_LINK_EXPIRE_MINUTES){  
-                throw new LoginException("Token expirado");
+                throw new ReachableException("Token expirado");
             }
             
             if(!$json['email'] || !$this->secure->isValid('email', $json['email'])){
-                throw new LoginException("Email invalido");
+                throw new ReachableException("Email já existente");
             }
 
             if(!$json['username'] || !$this->secure->isValid('username', $json['username'])){
-                throw new LoginException("Usuário invalido");
+                throw new ReachableException("Usuário já existente");
             }
 
             if(!$json['password'] || !$this->secure->isValid('password', $json['password'])){
-                throw new LoginException("Senha invalida");
+                throw new ReachableException("Senha invalida");
             }
 
             if(!$json['firstName'] || !$this->secure->isValid('name', $json['firstName'])
             || !$json['lastName'] || !$this->secure->isValid('name', $json['lastName'])){
-                throw new LoginException("Nome invalido");
+                throw new ReachableException("Nome invalido");
             }
 
             $user = $this->user->userExists($json['email'], $json['username'])[0];
 
             if($user){
                 if($user['email'] === $json['email']){
-                    throw new LoginException("Email ja existe");
+                    throw new ReachableException("Email ja existe");
                 }
 
                 if($user['username'] === $json['username']){
-                    throw new LoginException("Usuário ja existe");
+                    throw new ReachableException("Usuário ja existe");
                 }
             }
 
@@ -123,7 +123,7 @@ class NewUserController extends Controller
             ]);
 
             if (!$isSent){
-                throw new LoginException("Erro ao enviar o email");
+                throw new ReachableException("Erro ao enviar o email");
             }
 
             $_SESSION['user_to_create'] = $json;
@@ -136,7 +136,7 @@ class NewUserController extends Controller
                 'success' => true,
             ]);
 
-        } catch (LoginException $e) {
+        } catch (ReachableException $e) {
             Json::send([
                 'success' => false,
                 'message' => $e->getMessage(),
@@ -165,7 +165,7 @@ class NewUserController extends Controller
             if (!$json['pin'] || 
                 !$this->secure->verifyPin($json['pin'])
             ){
-                throw new LoginException("Pin invalido");
+                throw new ReachableException("Pin invalido");
             }
 
             $toCreate = [
@@ -176,13 +176,13 @@ class NewUserController extends Controller
                 'email' => $_SESSION['user_to_create']['email'],
                 'created_at' => Carbon::now()->format('Y-m-d H:i:s'),
                 'created_by' => $_SESSION['user_to_create']['created_by'],
-                'permission' => json_encode($_SESSION['user_to_create']['permission']),
+                'option' => json_encode($_SESSION['user_to_create']['option']),
             ];
 
             $createUser = $this->user->createUser($toCreate);
 
             if(!$createUser){
-                throw new loginException("Erro ao criar o usuário");
+                throw new ReachableException("Erro ao criar o usuário");
             }
 
             $user = $this->user->get([
@@ -204,7 +204,7 @@ class NewUserController extends Controller
                 'redirect' => '/inventario'
             ]);
 
-        } catch (LoginException $e) {
+        } catch (ReachableException $e) {
             Json::send([
                 'success' => false,
                 'message' => $e->getMessage(),
@@ -232,7 +232,7 @@ class NewUserController extends Controller
             }
 
             if(!$json['id'] || !$json['permission']){
-                throw new LoginException("Dados invalidos");
+                throw new ReachableException("Dados invalidos");
             }
 
             $user = $this->user->get([
@@ -242,13 +242,13 @@ class NewUserController extends Controller
             ])[0];
 
             if(!$user){
-                throw new LoginException("Id invalido");
+                throw new ReachableException("Id invalido");
             }
 
             $option = json_decode($user['option'], true);
 
             if($option['permission'][AclRole::SUPER_ADMIN->value] === true){
-                throw new LoginException("Impossível alterar o super admin");
+                throw new ReachableException("Impossível alterar permissoes de super admin");
             }
 
             $option['permission'] = $json['permission'];
@@ -264,7 +264,7 @@ class NewUserController extends Controller
                 'message' => 'Alterado com sucesso',
             ]);
 
-        }  catch (LoginException $e) {
+        }  catch (ReachableException $e) {
             Json::send([
                 'success' => false,
                 'message' => $e->getMessage(),
@@ -280,7 +280,8 @@ class NewUserController extends Controller
     public function createNewLinkApi()
     {
         try {
-            if(!$this->secure->isLoggedIn() || !$this->secure->hasPermission(AclRole::ADMIN->value)){
+            if(!$this->secure->isLoggedIn() 
+            || !$this->secure->hasPermission(AclRole::ADMIN->value)){
                 throw new PermissionException();
             }
 
@@ -294,7 +295,7 @@ class NewUserController extends Controller
             $isNullEmail = strlen($json['email']) === 0;
 
             if (!$isValidEmail && !$isNullEmail) {
-                throw new LoginException("Email invalido");
+                throw new ReachableException("Email invalido");
             }
 
             $this->secure->generateNewUserLink($json);
@@ -313,7 +314,7 @@ class NewUserController extends Controller
                 'linkType' => $isValidEmail ? 'email' : 'copy',
             ]);
 
-        } catch (LoginException $e) {
+        } catch (ReachableException $e) {
             Json::send([
                 'success' => false,
                 'message' => $e->getMessage(),
@@ -330,23 +331,26 @@ class NewUserController extends Controller
     {
         try {
             if($this->secure->isLoggedIn()){
-                throw new Exception("Não autorizado");
+                throw new PermissionException();
             }
 
             $request = Req::getParams();
 
+            if (!$request){
+                throw new RequestException();
+            }
+
             if(!$request['token'] || !$this->secure->isValidHex($request['token'])){
-                throw new Exception("Token invalido");
+                throw new ReachableException("Token invalido");
             }
 
             $token = $this->user->getPasswordLink($request['token']);
 
             if(!$token){
-                throw new Exception("Token expirado");
+                throw new ReachableException("Token expirado");
             }
 
             View::render('resetPassword');
-
         } catch (Throwable $th) {
             header("Location: /");
         }
@@ -356,7 +360,7 @@ class NewUserController extends Controller
     {
         try {
             if($this->secure->isLoggedIn()){	
-                throw new Exception("Não autorizado");
+                throw new PermissionException();
             }
 
             $json = Json::getJson();
@@ -364,41 +368,50 @@ class NewUserController extends Controller
             if (!$json['password'] || !$json['confirmPassword'] || 
             $json['password'] !== $json['confirmPassword'] ||
             !$this->secure->isValid('password', $json['password'])){
-                throw new Exception("Revise os campos");
+                throw new ReachableException("Revise os campos");
             }
 
             if(!$json['token'] || !$this->secure->isValidHex($json['token'])){
-                throw new Exception("Token invalido");
+                throw new ReachableException("Token invalido");
             }
 
             $token = $this->user->getLinks([
-                'link' => $json['token'],
-                'type' => 'reset',
+                'eq' => [
+                    'link' => $json['token'],
+                    'type' => 'reset',
+                ]
             ])[0];
 
             if(!$token ||
             Carbon::parse($token['disabled_at'])
             ->diffInHours(Carbon::now()) > User::PASSWORD_LINK_EXPIRE_MINUTES){  
-                throw new Exception("Token expirado");
+                throw new ReachableException("Token expirado");
             }
 
-            $userId = json_decode($token['permission'], true)['user'];
+            $userId = json_decode($token['option'], true)['user'];
 
             $this->user->update([
                 'password' => $this->secure->hash($json['password']),
             ], $userId);
 
             $this->user->deletePasswordLink($token['id']);
+            $this->user->forceLogin($userId);
 
             Json::send([
                 'success' => true,
                 'message' => 'Senha alterada com sucesso'
             ]);
 
+        } catch (ReachableException $e) {
+            Json::send([
+                'success' => false,
+                'message' => $e->getMessage(),
+                'redirect' => false
+            ]);
         } catch (Throwable $th) {
             Json::send([
                 'success' => false,
-                'message' => $th->getMessage(),
+                'message' => 'Erro ao processar a requisição',
                 'redirect' => '/'
             ]);
         }
@@ -408,7 +421,7 @@ class NewUserController extends Controller
     {
         try {
             if(!$this->secure->isLoggedIn()){
-                throw new Exception("Não autorizado");
+                throw new PermissionException();
             }
 
             $json = Json::getJson();

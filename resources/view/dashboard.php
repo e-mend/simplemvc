@@ -163,7 +163,7 @@
                     @click="getItems('deleted', false)"
                     v-if="this.permission['can_see_disabled_inventory']"
                     :class="{'opacity-25': this.itemSearch.deleted}">
-                        Apagados
+                        Desabilitados
                         <i class="fa-solid fa-circle-minus"></i>
                     </div>
                     <div class="btn btn-dark col-6 col-md-3 text-center py-3 fs-5"
@@ -236,7 +236,7 @@
                                     <div class="col-md-12 col-12 text-black fs-5 btn btn-light" 
                                     v-if="item.is_disabled">
                                         <i class="fa-solid fa-trash fs-4"></i>
-                                        Item Apagado
+                                        Item Desabilitado
                                     </div>
                                 </div>
                                 <div class="col-md-12 col-12">
@@ -744,16 +744,16 @@
                                         <input class="form-check-input" type="checkbox" role="switch" 
                                         v-model="createNewUser.permission['can_disable_post']">
                                         <label class="form-check-label">
-                                            Apagar item
+                                            Desabilitar item
                                         </label>
                                     </div>
                                 </div>
                                 <div class="text-center fs-5 col-md-6 col-12">
                                     <div class="form-check form-switch">
                                         <input class="form-check-input" type="checkbox" role="switch" 
-                                        v-model="createNewUser.permission['can_see_disabled_posts']">
+                                        v-model="createNewUser.permission['can_see_disabled_post']">
                                         <label class="form-check-label">
-                                            Ver item apagado
+                                            Ver item desabilitado
                                         </label>
                                     </div>
                                 </div>
@@ -814,7 +814,7 @@
                                         <input class="form-check-input" type="checkbox" role="switch"
                                         v-model="createNewUser.permission['can_disable_inventory']">
                                         <label class="form-check-label" for="flexSwitchCheckDefault">
-                                            Apagar item
+                                            Desabilitar item
                                         </label>
                                     </div>
                                 </div>
@@ -832,7 +832,7 @@
                                         <input class="form-check-input" type="checkbox" role="switch"
                                         v-model="createNewUser.permission['can_see_disabled_inventory']">
                                         <label class="form-check-label" for="flexSwitchCheckDefault">
-                                            Ver item apagado
+                                            Ver item desabilitado
                                         </label>
                                     </div>
                                 </div>
@@ -1068,17 +1068,17 @@
                                         v-model="userToEdit.permission['can_disable_post']"
                                         :disabled="userToEdit.permission['super_admin']">
                                         <label class="form-check-label">
-                                            Apagar item
+                                            Desabilitar item
                                         </label>
                                     </div>
                                 </div>
                                 <div class="text-center fs-5 col-md-6 col-12">
                                     <div class="form-check form-switch">
                                         <input class="form-check-input" type="checkbox" role="switch" 
-                                        v-model="userToEdit.permission['can_see_disabled_posts']"
+                                        v-model="userToEdit.permission['can_see_disabled_post']"
                                         :disabled="userToEdit.permission['super_admin']">
                                         <label class="form-check-label">
-                                            Ver item apagado
+                                            Ver item desabilitado
                                         </label>
                                     </div>
                                 </div>
@@ -1145,7 +1145,7 @@
                                         v-model="userToEdit.permission['can_disable_inventory']"
                                         :disabled="userToEdit.permission['super_admin']">
                                         <label class="form-check-label" for="flexSwitchCheckDefault">
-                                            Apagar item
+                                            Desabilitar item
                                         </label>
                                     </div>
                                 </div>
@@ -1165,7 +1165,7 @@
                                         v-model="userToEdit.permission['can_see_disabled_inventory']"
                                         :disabled="userToEdit.permission['super_admin']">
                                         <label class="form-check-label" for="flexSwitchCheckDefault">
-                                            Ver item apagado
+                                            Ver item desabilitado
                                         </label>
                                     </div>
                                 </div>

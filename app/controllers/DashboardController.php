@@ -7,11 +7,15 @@ use App\Helpers\View;
 use App\Models\User;
 use App\Requests\Json;
 use App\Requests\Req;
-use Exception;
 use Carbon\Carbon;
 use App\Helpers\Routines;
 use App\Helpers\Mailer;
 use App\enum\AclRole;
+use App\Exceptions\ReachableException;
+use App\Exceptions\PermissionException;
+use App\Exceptions\RequestException;
+use Throwable;
+use Exception;
 
 class DashboardController extends Controller
 {
@@ -37,32 +41,41 @@ class DashboardController extends Controller
     {
         try {
             if(!$this->secure->isLoggedIn() || !$this->secure->hasPermission(AclRole::ADMIN->value)){
-                throw new Exception("Não autorizado");
+                throw new PermissionException();
             }
 
             $json = Json::getJson();
 
             if (!$json){
-                throw new Exception("Erro ao processar a requisição");
+                throw new RequestException();
             }
 
             if (!$json['id']){
-                throw new Exception("Id invalido");
+                throw new ReachableException("Id invalido");
             }
 
             $toUpdate = $this->user->update([
                 'favorite' => $json['favorite'],
             ], $json['id']);
 
+            if (!$toUpdate){
+                throw new ReachableException("Erro ao atualizar");
+            }
+
             Json::send([
                 'success' => true,
                 'message' => $json['favorite'] ? 'Favorito adicionado com sucesso' : 'Favorito removido com sucesso',
             ]);
 
-        } catch (\Throwable $th) {
+        } catch (ReachableException $e) {
             Json::send([
                 'success' => false,
-                'message' => $th->getMessage()
+                'message' => $e->getMessage()
+            ]);
+        } catch (Throwable $th) {
+            Json::send([
+                'success' => false,
+                'message' => 'Erro ao processar a requisição'
             ]);
         }
     }
@@ -71,13 +84,17 @@ class DashboardController extends Controller
     {
         try {
             if(!$this->secure->isLoggedIn() || !$this->secure->hasPermission(AclRole::ADMIN->value)){
-                throw new Exception("Não autorizado");
+                throw new PermissionException("Não autorizado");
             }
 
             $params = Req::getParams();
 
+            if (!$params){
+                throw new RequestException();
+            }
+
             if (!$params['id']){
-                throw new Exception("Id invalido");
+                throw new ReachableException("Id invalido");
             }
 
             $user = $this->user->get([
@@ -87,13 +104,13 @@ class DashboardController extends Controller
             ])[0];
 
             if(!$user){
-                throw new Exception("Id invalido");
+                throw new ReachableException("Id invalido");
             }
 
-            $permission = json_decode($user['permission'], true)['permission'];
+            $permission = json_decode($user['option'], true)['permission'];
 
             if($permission[AclRole::SUPER_ADMIN->value] === true){
-                throw new Exception("Impossível desabilitar o super admin");
+                throw new ReachableException("Impossível desabilitar o super admin");
             }
 
             $update = $this->user->update([
@@ -101,7 +118,7 @@ class DashboardController extends Controller
             ], $params['id']);
 
             if(!$update){
-                throw new Exception("Erro ao processar a requisição");
+                throw new ReachableException("Erro ao processar a requisição");
             }
 
             Routines::foresightCoroutine($params['id'], 'death');
@@ -112,7 +129,7 @@ class DashboardController extends Controller
                 'is_disabled' => $user['is_disabled'] === 1
             ]);
 
-        } catch (\Throwable $th) {
+        } catch (Throwable $th) {
             Json::send([
                 'success' => false,
                 'message' => $th->getMessage()
@@ -153,11 +170,11 @@ class DashboardController extends Controller
                 'message' => 'Nada aconteceu',
             ]);
 
-        } catch (\Throwable $th) {
+        } catch (Throwable $th) {
             Json::send([
                 'success' => false,
                 'redirect' => '/',
-                'message' => $th->getMessage()
+                'message' => 'Erro ao processar a requisição',
             ]);
         }
     }
@@ -166,7 +183,7 @@ class DashboardController extends Controller
     {
         try {
             if(!$this->secure->isLoggedIn()){
-                throw new Exception("Não autorizado");
+                throw new PermissionException("Não autorizado");
             }
 
             $this->secure->logout();
@@ -175,10 +192,10 @@ class DashboardController extends Controller
                 'success' => true,
                 'message' => 'Logout efetuado com sucesso'
             ]);
-        } catch (\Throwable $th) {
+        } catch (Throwable $th) {
             Json::send([
                 'success' => false,
-                'message' => $th->getMessage()
+                'message' => 'Erro ao processar a requisição'
             ]);
         }
     }
@@ -187,7 +204,7 @@ class DashboardController extends Controller
     {
         try {
             if(!$this->secure->isLoggedIn() || !$this->secure->hasPermission(AclRole::ADMIN->value)){
-                throw new Exception("Não autorizado");
+                throw new PermissionException("Não autorizado");
             }
 
             $params = Req::getParams();
@@ -229,9 +246,11 @@ class DashboardController extends Controller
                 'username',
                 'email',
                 'created_at',
+                'updated_at',
+                'disabled_at',
                 'is_disabled',
                 'favorite',
-                'permission'
+                'option',
             ];
 
             $users = $this->user->get($query);
@@ -245,7 +264,8 @@ class DashboardController extends Controller
             }
 
             if($params['id'] && $users[0]) {
-                $users[0]['permission'] = json_decode($users[0]['permission'], true)['permission'];
+                $users[0]['option'] = json_decode($users[0]['option'], true);
+                $users[0]['permission'] = $users[0]['option']['permission'];
             }
 
             Json::send([
@@ -255,11 +275,10 @@ class DashboardController extends Controller
                 'count' => ceil($count / User::OFFSET)
             ]);
             
-        } catch (\Throwable $th) {
+        } catch (Throwable $th) {
             Json::send([
                 'success' => false,
-                'message' => $th->getMessage(),
-                'users' => $params
+                'message' => 'Erro ao fazer busca',
             ]);
         }
     }
@@ -268,19 +287,19 @@ class DashboardController extends Controller
     {
         try {
             if(!$this->secure->isLoggedIn() || !$this->secure->hasPermission(AclRole::ADMIN->value)){
-                throw new Exception("Não autorizado");
+                throw new PermissionException();
             }
 
             $json = Json::getJson();
 
             if (!$json){
-                throw new Exception("Erro ao processar a requisição");
+                throw new RequestException("Erro ao processar a requisição");
             }
 
             if (
                 !$json['id']
             ){
-                throw new Exception("Id invalido");
+                throw new ReachableException("Id invalido");
             }
 
             $user = $this->user->get([
@@ -290,7 +309,7 @@ class DashboardController extends Controller
             ])[0];
 
             if (!$user){
-                throw new Exception("Id invalido");
+                throw new ReachableException("Usuario inexistente");
             }
 
             $item = Mailer::sendPassword([
@@ -301,15 +320,24 @@ class DashboardController extends Controller
                 ]
             ]);
 
+            if (!$item){
+                throw new ReachableException("Erro ao enviar email");
+            }
+
             Json::send([
                 'success' => true,
                 'message' => 'Email enviado com sucesso',
             ]);
 
-        } catch (\Throwable $th) {
+        } catch (ReachableException $e) {
             Json::send([
                 'success' => false,
-                'message' => $th->getMessage(),
+                'message' => $e->getMessage(),
+            ]);
+        } catch (Throwable $th) {
+            Json::send([
+                'success' => false,
+                'message' => 'Erro ao processar a requisição',
             ]);
         }
             
@@ -319,7 +347,7 @@ class DashboardController extends Controller
     {
         try {
             if(!$this->secure->isLoggedIn() || !$this->secure->hasPermission(AclRole::ADMIN->value)){
-                throw new Exception("Não autorizado");
+                throw new PermissionException("Não autorizado");
             }
 
             $links = $this->user->getLinks([
@@ -343,10 +371,10 @@ class DashboardController extends Controller
                 'links' => $links ? $this->secure->getFullLink($links) : [],
             ]);
             
-        } catch (\Throwable $th) {
+        } catch (Throwable $th) {
             Json::send([
                 'success' => false,
-                'message' => $th->getMessage()
+                'message' => 'Erro ao processar a requisição',
             ]);
         }
     }
@@ -354,35 +382,62 @@ class DashboardController extends Controller
     public function updatePasswordApi()
     {
         try {
-            if(!$this->secure->isLoggedIn()){
-                throw new Exception("Não autorizado");
+            if(!$this->secure->isLoggedIn() || !$this->secure->hasPermission(AclRole::ADMIN->value)){
+                throw new PermissionException("Não autorizado");
             }
 
             $json = Json::getJson();
 
             if (!$json){
-                throw new Exception("Erro ao processar a requisição");
+                throw new RequestException("Erro ao processar a requisição");
             }
 
-            if (
-                !$json['password'] || !$this->secure->isValid('password', $json['password'])
+            if (!$json['password'] 
+                || !$this->secure->isValid('password', $json['password'])
             ){
-                throw new Exception("Utilize todos os caracteres!");
+                throw new ReachableException("Utilize todos os caracteres!");
+            }
+
+            $user = $this->user->get([
+                'where' => [
+                    'id' => $json['id']
+                ]
+            ])[0];
+
+            if (!$user){
+                throw new ReachableException("Usuario inexistente");
+            }
+
+            $permission = json_decode($user['option'], true)['permission'];
+
+            if($permission[AclRole::SUPER_ADMIN->value] === true 
+            && $_SESSION['user']['id'] !== $json['id']){
+                throw new ReachableException("Não é permitido alterar a senha de outros super-admininistradores");
             }
             
-            $this->user->update([
-                'password' => $this->secure->hash($json['password'])
+            $update = $this->user->update([
+                'password' => $this->secure->hash($json['password']),
+                'updated_at' => Carbon::now()->format('Y-m-d H:i:s'),
+                'updated_by' => $_SESSION['user']['id']
             ], $json['id']);
+
+            if (!$update){
+                throw new ReachableException("Erro ao atualizar");
+            }
             
             Json::send([
                 'success' => true,
                 'message' => 'Senha alterada com sucesso'
             ]);
-
-        } catch (\Throwable $th) {
+        } catch (ReachableException $e) {
             Json::send([
                 'success' => false,
-                'message' => $th->getMessage()
+                'message' => $e->getMessage(),
+            ]);
+        } catch (Throwable $th) {
+            Json::send([
+                'success' => false,
+                'message' => 'Erro ao processar a requisição',
             ]);
         }
     }
@@ -391,40 +446,49 @@ class DashboardController extends Controller
     {
         try {
             if(!$this->secure->isLoggedIn()){
-                throw new Exception("Não autorizado");
+                throw new PermissionException("Não autorizado");
             }
 
             $json = Json::getJson();
 
             if (!$json){
-                throw new Exception("Erro ao processar a requisição");
+                throw new RequestException("Erro ao processar a requisição");
             }
 
             if (
             !$json['username'] || !$this->secure->isValid('username', $json['username'])
             || !$json['email'] || !$this->secure->isValid('email', $json['email'])
-            || !$json['first_name'] || !$this->secure->isValid('text', $json['first_name'])
-            || !$json['last_name'] || !$this->secure->isValid('text', $json['last_name'])
+            || !$json['first_name'] || !$this->secure->isValid('name', $json['first_name'])
+            || !$json['last_name'] || !$this->secure->isValid('name', $json['last_name'])
             ){
-                throw new Exception("Preencha todos os campos corretamente!");
+                throw new ReachableException("Preencha todos os campos corretamente!");
             }
 
-            $this->user->update([
+            $update = $this->user->update([
                 'username' => $json['username'],
                 'email' => $json['email'],
                 'first_name' => $json['first_name'],
-                'last_name' => $json['last_name']
+                'last_name' => $json['last_name'],
             ], $json['id']);
+
+            if (!$update){
+                throw new Exception("Erro ao atualizar os dados");
+            }
                 
             Json::send([
                 'success' => true,
                 'message' => 'Dados atualizados com sucesso'
             ]);
             
-        } catch (\Throwable $th) {
+        } catch (ReachableException $le) {
             Json::send([
                 'success' => false,
-                'message' => $th->getMessage()
+                'message' => $le->getMessage()
+            ]);
+        } catch (Throwable $th) {
+            Json::send([
+                'success' => false,
+                'message' => 'Falha ao atualizar os dados',
             ]);
         }
     }
@@ -433,7 +497,7 @@ class DashboardController extends Controller
     {
         try {
             if(!$this->secure->isLoggedIn()){
-                throw new Exception("Não autorizado");
+                throw new PermissionException("Não autorizado");
             }
 
             Json::send([
@@ -450,10 +514,10 @@ class DashboardController extends Controller
                 ],
                 'message' => 'Dados sincronizados com sucesso'
             ]);
-        } catch (\Throwable $th) {
+        } catch (Throwable $th) {
             Json::send([
                 'success' => false,
-                'message' => $th->getMessage()
+                'message' => 'Falha ao sincronizar os dados',
             ]);
         }
     }

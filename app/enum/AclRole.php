@@ -8,7 +8,7 @@ enum AclRole: string
     case CAN_CREATE_POST = 'can_create_post';
     case CAN_UPDATE_POST = 'can_update_post';
     case CAN_DISABLE_POST = 'can_disable_post';
-    case CAN_SEE_DISABLED_POSTS = 'can_see_disabled_posts';
+    case CAN_SEE_DISABLED_POST = 'can_see_disabled_post';
     case POST_1 = 'post_1';
     case POST_2 = 'post_2';
     case POST_3 = 'post_3';

@@ -28,35 +28,36 @@
                 </div>
                 <div class="form-group fs-5 mb-2 d-flex">
                     <div class="col-9">
-                        <input type="password" class="form-control fs-5 w-100" 
+                        <input :type="passwordFieldType" class="form-control fs-5 w-100" 
                         @focus="changeText('password')"
                         @input="passwordEnter"
                         v-model="loginForm.password" id="password" placeholder="Senha">
                     </div>
                     <div class="col-3">
                         <span 
-                            class="toggle-password my-auto rounded text-white mx-2" 
+                            class="toggle-password rounded text-white mx-2" 
+                            role="button"
                             @click="togglePasswordVisibility">
-                            <i :class="iconClass"></i>
+                            <i :class="iconClass" class="fs-3 mt-2"></i>
                         </span>
                     </div>
                    
                 </div>
-                <div class="d-flex row justify-content-center mt-1"
+                <div class="d-flex justify-content-center my-1"
                     v-if="loginForm.password.length > 0">
-                    <div class="btn btn-primary col-4 animate__pulse animate__infinite
+                    <div class="btn animate__pulse animate__infinite
                     animate__slower text-white" 
-                    :class="{'animate__animated': upper}">
+                    :class="{'animate__animated btn-primary': upper}">
                         A-Z
                     </div>
-                    <div class="btn btn-primary col-4 animate__pulse animate__infinite
+                    <div class="btn animate__pulse animate__infinite
                     animate__slower text-white" 
-                    :class="{'animate__animated': number}">
+                    :class="{'animate__animated btn-primary': number}">
                         0-9
                     </div>
-                    <div class="btn btn-primary col-4 animate__pulse animate__infinite white
+                    <div class="btn animate__pulse animate__infinite white
                     animate__slower text-white" 
-                    :class="{'animate__animated': special}">
+                    :class="{'animate__animated btn-primary': special}">
                         @$!%*?&
                     </div>
                 </div>
@@ -135,7 +136,7 @@
                     message: '',
                     loginForm: {
                         username: 'ADsense12',
-                        password: 'Coxa18@1',
+                        password: 'C0c@C0l4',
                         email: 'gabrielcamargodepaiva@gmail.com'
                     },
                     warnings: [],
