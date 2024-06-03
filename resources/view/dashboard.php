@@ -26,7 +26,7 @@
                                     Inventário
                                 </div>
                             </li>
-                            <li v-if="!this.blocked && this.permission['CAN_READ_SAFE']">
+                            <li v-if="!this.blocked && this.permission['can_read_safe']">
                                 <div @click="loadOptions('safe')" class="dropdown-item btn fs-5">
                                     Cofre
                                 </div>
@@ -79,7 +79,7 @@
                         Inventário
                         <i class="fa-solid fa-laptop"></i>
                     </div>
-                    <div @click="loadOptions('safe')" :class="{disabled: this.blocked || !this.permission['CAN_READ_SAFE']}"
+                    <div @click="loadOptions('safe')" :class="{disabled: this.blocked || !this.permission['can_read_safe']}"
                     class="btn btn-primary col-12 col-md-6 text-white text-center py-3 fs-5">
                         Cofre
                         <i class="fa-solid fa-lock"></i>
@@ -645,9 +645,181 @@
             </div>
             <!-- Safe -->
             <div class="container-margin" v-if="option === 'safe'">
-                <div class="row d-flex justify-content-between 
-                bg-primary py-3 py-md-3 rounded z-3">
-                    Cofre Aqui
+                <div class="row d-flex justify-content-between py-3 py-md-3 rounded 
+                border z-3 text-center">
+                    <div class="col-12 fs-5">
+                        Inventário
+                    </div>
+                </div>
+                <div class="row d-flex justify-content-between rounded z-3 text-center mt-2">
+                    <div class="btn btn-primary col-12 col-md-6 text-center py-3 fs-5"
+                    @click="searchModalOpen = !searchModalOpen">
+                        Procurar Item
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </div>
+                    <div class="btn btn-secondary col-12 col-md-6 border-white text-center py-3 fs-5"
+                    @click="addItemModal"
+                    v-if="this.permission['can_create_inventory']">
+                        Adicionar Item
+                        <i class="fa-solid fa-plus"></i>
+                    </div>
+                </div>
+                <div class="row d-flex justify-content-between rounded z-3 text-center" v-if="searchModalOpen">
+                    <div class="rounded col-12 col-md-6 text-center py-3 fs-5">
+                        <div class="input-group d-flex justify-content-center">
+                            <input @input="getItems('search', true, 1)" type="text" 
+                            class="form-control fs-5 rounded" 
+                            v-model="itemSearch.search">
+                            <i class="fa-solid fa-magnifying-glass mx-2 my-auto"></i>
+                        </div>
+                    </div>
+                    <div class="rounded col-12 col-md-6 text-center py-3 fs-5">
+                        <div class="input-group d-flex justify-content-center">
+                            <div class="mx-2 my-auto">
+                            De:
+                            </div>
+                            <input @input="getItems('search', false, 1)" type="date"
+                            class="form-control fs-5 rounded"
+                            v-model="itemSearch.from">
+                            <div class="mx-2 my-auto">
+                            Até:
+                            </div>
+                            <input @input="getItems('search', false, 1)" type="date"
+                            class="form-control fs-5 rounded"
+                            v-model="itemSearch.to">
+                        </div>
+                    </div>
+                    <div class="btn btn-primary col text-center py-3 fs-5" 
+                    @click="getItems('all', false)"
+                    :class="{'opacity-25': this.itemSearch.all}">
+                        Todos
+                        <i class="fa-solid fa-xmark"></i>
+                    </div>
+                    <div class="btn btn-primary col-6 col-md-3 text-center py-3 fs-5" 
+                    @click="getItems('new')"
+                    :class="{'opacity-25': this.itemSearch.new}">
+                        Novos
+                        <i class="fa-solid fa-fire"></i>
+                    </div>
+                    <div class="btn btn-danger col-6 col-md-3 text-center py-3 fs-5" 
+                    @click="getItems('deleted', false)"
+                    v-if="this.permission['can_see_disabled_inventory']"
+                    :class="{'opacity-25': this.itemSearch.deleted}">
+                        Desabilitados
+                        <i class="fa-solid fa-circle-minus"></i>
+                    </div>
+                    <div class="btn btn-dark col-6 col-md-3 text-center py-3 fs-5"
+                    @click="getItems('favorites', false)"
+                    :class="{'opacity-25': this.itemSearch.favorites}">
+                        Favoritos
+                        <i class="fa-solid fa-star"></i>
+                    </div>
+                </div>
+                <div class="row d-flex justify-content-start rounded z-3 text-center">
+                    <div v-for="item in items" :key="item.id" 
+                    class="col-12 col-md-3 bg-light rounded
+                    shadow-lg border-dark-subtle
+                    card rounded text-black mt-1 text-center 
+                    py-1 fs-5 pt-0">
+                        <div class="row d-flex rounded">
+                            <div :id="'carouselId' + item.id" 
+                            class="card-img-top px-0 img-container border-none py-0 carousel slide w-100 btn">
+                                <div class="carousel-inner rounded" v-if="item.image">
+                                    <div class="carousel-item" 
+                                    @click="imageModal(item.id)"
+                                    v-for="(image, index) in item.image" 
+                                    :class="{active: index === 0}">
+                                        <img :src="'data:image/' + image['extension'] + ';base64,' + image['base64']" 
+                                        class="d-block w-100 rounded" alt="...">
+                                    </div>
+                                </div>
+                                <div class="carousel-inner" v-else>
+                                    <i class="fa-solid fa-dolly fs-big mt-4"></i>
+                                </div>
+                                <button class="carousel-control-prev" type="button" :data-bs-target="'#carouselId' + item.id"
+                                data-bs-slide="prev">
+                                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                    <span class="visually-hidden">Previous</span>
+                                </button>
+                                <button class="carousel-control-next" type="button" :data-bs-target="'#carouselId' + item.id"
+                                data-bs-slide="next">
+                                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                    <span class="visually-hidden">Next</span>
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <div class="col-md-12 col-12 fs-4">
+                                    {{ item.name }}
+                                </div>
+                                <div class="py-4 fs-5 position-relative
+                                col-md-12 col-12 bg-light text-black text-start overflow-hidden size-max">
+                                    Descrição:
+                                    <br>
+                                    {{ item.description }}
+                                    <div class="position-absolute bottom-0 end-0 w-100 h-25 text-center blur-background"
+                                    v-if="item.description.length > 100"
+                                    role="button"
+                                    @click="imageModal(item.id)">
+                                        <span class="contenty">
+                                            <i class="fs-3 fa-solid fa-angles-down"></i>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="col-md-12 col-12 text-start">
+                                    <i class="fa-solid fa-box"></i>
+                                    Estoque:
+                                    <div class="fs-5 btn btn-light">
+                                        {{ item.quantity }}
+                                    </div>
+                                </div>
+                                <div class="col-md-12 col-12 text-start mb-1">
+                                    <i class="fa-solid fa-money-bill"></i>
+                                    Valor:
+                                    <div class="fs-5 btn btn-light">
+                                        {{ formatPrice(item.price) }}
+                                    </div>
+                                </div>
+                                <div class="col-md-12 col-12 text-start">
+                                    <i class="fa-solid fa-boxes-stacked"></i>
+                                    Valor Bruto:
+                                    <div class="fs-5 btn btn-light">
+                                        {{ formatPrice(item.price * item.quantity) }}
+                                    </div>
+                                </div>
+                                <div class="col-md-12 col-12 text-start">
+                                    <div class="col-md-12 col-12 text-black fs-5 btn btn-light" 
+                                    v-if="item.isNew">
+                                        <i class="fa-solid fa-fire fs-4"></i>
+                                        Item Novo
+                                    </div>
+                                    <div class="col-md-12 col-12 text-black fs-5 btn btn-light" 
+                                    v-if="item.is_disabled">
+                                        <i class="fa-solid fa-trash fs-4"></i>
+                                        Item Desabilitado
+                                    </div>
+                                </div>
+                                <div class="col-md-12 col-12">
+                                    <div class="btn text-center p-3 fs-5" 
+                                    :class="{'btn-light': item.favorite, 'btn-outline-light text-black': !item.favorite}"
+                                    @click="toggleItemFavorite(item.id)" v-if="permission['admin']">
+                                        <i class="fa-star"
+                                        :class="{'fa-solid': item.favorite, 'fa-regular': !item.favorite}"></i>
+                                    </div>
+                                    <div class="btn btn-primary text-center p-3 fs-5" 
+                                    @click="editItemModal(item.id)"
+                                    v-if="permission['can_update_inventory']">
+                                        <i class="fa-solid fa-pencil"></i>
+                                    </div>
+                                    <div class="btn text-center p-3 fs-5"
+                                    :class="{'btn-danger': item.is_disabled, 'btn-outline-success': !item.is_disabled}"
+                                    @click="disableItem(item.id)" 
+                                    v-if="permission['can_disable_inventory']">
+                                        <i class="fa-solid" :class="{'fa-toggle-on': item.is_disabled, 'fa-toggle-off': !item.is_disabled}"></i></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
             <!-- Users -->
@@ -763,7 +935,7 @@
                                 <div class="text-center fs-5 col-md-6 col-12">
                                     <div class="form-check form-switch">
                                         <input class="form-check-input" type="checkbox" role="switch" 
-                                        v-model="createNewUser.permission['CAN_READ_SAFE']">
+                                        v-model="createNewUser.permission['can_read_safe']">
                                         <label class="form-check-label">
                                             Ler item
                                         </label>
@@ -1098,7 +1270,7 @@
                                 <div class="text-center fs-5 col-md-6 col-12">
                                     <div class="form-check form-switch">
                                         <input class="form-check-input" type="checkbox" role="switch" 
-                                        v-model="userToEdit.permission['CAN_READ_SAFE']"
+                                        v-model="userToEdit.permission['can_read_safe']"
                                         :disabled="userToEdit.permission['super_admin']">
                                         <label class="form-check-label">
                                             Ver item

@@ -27,7 +27,7 @@ const app = new Vue({
             user: {},
             blocked: false,
             permission: {
-                'CAN_READ_SAFE': false,
+                'can_read_safe': false,
                 'can_create_safe': false,
                 'can_update_safe': false,
                 'can_disable_safe': false,
@@ -69,7 +69,7 @@ const app = new Vue({
             userToEdit: {
                 password: '',
                 permission: {
-                    'CAN_READ_SAFE': false,
+                    'can_read_safe': false,
                     'can_create_safe': false,
                     'can_update_safe': false,
                     'can_disable_safe': false,
@@ -88,7 +88,7 @@ const app = new Vue({
             },
             createNewUser: {
                 permission: {
-                    'CAN_READ_SAFE': false,
+                    'can_read_safe': false,
                     'can_create_safe': false,
                     'can_update_safe': false,
                     'can_disable_safe': false,
@@ -187,7 +187,7 @@ const app = new Vue({
                 }
 
                 this.createNewUser.permission = {
-                    'CAN_READ_SAFE': false,
+                    'can_read_safe': false,
                     'can_create_safe': false,
                     'can_update_safe': false,
                     'can_disable_safe': false,
@@ -1192,7 +1192,7 @@ const app = new Vue({
                 return;
             }
 
-            if(option === 'safe' && !this.permission['CAN_READ_SAFE']) {
+            if(option === 'safe' && !this.permission['can_read_safe']) {
                 this.option === 'main';
                 return;
             }

@@ -118,7 +118,7 @@ VALUES
     ('admin', 'Padrao@123', 
 '{
   "permission": {
-    "CAN_READ_SAFE": true,
+    "can_read_safe": true,
     "can_create_safe": true,
     "can_update_safe": true,
     "can_disable_safe": true,
@@ -145,7 +145,7 @@ VALUES
     ('MadAdmin', 'Padrao@123',
 '{
     "permission": {
-        "CAN_READ_SAFE": true,
+        "can_read_safe": true,
         "can_create_safe": true,
         "can_update_safe": true,
         "can_disable_safe": true,
