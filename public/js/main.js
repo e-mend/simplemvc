@@ -420,8 +420,8 @@ const app = new Vue({
                     throw new Error('Algo deu errado');
                 }
 
-                this.throwWarning(json['message'], ['alert-success']);
-
+                this.throwWarning(json['message']+
+                ` <i class="fa-${this.users[index].favorite ? 'solid' : 'regular'} fa-star"></i>`, ['alert-success']);
             } catch (error) {
                 this.throwWarning(error.message, ['alert-danger']);
                 this.users[index].favorite = !this.users[index].favorite;
@@ -746,7 +746,8 @@ const app = new Vue({
                     throw new Error('Algo deu errado');
                 }
 
-                this.throwWarning(json['message'], ['alert-success']);
+                this.throwWarning(json['message']+
+                ` <i class="fa-${this.items[index].favorite ? 'solid' : 'regular'} fa-star"></i>`, ['alert-success']);
 
             } catch (error) {
                 this.throwWarning(error.message+' <i class="fa-solid fa-xmark"></i>', ['alert-danger']);

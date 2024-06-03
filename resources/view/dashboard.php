@@ -640,12 +640,15 @@
                     </div>
                 </div>
             </div>
+
+
+            </div>
             <!-- Safe -->
             <div class="container-margin" v-if="option === 'safe'">
-                    <div class="row d-flex justify-content-between bg-primary py-3 py-md-3 rounded
-                        z-3">
-                        Cofre Aqui
-                    </div>
+            <div class="row d-flex justify-content-between bg-primary py-3 py-md-3 rounded
+                z-3">
+                Cofre Aqui
+            </div>
             </div>
             <!-- Users -->
             <div class="container-margin" v-if="option === 'users'">
@@ -1325,7 +1328,6 @@
                     Configurações Aqui
                 </div>
             </div>
-
         </div>
         <!-- Warnings -->
         <div class="container position-fixed bottom-0 w-100 warn">
