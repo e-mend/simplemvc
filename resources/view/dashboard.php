@@ -2,9 +2,8 @@
 
 <body>
     <div class="container-fluid vertical-center position-absolute top-0 start-0" id="app">
-        <div class="container top-0 position-fixed">
-            <div class="row d-flex justify-content-between bg-primary py-3 py-md-3 rounded
-            z-3">
+        <div class="container top-0 position-fixed z-1000">
+            <div class="row d-flex justify-content-between bg-primary py-3 py-md-3 rounded">
                 <div class="col-6 col-md-2 px-0">
                     <a href="http://crm.sjpinfo.com.br/authentication/login" target="_blank">
                         <img src="img/logo2.png" id="logo-header" class="ms-md-3">
@@ -12,39 +11,39 @@
                 </div> 
                 <div class="d-flex col-6 col-md-10 justify-content-end">
                     <div class="dropdown col-6 col-md-4 px-0">
-                        <button class="btn btn-primary dropdown-toggle
+                        <button class="btn btn-primary dropdown-toggle fs-5
                         w-100" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                             Menu
                         </button>
                         <ul class="dropdown-menu w-100 text-center">
                             <li>
-                                <div @click="loadOptions('main')" class="dropdown-item btn">
+                                <div @click="loadOptions('main')" class="dropdown-item btn fs-5">
                                     Menu
                                 </div>
                             </li>
                             <li v-if="!this.blocked && this.permission['can_read_inventory']">
-                                <div @click="loadOptions('inventory')" class="dropdown-item btn">
+                                <div @click="loadOptions('inventory')" class="dropdown-item btn fs-5">
                                     Inventário
                                 </div>
                             </li>
                             <li v-if="!this.blocked && this.permission['can_read_post']">
-                                <div @click="loadOptions('safe')" class="dropdown-item btn">
+                                <div @click="loadOptions('safe')" class="dropdown-item btn fs-5">
                                     Cofre
                                 </div>
                             </li>
                             <li v-if="!this.blocked && this.permission['admin']">
-                                <div @click="loadOptions('users')" class="dropdown-item btn">
+                                <div @click="loadOptions('users')" class="dropdown-item btn fs-5">
                                     Usuários
                                 </div>
                             </li>
                             <li v-if="!this.blocked">
-                                <div @click="loadOptions('settings')" class="dropdown-item btn">
+                                <div @click="loadOptions('settings')" class="dropdown-item btn fs-5">
                                     Configurações
                                 </div>
                             </li>
                         </ul>
                     </div>
-                    <div class="btn btn-primary col-6 col-md-1" @click="logout">
+                    <div class="btn btn-primary col-6 col-md-1 fs-5" @click="logout">
                         Sair
                         <i class="fa-solid fa-right-to-bracket"></i>
                     </div>
@@ -173,7 +172,7 @@
                         <i class="fa-solid fa-star"></i>
                     </div>
                 </div>
-                <div class="row d-flex justify-content-center rounded z-3 text-center">
+                <div class="row d-flex justify-content-start rounded z-3 text-center">
                     <div v-for="item in items" :key="item.id" 
                     class="col-12 col-md-3 bg-light rounded
                     shadow-lg border-dark-subtle
@@ -209,11 +208,19 @@
                                 <div class="col-md-12 col-12 fs-4">
                                     {{ item.name }}
                                 </div>
-                                <div class="py-4 fs-5
-                                col-md-12 col-12 bg-light text-black text-start">
+                                <div class="py-4 fs-5 position-relative
+                                col-md-12 col-12 bg-light text-black text-start overflow-hidden size-max">
                                     Descrição:
                                     <br>
                                     {{ item.description }}
+                                    <div class="position-absolute bottom-0 end-0 w-100 h-25 text-center blur-background"
+                                    v-if="item.description.length > 100"
+                                    role="button"
+                                    @click="imageModal(item.id)">
+                                        <span class="contenty">
+                                            <i class="fs-3 fa-solid fa-angles-down"></i>
+                                        </span>
+                                    </div>
                                 </div>
                                 <div class="col-md-12 col-12 text-start">
                                     <i class="fa-solid fa-box"></i>
@@ -231,7 +238,7 @@
                                 </div>
                                 <div class="col-md-12 col-12 text-start">
                                     <i class="fa-solid fa-boxes-stacked"></i>
-                                    ValorBruto:
+                                    Valor Bruto:
                                     <div class="fs-5 btn btn-light">
                                         {{ formatPrice(item.price * item.quantity) }}
                                     </div>
@@ -314,7 +321,8 @@
                                 <div class="col-md-12 col-12 form-group fs-5 mb-2">
                                     <label for="description">Descrição</label>
                                     <textarea class="form-control fs-5"
-                                    id="description" v-model="itemToAdd.description"></textarea>
+                                    id="description" v-model="itemToAdd.description"
+                                    rows="5"></textarea>
                                 </div>
                                 <div class="col-md-12 col-12 form-group fs-3 mt-3 text-center">
                                     Total: {{ totalPrice }}
@@ -430,7 +438,7 @@
                                             id="edit-product-name" v-model="itemToEdit.name">
                                         </div>
                                         <div class="col-md-6 col-12 form-group fs-5 mb-2">
-                                            <i class="fa-solid fa-user"></i>
+                                            <i class="fa-solid fa-clock"></i>
                                             Criado em: {{ itemToEdit.created_at_formatted }}
                                         </div>
                                         <div class="col-md-6 col-12 form-group fs-5 mb-2">
@@ -440,16 +448,21 @@
                                         <div class="col-md-6 col-12 form-group fs-5 mb-2" 
                                         v-if="itemToEdit.updated_at">
                                             <i class="fa-regular fa-clock"></i>
-                                            Atualizado em: {{ itemToEdit.updated_at_formatted }}
+                                            Atualizado última vez em: 
+                                            <br>
+                                            {{ itemToEdit.updated_at_formatted }}
                                         </div>
                                         <div class="col-md-6 col-12 form-group fs-5 mb-2" 
                                         v-if="itemToEdit.updated_by">
                                             <i class="fa-regular fa-user"></i>
-                                            Atualizado por: {{ itemToEdit.updated_by_name }}
+                                            Atualizado última vez por: 
+                                            <br>
+                                            {{ itemToEdit.updated_by_name }}
                                         </div>
                                         <div class="col-md-12 col-12 form-group fs-5 mb-2">
                                             <label for="edit-product-description">Descrição</label>
                                             <textarea class="form-control fs-5"
+                                            rows="5"
                                             id="edit-product-description" v-model="itemToEdit.description">
                                             </textarea>
                                         </div>
@@ -472,7 +485,7 @@
                                         </div>
                                         <div class="mt-auto mb-2 text-center fs-5 col-md-12 col-12">
                                             <button class="btn btn-primary fs-5 col-md-4 col-12"
-                                            @click="alert">
+                                            @click="updateItem()">
                                                 Atualizar
                                                 <i class="fa-regular fa-thumbs-up"></i>
                                             </button>
@@ -568,7 +581,7 @@
                                     z-3">
                                         <div class="mt-auto mb-2 text-center fs-5 col-md-12 col-12">
                                             <button class="btn btn-primary fs-5 col-md-4 col-12"
-                                            @click="alert">
+                                            @click="uploadEditImage()">
                                                 Atualizar imagens
                                                 <i class="fa-solid fa-image"></i>
                                             </button>
@@ -577,13 +590,15 @@
                             </div>
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-danger fs-5"
-                                v-if="this.permission['admin']">
+                                v-if="this.permission['super_admin']"
+                                @click="deleteItem()">
                                     Apagar permanentemente <i class="fa-regular fa-trash-can"></i>
                                 </button>
                                 <button type="button" class="btn btn-secondary" 
                                 data-bs-dismiss="modal">Fechar</button>
                             </div>
                         </div>
+                    </div>
                     </div>
                 </div>
                 <div id="image-modal" class="modal fade" id="staticBackdrop"
@@ -596,11 +611,15 @@
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
                             <div class="modal-body">
+                            <div class="row d-flex justify-content-between fs-5">
+                                Descrição: 
+                                <br>{{ imageModalContent.description }}
+                            </div>
                             <div id="image-carousel" 
                                 class="card-img-top px-0 img-container h-100 carousel slide w-100">
                                 <div class="carousel-inner rounded">
                                     <div class="carousel-item" 
-                                    v-for="(image, index) in imageModalContent" 
+                                    v-for="(image, index) in imageModalContent.image" 
                                     :class="{active: index === 0}">
                                         <img :src="'data:image/' + image['extension'] + ';base64,' + image['base64']" 
                                         class="d-block w-100 rounded" alt="...">
@@ -617,10 +636,8 @@
                                     <span class="visually-hidden">Next</span>
                                 </button>
                             </div>
-                            </div>
                         </div>
                     </div>
-                </div>
                 </div>
             </div>
             <!-- Safe -->
@@ -1308,44 +1325,45 @@
                     Configurações Aqui
                 </div>
             </div>
-            <!-- Warnings -->
-            <div class="container position-fixed bottom-0 w-100 warn">
-                <div class="row justify-content-center warnings-container">
-                    <div v-for="warning in warnings" :key="warning.id" class="warning col-12 col-md-12" 
-                    @click="isClicked(warning.id)">
-                        <div class="alert text-center animate__animated animate__fadeInUp
-                        animate__faster col-md-6 mx-auto
-                        d-flex justify-content-between py-3 mb-1 fs-5"  
-                        :class="warning.class">
-                            <div class="justify-content-center flex-grow-1" v-html="warning.text">
-                            </div> 
-                            <div class="d-flex" role="button"
-                            @click="removeMessage(warning.id)">
-                                <i class="fa-solid fa-xmark my-auto"></i>
-                            </div>
+
+        </div>
+        <!-- Warnings -->
+        <div class="container position-fixed bottom-0 w-100 warn">
+            <div class="row justify-content-center warnings-container">
+                <div v-for="warning in warnings" :key="warning.id" class="warning col-12 col-md-12" 
+                @click="isClicked(warning.id)">
+                    <div class="alert text-center animate__animated animate__fadeInUp
+                    animate__faster col-md-6 mx-auto
+                    d-flex justify-content-between py-3 mb-1 fs-5"  
+                    :class="warning.class">
+                        <div class="justify-content-center flex-grow-1" v-html="warning.text">
+                        </div> 
+                        <div class="d-flex" role="button"
+                        @click="removeMessage(warning.id)">
+                            <i class="fa-solid fa-xmark my-auto"></i>
                         </div>
                     </div>
                 </div>
             </div>
-            <!-- QR Modal -->
-            <div id="qr-modal" class="modal fade" id="staticBackdrop"
-                data-bs-backdrop="static" data-bs-keyboard="false" 
-                tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-                    <div class="modal-dialog modal-lg">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h1 class="modal-title fs-5" id="staticBackdropLabel">QR code</h1>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div>
-                            <div class="modal-body text-center">
-                                <div id="qrcode" class="d-flex justify-content-center"></div>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" 
-                                data-bs-dismiss="modal">Fechar</button>
-                            </div>
-                        </div>
+        </div>
+        <!-- QR Modal -->
+        <div id="qr-modal" class="modal fade" id="staticBackdrop"
+            data-bs-backdrop="static" data-bs-keyboard="false" 
+            tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="staticBackdropLabel">QR code</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
+                    <div class="modal-body text-center">
+                        <div id="qrcode" class="d-flex justify-content-center"></div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" 
+                        data-bs-dismiss="modal">Fechar</button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

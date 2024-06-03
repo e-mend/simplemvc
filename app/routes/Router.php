@@ -45,6 +45,7 @@ final class Router
                 '/foresight' => fn() => self::load('DashboardController', 'routinesApi'),
                 '/getitems' => fn() => self::load('InventoryController', 'getItemsApi'),
                 '/disableitem' => fn() => self::load('InventoryController', 'disableItemApi'),
+                '/deleteitem' => fn() => self::load('InventoryController', 'deleteItemApi'),
           ],
           'post' => [
                 '/login' => fn() => self::load('HomeController', 'loginApi'),
@@ -64,6 +65,8 @@ final class Router
                 '/additem' => fn() => self::load('InventoryController', 'addItemApi'),
                 '/uploadimage' => fn() => self::load('InventoryController', 'uploadImageApi'),
                 '/toggleitemfavorite' => fn() => self::load('InventoryController', 'toggleFavoriteApi'),
+                '/updateitem' => fn() => self::load('InventoryController', 'updateItemApi'),
+                '/uploadedit' => fn() => self::load('InventoryController', 'uploadEditApi'),
           ]
         ];
     }

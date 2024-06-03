@@ -174,6 +174,80 @@ class InventoryController extends Controller
         }
     }
 
+    public function updateItemApi()
+    {
+        try {
+            if (!$this->secure->isLoggedIn()
+            || !$this->secure->hasPermission(AclRole::CAN_UPDATE_INVENTORY->value)){
+                throw new PermissionException();
+            }
+
+            $json = Json::getJson();
+
+            if (!$json){
+                throw new RequestException();
+            }
+
+            if (!$json['id']){
+                throw new ReachableException("Id inválido");
+            }
+
+            if (!$json['name'] || !$this->secure->isValid('name', $json['name'])){
+                throw new ReachableException("Revise o nome");
+            }
+
+            if (!$json['price'] || !$this->secure->isValid('price', $json['price'])){
+                throw new ReachableException("Revise o valor");
+            }
+
+            if (!$json['quantity'] || !$this->secure->isValid('quantity', $json['quantity'])){
+                throw new ReachableException("Revise a quantidade");
+            }
+
+            if ($json['description'] != '' && !$this->secure->isValid('description', $json['description'])){
+                throw new ReachableException("Revise a descrição");
+            }
+
+            $toUpdate = $this->inventory->update([
+                'name' => $json['name'],
+                'description' => $json['description'],
+                'price' => $this->addDotBeforeZeros($json['price']),
+                'quantity' => $json['quantity'],
+            ], $json['id']);
+
+            if (!$toUpdate){
+                throw new ReachableException("Erro ao processar a requisição");
+            }
+
+            Json::send([
+                'success' => true,
+                'message' => 'Item atualizado com sucesso'
+            ]);
+        } catch (ReachableException $e) {
+            Json::send([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ]);
+        } catch (Throwable $th) {
+            Json::send([
+                'success' => false,
+                'message' => 'Erro ao processar a requisição',
+            ]);
+        }
+    }
+
+    private function addDotBeforeZeros(string $string): string
+    {
+        $length = strlen($string);
+    
+        if ($length < 2) {
+            return $string;
+        }
+        
+        $newNumberStr = substr($string, 0, $length - 2) . '.' . substr($string, $length - 2);
+        return $newNumberStr;
+    }
+
     public function toggleFavoriteApi()
     {
         try {
@@ -264,6 +338,101 @@ class InventoryController extends Controller
         }
     }
 
+    public function uploadEditApi()
+    {
+        try {
+            if(!$this->secure->isLoggedIn()
+            || !$this->secure->hasPermission(AclRole::CAN_CREATE_INVENTORY->value)){
+                throw new PermissionException();
+            }
+
+            $files = Req::getFiles();
+
+            if ($files){
+                if(count($files) <= Req::MAX_IMAGES){
+                    foreach ($files as $file) {
+                        if(!Req::validateFile($file)){
+                            throw new ReachableException("Imagem inválida");
+                        }
+                    }
+                }
+    
+                $insert = $this->inventory->update([
+                    'image' => json_encode(Req::getImages()),
+                ], $_POST['id']);
+    
+                if(!$insert){
+                    throw new ReachableException("Algo deu errado");
+                }
+            }else{
+                $insert = $this->inventory->update([
+                    'image' => null,
+                ], $_POST['id']);
+    
+                if(!$insert){
+                    throw new ReachableException("Algo deu errado");
+                }
+            }
+            
+            Json::send([
+                'success' => true,
+                'message' => 'Imagem alterada com sucesso'
+            ]);
+        } catch (ReachableException $e) {
+            Json::send([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ]); 
+        } catch (Throwable $th) {
+            Json::send([
+                'success' => false,
+                'message' => 'Erro ao processar a requisição',
+            ]);
+        }
+    }
+
+    public function deleteItemApi()
+    {
+        try {
+            if(!$this->secure->isLoggedIn()
+            || !$this->secure->hasPermission(AclRole::SUPER_ADMIN->value)){
+                throw new PermissionException();
+            }
+
+            $req = Req::getParams();
+
+            if (!$req){
+                throw new RequestException();
+            }
+
+            if(!$req['id']){
+                throw new ReachableException("Id inválido");
+            }
+
+            $delete = $this->inventory->delete($req['id']);
+
+            if(!$delete){
+                throw new ReachableException("Erro ao processar a requisição");
+            }
+
+            Json::send([
+                'success' => true,
+                'message' => 'Item excluído com sucesso'
+            ]);
+        } catch (ReachableException $e) {
+            Json::send([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ]);
+        } catch (Throwable $th) {
+            Json::send([
+                'success' => false,
+                'message' => 'Erro ao processar a requisição',
+            ]);
+        }
+    }
+
+
     public function addItemApi()
     {
         try {
@@ -296,7 +465,7 @@ class InventoryController extends Controller
 
             $insert = $this->inventory->createItem([
                 'name' => $json['name'],
-                'price' => $json['price'],
+                'price' => $this->addDotBeforeZeros($json['price']),
                 'quantity' => $json['quantity'],
                 'description' => $json['description'],
             ]);

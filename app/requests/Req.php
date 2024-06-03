@@ -5,8 +5,8 @@ namespace App\Requests;
 class Req
 {
      const MAX_IMAGES = 3;
-     const ALLOWED_IMAGE_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif'];
-     const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/gif'];
+     const ALLOWED_IMAGE_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'jfif'];
+     const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/jfif'];
      const MAX_FILE_SIZE = 32 * 1024 * 1024;
      const UPLOAD_DIR = '../resources/uploads/';
      private static $images = [];

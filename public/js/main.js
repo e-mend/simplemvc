@@ -141,7 +141,7 @@ const app = new Vue({
                 image2Link: null,
                 image3Link: null
             },
-            imageModalContent: {}
+            imageModalContent: {},
         }
     },
     methods: {
@@ -595,15 +595,14 @@ const app = new Vue({
                     throw new Error('Erro no servidor');
                 }
 
-                this.throwWarning(json['message'], ['alert-success']);
+                this.throwWarning(json['message']+
+                ' <i class="fa-solid fa-check"></i>', ['alert-success']);
 
                 this.user = json['user'];
-
                 this.permission = json['user']['permission'];
-                console.log(this.permission);
-
             } catch (error) {
-                this.throwWarning(error.message, ['alert-danger']);
+                this.throwWarning(error.message+
+                ' <i class="fa-solid fa-xmark"></i>', ['alert-danger']);
                 this.blocked = true;
             }
 
@@ -780,9 +779,7 @@ const app = new Vue({
                     ' <i class="fa-solid fa-xmark"></i>', ['alert-danger']);
             }
         },
-        async editItemModal(id) {
-            $('#edit-inventory-modal').modal('show');  
-
+        async getItem(id) {
             try {
                 const response = await fetch('/getitems?id='+id);
                 const json = await response.json();
@@ -806,6 +803,10 @@ const app = new Vue({
                 this.throwWarning(error.message, ['alert-danger']);
             }
         },
+        async editItemModal(id) {
+            $('#edit-inventory-modal').modal('show');  
+            await this.getItem(id);
+        },
         addItemModal() {
             $('#inventory-modal').modal('show');
         },
@@ -816,7 +817,7 @@ const app = new Vue({
                 return;
             }
 
-            this.imageModalContent = item['image'];
+            this.imageModalContent = item;
 
             $('#image-modal').modal('show');
         },
@@ -888,7 +889,6 @@ const app = new Vue({
 
                 const interval = setInterval(() => {
                     this.$forceUpdate();
-                    console.log('doing...');
 
                     if (reader.readyState === 2) {
                         clearInterval(interval);
@@ -998,6 +998,117 @@ const app = new Vue({
             } catch (error) {
                 this.throwWarning(error.message, ['alert-danger']);
             }
+        },
+        async uploadEditImage() {
+            const formData = new FormData();
+
+            if (this.itemToEdit.image1 != null) {
+                formData.append('image1', this.itemToEdit.image1);
+            }
+
+            if (this.itemToEdit.image2 != null) {
+                formData.append('image2', this.itemToEdit.image2);
+            }
+
+            if (this.itemToEdit.image3 != null) {
+                formData.append('image3', this.itemToEdit.image3);
+            }
+
+            formData.append('id', this.itemToEdit.id);
+
+            try {
+                const response = await fetch('/uploadedit', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error('Algo deu errado');
+                }
+
+                const json = await response.json();
+
+                if (!json.success) {
+                    throw new Error(json['message']);
+                }
+
+                this.getItems('reload');
+                this.throwWarning(json['message']+
+                ` <i class="fa-solid fa-check"></i>`, ['alert-success']);
+
+                this.itemToEdit['image1'] = null;
+                this.itemToEdit['image2'] = null;
+                this.itemToEdit['image3'] = null;
+            } catch (error) {
+                this.throwWarning(error.message, ['alert-danger']);
+            }
+        },
+        async deleteItem() {
+            try {
+                const response = await fetch('/deleteitem?id='+this.itemToEdit.id);
+
+                if (!response.ok) {
+                    throw new Error('Algo deu errado');
+                }
+
+                const json = await response.json();
+
+                if (!json.success) {
+                    throw new Error(json['message']);
+                }
+
+                this.throwWarning(json['message']+
+                ` <i class="fa-solid fa-check"></i>`, ['alert-success']);
+
+                $('#edit-inventory-modal').modal('hide');
+
+                this.itemToEdit = {
+                    name: '',
+                    quantity: 0,
+                    description: '',
+                    price: 'R$ 0,00',
+                    image1: null,
+                    image2: null,
+                    image3: null
+                };
+                await this.getItems('reload');
+            } catch (error) {
+                this.throwWarning(error.message, ['alert-danger']);
+            }  
+        },
+        async updateItem() {
+            let price = this.itemToEdit.price.replace(/[^0-9]/g, '');
+                try {
+                    const response = await fetch('/updateitem', {
+                        method: 'POST',
+                        headers: {
+                            'Content-type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            id: this.itemToEdit.id,
+                            name: this.itemToEdit.name,
+                            quantity: this.itemToEdit.quantity,
+                            description: this.itemToEdit.description,
+                            price: price
+                        })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Algo deu errado');
+                    }
+
+                    const json = await response.json();
+
+                    if (!json.success) {
+                        throw new Error(json['message']);
+                    }
+
+                    this.throwWarning(json['message'], ['alert-success']);
+                    await this.getItem(this.itemToEdit.id);
+                    await this.getItems('reload');
+                } catch (error) {
+                    this.throwWarning(error.message, ['alert-danger']);
+                }
         },
         throwWarning(textMessage, classObject = {
             'alert-danger': true,

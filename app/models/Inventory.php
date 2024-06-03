@@ -12,6 +12,7 @@ use Laminas\Db\Sql\Delete;
 use Carbon\Carbon;
 use Laminas\Db\Sql\Expression;
 use App\Requests\Json;
+use Throwable;
 
 class Inventory
 {
@@ -33,12 +34,28 @@ class Inventory
     {
         try {
             $update = $this->sql->update('inventory');
-            $update->set($data);
+            $update->set(array_merge($data, [
+                'updated_at' => Carbon::now(), 
+                'updated_by' => $_SESSION['user']['id'],
+            ]));
             $update->where(['id' => $id]);
             $update = $this->sql->buildSqlString($update);
             $result = $this->adapter->query($update, Adapter::QUERY_MODE_EXECUTE);
             return $result;
-        } catch (\Throwable $th) {
+        } catch (Throwable $th) {
+            return false;
+        }
+    }
+
+    public function delete(string $id)
+    {
+        try {
+            $delete = $this->sql->delete('inventory');
+            $delete->where(['id' => $id]);
+            $delete = $this->sql->buildSqlString($delete);
+            $result = $this->adapter->query($delete, Adapter::QUERY_MODE_EXECUTE);
+            return $result->count() > 0;
+        } catch (Throwable $th) {
             return false;
         }
     }

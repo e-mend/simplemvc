@@ -86,6 +86,24 @@
     align-items: center;
 }
 
+.z-1000{
+    z-index: 1000 !important;
+}
+
+.size-max{
+    max-height: 150px;
+}
+
+.blur-background {
+    background-color: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(5px);
+}
+
+.contenty {
+    position: relative;
+    z-index: 2000;
+}
+
 .produkt-img{
     height: 100%;
     object-position: 50% 50%; 
