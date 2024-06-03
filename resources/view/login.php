@@ -100,7 +100,7 @@
                     message: '',
                     loginForm: {
                         username: 'ADsense12',
-                        password: 'Padrao@123'
+                        password: 'C0c@C0l4',
                     },
                     warnings: [],
                     nextId: 0,

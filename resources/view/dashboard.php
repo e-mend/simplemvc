@@ -26,7 +26,7 @@
                                     Inventário
                                 </div>
                             </li>
-                            <li v-if="!this.blocked && this.permission['can_read_post']">
+                            <li v-if="!this.blocked && this.permission['CAN_READ_SAFE']">
                                 <div @click="loadOptions('safe')" class="dropdown-item btn fs-5">
                                     Cofre
                                 </div>
@@ -79,7 +79,7 @@
                         Inventário
                         <i class="fa-solid fa-laptop"></i>
                     </div>
-                    <div @click="loadOptions('safe')" :class="{disabled: this.blocked || !this.permission['can_read_post']}"
+                    <div @click="loadOptions('safe')" :class="{disabled: this.blocked || !this.permission['CAN_READ_SAFE']}"
                     class="btn btn-primary col-12 col-md-6 text-white text-center py-3 fs-5">
                         Cofre
                         <i class="fa-solid fa-lock"></i>
@@ -645,10 +645,10 @@
             </div>
             <!-- Safe -->
             <div class="container-margin" v-if="option === 'safe'">
-            <div class="row d-flex justify-content-between bg-primary py-3 py-md-3 rounded
-                z-3">
-                Cofre Aqui
-            </div>
+                <div class="row d-flex justify-content-between 
+                bg-primary py-3 py-md-3 rounded z-3">
+                    Cofre Aqui
+                </div>
             </div>
             <!-- Users -->
             <div class="container-margin" v-if="option === 'users'">
@@ -763,7 +763,7 @@
                                 <div class="text-center fs-5 col-md-6 col-12">
                                     <div class="form-check form-switch">
                                         <input class="form-check-input" type="checkbox" role="switch" 
-                                        v-model="createNewUser.permission['can_read_post']">
+                                        v-model="createNewUser.permission['CAN_READ_SAFE']">
                                         <label class="form-check-label">
                                             Ler item
                                         </label>
@@ -772,7 +772,7 @@
                                 <div class="text-center fs-5 col-md-6 col-12">
                                     <div class="form-check form-switch">
                                         <input class="form-check-input" type="checkbox" role="switch" 
-                                        v-model="createNewUser.permission['can_create_post']">
+                                        v-model="createNewUser.permission['can_create_safe']">
                                         <label class="form-check-label">
                                             Criar item
                                         </label>
@@ -781,7 +781,7 @@
                                 <div class="text-center fs-5 col-md-6 col-12">
                                     <div class="form-check form-switch">
                                         <input class="form-check-input" type="checkbox" role="switch"
-                                        v-model="createNewUser.permission['can_update_post']">
+                                        v-model="createNewUser.permission['can_update_safe']">
                                         <label class="form-check-label">
                                             Modificar item
                                         </label>
@@ -790,7 +790,7 @@
                                 <div class="text-center fs-5 col-md-6 col-12">
                                     <div class="form-check form-switch">
                                         <input class="form-check-input" type="checkbox" role="switch" 
-                                        v-model="createNewUser.permission['can_disable_post']">
+                                        v-model="createNewUser.permission['can_disable_safe']">
                                         <label class="form-check-label">
                                             Desabilitar item
                                         </label>
@@ -799,7 +799,7 @@
                                 <div class="text-center fs-5 col-md-6 col-12">
                                     <div class="form-check form-switch">
                                         <input class="form-check-input" type="checkbox" role="switch" 
-                                        v-model="createNewUser.permission['can_see_disabled_post']">
+                                        v-model="createNewUser.permission['can_see_disabled_safe']">
                                         <label class="form-check-label">
                                             Ver item desabilitado
                                         </label>
@@ -811,7 +811,7 @@
                                 <div class="text-center fs-5 col-md-3 col-12">
                                     <div class="form-check form-switch">
                                         <input class="form-check-input" type="checkbox" role="switch" 
-                                        v-model="createNewUser.permission['post_1']">
+                                        v-model="createNewUser.permission['safe_1']">
                                         <label class="form-check-label">
                                             Cofre nível 1
                                         </label>
@@ -820,7 +820,7 @@
                                 <div class="text-center fs-5 col-md-3 col-12">
                                     <div class="form-check form-switch">
                                         <input class="form-check-input" type="checkbox" role="switch"
-                                        v-model="createNewUser.permission['post_2']">
+                                        v-model="createNewUser.permission['safe_2']">
                                         <label class="form-check-label" for="flexSwitchCheckDefault">
                                             Cofre nível 2
                                         </label>
@@ -829,7 +829,7 @@
                                 <div class="text-center fs-5 col-md-3 col-12">
                                     <div class="form-check form-switch">
                                         <input class="form-check-input" type="checkbox" role="switch"
-                                        v-model="createNewUser.permission['post_3']">
+                                        v-model="createNewUser.permission['safe_3']">
                                         <label class="form-check-label" for="flexSwitchCheckDefault">
                                             Cofre nível 3
                                         </label>
@@ -1098,7 +1098,7 @@
                                 <div class="text-center fs-5 col-md-6 col-12">
                                     <div class="form-check form-switch">
                                         <input class="form-check-input" type="checkbox" role="switch" 
-                                        v-model="userToEdit.permission['can_read_post']"
+                                        v-model="userToEdit.permission['CAN_READ_SAFE']"
                                         :disabled="userToEdit.permission['super_admin']">
                                         <label class="form-check-label">
                                             Ver item
@@ -1108,7 +1108,7 @@
                                 <div class="text-center fs-5 col-md-6 col-12">
                                     <div class="form-check form-switch">
                                         <input class="form-check-input" type="checkbox" role="switch" 
-                                        v-model="userToEdit.permission['can_create_post']"
+                                        v-model="userToEdit.permission['can_create_safe']"
                                         :disabled="userToEdit.permission['super_admin']">
                                         <label class="form-check-label">
                                             Criar item
@@ -1118,7 +1118,7 @@
                                 <div class="text-center fs-5 col-md-6 col-12">
                                     <div class="form-check form-switch">
                                         <input class="form-check-input" type="checkbox" role="switch"
-                                        v-model="userToEdit.permission['can_update_post']"
+                                        v-model="userToEdit.permission['can_update_safe']"
                                         :disabled="userToEdit.permission['super_admin']">
                                         <label class="form-check-label">
                                             Modificar item
@@ -1128,7 +1128,7 @@
                                 <div class="text-center fs-5 col-md-6 col-12">
                                     <div class="form-check form-switch">
                                         <input class="form-check-input" type="checkbox" role="switch" 
-                                        v-model="userToEdit.permission['can_disable_post']"
+                                        v-model="userToEdit.permission['can_disable_safe']"
                                         :disabled="userToEdit.permission['super_admin']">
                                         <label class="form-check-label">
                                             Desabilitar item
@@ -1138,7 +1138,7 @@
                                 <div class="text-center fs-5 col-md-6 col-12">
                                     <div class="form-check form-switch">
                                         <input class="form-check-input" type="checkbox" role="switch" 
-                                        v-model="userToEdit.permission['can_see_disabled_post']"
+                                        v-model="userToEdit.permission['can_see_disabled_safe']"
                                         :disabled="userToEdit.permission['super_admin']">
                                         <label class="form-check-label">
                                             Ver item desabilitado
@@ -1151,7 +1151,7 @@
                                 <div class="text-center fs-5 col-md-3 col-12">
                                     <div class="form-check form-switch">
                                         <input class="form-check-input" type="checkbox" role="switch" 
-                                        v-model="userToEdit.permission['post_1']"
+                                        v-model="userToEdit.permission['safe_1']"
                                         :disabled="userToEdit.permission['super_admin']">
                                         <label class="form-check-label">
                                             Cofre nível 1
@@ -1161,7 +1161,7 @@
                                 <div class="text-center fs-5 col-md-3 col-12">
                                     <div class="form-check form-switch">
                                         <input class="form-check-input" type="checkbox" role="switch"
-                                        v-model="userToEdit.permission['post_2']"
+                                        v-model="userToEdit.permission['safe_2']"
                                         :disabled="userToEdit.permission['super_admin']">
                                         <label class="form-check-label" for="flexSwitchCheckDefault">
                                             Cofre nível 2
@@ -1171,7 +1171,7 @@
                                 <div class="text-center fs-5 col-md-3 col-12">
                                     <div class="form-check form-switch">
                                         <input class="form-check-input" type="checkbox" role="switch"
-                                        v-model="userToEdit.permission['post_3']"
+                                        v-model="userToEdit.permission['safe_3']"
                                         :disabled="userToEdit.permission['super_admin']">
                                         <label class="form-check-label" for="flexSwitchCheckDefault">
                                             Cofre nível 3

@@ -4,14 +4,14 @@ namespace App\enum;
 
 enum AclRole: string
 {
-    case CAN_READ_POST = 'can_read_post';
-    case CAN_CREATE_POST = 'can_create_post';
-    case CAN_UPDATE_POST = 'can_update_post';
-    case CAN_DISABLE_POST = 'can_disable_post';
-    case CAN_SEE_DISABLED_POST = 'can_see_disabled_post';
-    case POST_1 = 'post_1';
-    case POST_2 = 'post_2';
-    case POST_3 = 'post_3';
+    case CAN_READ_SAFE = 'can_read_safe';
+    case CAN_CREATE_SAFE = 'can_create_safe';
+    case CAN_UPDATE_SAFE = 'can_update_safe';
+    case CAN_DISABLE_SAFE = 'can_disable_safe';
+    case CAN_SEE_DISABLED_SAFE = 'can_see_disabled_safe';
+    case SAFE_1 = 'safe_1';
+    case SAFE_2 = 'safe_2';
+    case SAFE_3 = 'safe_3';
     case CAN_READ_INVENTORY = 'can_read_inventory';
     case CAN_CREATE_INVENTORY = 'can_create_inventory';
     case CAN_UPDATE_INVENTORY = 'can_update_inventory';

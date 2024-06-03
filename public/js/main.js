@@ -27,14 +27,14 @@ const app = new Vue({
             user: {},
             blocked: false,
             permission: {
-                'can_read_post': false,
-                'can_create_post': false,
-                'can_update_post': false,
-                'can_disable_post': false,
-                'can_see_disabled_post': false,
-                'post_1': false,
-                'post_2': false,
-                'post_3': false,
+                'CAN_READ_SAFE': false,
+                'can_create_safe': false,
+                'can_update_safe': false,
+                'can_disable_safe': false,
+                'can_see_disabled_safe': false,
+                'safe_1': false,
+                'safe_2': false,
+                'safe_3': false,
                 'can_read_inventory': false,              
                 'can_create_inventory': false,
                 'can_update_inventory': false,
@@ -69,14 +69,14 @@ const app = new Vue({
             userToEdit: {
                 password: '',
                 permission: {
-                    'can_read_post': false,
-                    'can_create_post': false,
-                    'can_update_post': false,
-                    'can_disable_post': false,
-                    'can_see_disabled_post': false,
-                    'post_1': false,
-                    'post_2': false,
-                    'post_3': false,
+                    'CAN_READ_SAFE': false,
+                    'can_create_safe': false,
+                    'can_update_safe': false,
+                    'can_disable_safe': false,
+                    'can_see_disabled_safe': false,
+                    'safe_1': false,
+                    'safe_2': false,
+                    'safe_3': false,
                     'can_read_inventory': false,              
                     'can_create_inventory': false,
                     'can_update_inventory': false,
@@ -88,14 +88,14 @@ const app = new Vue({
             },
             createNewUser: {
                 permission: {
-                    'can_read_post': false,
-                    'can_create_post': false,
-                    'can_update_post': false,
-                    'can_disable_post': false,
-                    'can_see_disabled_post': false,
-                    'post_1': false,
-                    'post_2': false,
-                    'post_3': false,
+                    'CAN_READ_SAFE': false,
+                    'can_create_safe': false,
+                    'can_update_safe': false,
+                    'can_disable_safe': false,
+                    'can_see_disabled_safe': false,
+                    'safe_1': false,
+                    'safe_2': false,
+                    'safe_3': false,
                     'can_read_inventory': false,              
                     'can_create_inventory': false,
                     'can_update_inventory': false,
@@ -187,14 +187,14 @@ const app = new Vue({
                 }
 
                 this.createNewUser.permission = {
-                    'can_read_post': false,
-                    'can_create_post': false,
-                    'can_update_post': false,
-                    'can_disable_post': false,
-                    'can_see_disabled_post': false,
-                    'post_1': false,
-                    'post_2': false,
-                    'post_3': false,
+                    'CAN_READ_SAFE': false,
+                    'can_create_safe': false,
+                    'can_update_safe': false,
+                    'can_disable_safe': false,
+                    'can_see_disabled_safe': false,
+                    'safe_1': false,
+                    'safe_2': false,
+                    'safe_3': false,
                     'can_read_inventory': false,              
                     'can_create_inventory': false,
                     'can_update_inventory': false,
@@ -1192,7 +1192,7 @@ const app = new Vue({
                 return;
             }
 
-            if(option === 'safe' && !this.permission['can_read_post']) {
+            if(option === 'safe' && !this.permission['CAN_READ_SAFE']) {
                 this.option === 'main';
                 return;
             }

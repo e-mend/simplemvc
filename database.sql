@@ -62,7 +62,7 @@ CREATE TABLE `InventoryApp`.`throttle`(
     `details` JSON
 );
 
-CREATE TABLE `InventoryApp`.`post`(
+CREATE TABLE `InventoryApp`.`safe`(
     `id` INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
     `title` VARCHAR(255) NOT NULL,
     `body` VARCHAR(255) NOT NULL,
@@ -118,14 +118,14 @@ VALUES
     ('admin', 'Padrao@123', 
 '{
   "permission": {
-    "can_read_post": true,
-    "can_create_post": true,
-    "can_update_post": true,
-    "can_disable_post": true,
-    "can_see_disabled_post": true,
-    "post_1": true,
-    "post_2": true,
-    "post_3": true,
+    "CAN_READ_SAFE": true,
+    "can_create_safe": true,
+    "can_update_safe": true,
+    "can_disable_safe": true,
+    "can_see_disabled_safe": true,
+    "safe_1": true,
+    "safe_2": true,
+    "safe_3": true,
     "can_read_inventory": true,
     "can_create_inventory": true,
     "can_update_inventory": true,
@@ -145,14 +145,14 @@ VALUES
     ('MadAdmin', 'Padrao@123',
 '{
     "permission": {
-        "can_read_post": true,
-        "can_create_post": true,
-        "can_update_post": true,
-        "can_disable_post": true,
-        "can_see_disabled_post": true,
-        "post_1": true,
-        "post_2": true,
-        "post_3": true,
+        "CAN_READ_SAFE": true,
+        "can_create_safe": true,
+        "can_update_safe": true,
+        "can_disable_safe": true,
+        "can_see_disabled_safe": true,
+        "safe_1": true,
+        "safe_2": true,
+        "safe_3": true,
         "can_read_inventory": true,
         "can_create_inventory": true,
         "can_update_inventory": true,
