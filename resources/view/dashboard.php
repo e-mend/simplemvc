@@ -648,28 +648,28 @@
                 <div class="row d-flex justify-content-between py-3 py-md-3 rounded 
                 border z-3 text-center">
                     <div class="col-12 fs-5">
-                        Inventário
+                        Cofre
                     </div>
                 </div>
                 <div class="row d-flex justify-content-between rounded z-3 text-center mt-2">
                     <div class="btn btn-primary col-12 col-md-6 text-center py-3 fs-5"
                     @click="searchModalOpen = !searchModalOpen">
-                        Procurar Item
+                        Procurar Post
                         <i class="fa-solid fa-magnifying-glass"></i>
                     </div>
                     <div class="btn btn-secondary col-12 col-md-6 border-white text-center py-3 fs-5"
-                    @click="addItemModal"
-                    v-if="this.permission['can_create_inventory']">
-                        Adicionar Item
-                        <i class="fa-solid fa-plus"></i>
+                    @click="addSafeModal"
+                    v-if="this.permission['can_create_safe']">
+                        Criar Post
+                        <i class="fa-solid fa-shield-halved"></i>
                     </div>
                 </div>
                 <div class="row d-flex justify-content-between rounded z-3 text-center" v-if="searchModalOpen">
                     <div class="rounded col-12 col-md-6 text-center py-3 fs-5">
                         <div class="input-group d-flex justify-content-center">
-                            <input @input="getItems('search', true, 1)" type="text" 
+                            <input @input="getSafe('search', true, 1)" type="text" 
                             class="form-control fs-5 rounded" 
-                            v-model="itemSearch.search">
+                            v-model="safeSearch.search">
                             <i class="fa-solid fa-magnifying-glass mx-2 my-auto"></i>
                         </div>
                     </div>
@@ -678,143 +678,109 @@
                             <div class="mx-2 my-auto">
                             De:
                             </div>
-                            <input @input="getItems('search', false, 1)" type="date"
+                            <input @input="getSafe('search', false, 1)" type="date"
                             class="form-control fs-5 rounded"
-                            v-model="itemSearch.from">
+                            v-model="safeSearch.from">
                             <div class="mx-2 my-auto">
                             Até:
                             </div>
-                            <input @input="getItems('search', false, 1)" type="date"
+                            <input @input="getSafe('search', false, 1)" type="date"
                             class="form-control fs-5 rounded"
-                            v-model="itemSearch.to">
+                            v-model="safeSearch.to">
                         </div>
                     </div>
                     <div class="btn btn-primary col text-center py-3 fs-5" 
-                    @click="getItems('all', false)"
-                    :class="{'opacity-25': this.itemSearch.all}">
+                    @click="getSafe('all', false)"
+                    :class="{'opacity-25': safeSearch.all}">
                         Todos
                         <i class="fa-solid fa-xmark"></i>
                     </div>
                     <div class="btn btn-primary col-6 col-md-3 text-center py-3 fs-5" 
-                    @click="getItems('new')"
-                    :class="{'opacity-25': this.itemSearch.new}">
+                    @click="getSafe('new')"
+                    :class="{'opacity-25': safeSearch.new}">
                         Novos
                         <i class="fa-solid fa-fire"></i>
                     </div>
                     <div class="btn btn-danger col-6 col-md-3 text-center py-3 fs-5" 
-                    @click="getItems('deleted', false)"
-                    v-if="this.permission['can_see_disabled_inventory']"
-                    :class="{'opacity-25': this.itemSearch.deleted}">
+                    @click="getSafe('deleted', false)"
+                    v-if="permission['can_see_disabled_safe']"
+                    :class="{'opacity-25': safeSearch.deleted}">
                         Desabilitados
                         <i class="fa-solid fa-circle-minus"></i>
                     </div>
                     <div class="btn btn-dark col-6 col-md-3 text-center py-3 fs-5"
-                    @click="getItems('favorites', false)"
-                    :class="{'opacity-25': this.itemSearch.favorites}">
+                    @click="getSafe('favorites', false)"
+                    :class="{'opacity-25': safeSearch.favorites}">
                         Favoritos
                         <i class="fa-solid fa-star"></i>
                     </div>
                 </div>
                 <div class="row d-flex justify-content-start rounded z-3 text-center">
-                    <div v-for="item in items" :key="item.id" 
-                    class="col-12 col-md-3 bg-light rounded
+                    <div v-for="safe in safes" :key="safe.id" 
+                    class="col-12 col-md-12 bg-light rounded
                     shadow-lg border-dark-subtle
                     card rounded text-black mt-1 text-center 
                     py-1 fs-5 pt-0">
                         <div class="row d-flex rounded">
-                            <div :id="'carouselId' + item.id" 
-                            class="card-img-top px-0 img-container border-none py-0 carousel slide w-100 btn">
-                                <div class="carousel-inner rounded" v-if="item.image">
-                                    <div class="carousel-item" 
-                                    @click="imageModal(item.id)"
-                                    v-for="(image, index) in item.image" 
-                                    :class="{active: index === 0}">
-                                        <img :src="'data:image/' + image['extension'] + ';base64,' + image['base64']" 
-                                        class="d-block w-100 rounded" alt="...">
-                                    </div>
-                                </div>
-                                <div class="carousel-inner" v-else>
-                                    <i class="fa-solid fa-dolly fs-big mt-4"></i>
-                                </div>
-                                <button class="carousel-control-prev" type="button" :data-bs-target="'#carouselId' + item.id"
-                                data-bs-slide="prev">
-                                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                                    <span class="visually-hidden">Previous</span>
-                                </button>
-                                <button class="carousel-control-next" type="button" :data-bs-target="'#carouselId' + item.id"
-                                data-bs-slide="next">
-                                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                                    <span class="visually-hidden">Next</span>
-                                </button>
-                            </div>
                             <div class="card-body">
                                 <div class="col-md-12 col-12 fs-4">
-                                    {{ item.name }}
+                                    {{ safe.title }}
                                 </div>
                                 <div class="py-4 fs-5 position-relative
-                                col-md-12 col-12 bg-light text-black text-start overflow-hidden size-max">
+                                col-md-12 col-12 bg-light text-black text-start">
                                     Descrição:
                                     <br>
-                                    {{ item.description }}
-                                    <div class="position-absolute bottom-0 end-0 w-100 h-25 text-center blur-background"
-                                    v-if="item.description.length > 100"
-                                    role="button"
-                                    @click="imageModal(item.id)">
-                                        <span class="contenty">
-                                            <i class="fs-3 fa-solid fa-angles-down"></i>
-                                        </span>
-                                    </div>
+                                    {{ safe.description }}
                                 </div>
                                 <div class="col-md-12 col-12 text-start">
-                                    <i class="fa-solid fa-box"></i>
-                                    Estoque:
-                                    <div class="fs-5 btn btn-light">
-                                        {{ item.quantity }}
-                                    </div>
+                                    <i class="fa-solid fa-clock"></i>
+                                    {{ safe.created_at }}
                                 </div>
                                 <div class="col-md-12 col-12 text-start mb-1">
-                                    <i class="fa-solid fa-money-bill"></i>
-                                    Valor:
-                                    <div class="fs-5 btn btn-light">
-                                        {{ formatPrice(item.price) }}
-                                    </div>
+                                    <i class="fa-solid fa-mobile"></i>
+                                    <i class="fa-solid fa-computer"></i>
+                                    <i class="fa-solid fa-laptop"></i>
+                                    <i class="fa-solid fa-desktop"></i>
+                                    <i class="fa-solid fa-mobile-button"></i>
+                                    {{ safe.created_by }}
                                 </div>
                                 <div class="col-md-12 col-12 text-start">
-                                    <i class="fa-solid fa-boxes-stacked"></i>
-                                    Valor Bruto:
-                                    <div class="fs-5 btn btn-light">
-                                        {{ formatPrice(item.price * item.quantity) }}
-                                    </div>
+                                    <i class="fa-solid fa-trash"></i>
+                                    {{ safe.disabled_at }}
+                                </div>
+                                <div class="col-md-12 col-12 text-start">
+                                    <i class="fa-solid fa-key"></i>
+                                    {{ safe.disabled_by }}
                                 </div>
                                 <div class="col-md-12 col-12 text-start">
                                     <div class="col-md-12 col-12 text-black fs-5 btn btn-light" 
-                                    v-if="item.isNew">
+                                    v-if="safe.isNew">
                                         <i class="fa-solid fa-fire fs-4"></i>
-                                        Item Novo
+                                        Post Novo
                                     </div>
                                     <div class="col-md-12 col-12 text-black fs-5 btn btn-light" 
-                                    v-if="item.is_disabled">
+                                    v-if="safe.is_disabled">
                                         <i class="fa-solid fa-trash fs-4"></i>
-                                        Item Desabilitado
+                                        Post Desabilitado
                                     </div>
                                 </div>
                                 <div class="col-md-12 col-12">
                                     <div class="btn text-center p-3 fs-5" 
-                                    :class="{'btn-light': item.favorite, 'btn-outline-light text-black': !item.favorite}"
-                                    @click="toggleItemFavorite(item.id)" v-if="permission['admin']">
+                                    :class="{'btn-light': safe.favorite, 'btn-outline-light text-black': !safe.favorite}"
+                                    @click="toggleSafeFavorite(safe.id)" v-if="permission['admin']">
                                         <i class="fa-star"
-                                        :class="{'fa-solid': item.favorite, 'fa-regular': !item.favorite}"></i>
+                                        :class="{'fa-solid': safe.favorite, 'fa-regular': !safe.favorite}"></i>
                                     </div>
                                     <div class="btn btn-primary text-center p-3 fs-5" 
-                                    @click="editItemModal(item.id)"
-                                    v-if="permission['can_update_inventory']">
+                                    @click="editSafeModal(safe.id)"
+                                    v-if="permission['can_update_safe']">
                                         <i class="fa-solid fa-pencil"></i>
                                     </div>
                                     <div class="btn text-center p-3 fs-5"
-                                    :class="{'btn-danger': item.is_disabled, 'btn-outline-success': !item.is_disabled}"
-                                    @click="disableItem(item.id)" 
-                                    v-if="permission['can_disable_inventory']">
-                                        <i class="fa-solid" :class="{'fa-toggle-on': item.is_disabled, 'fa-toggle-off': !item.is_disabled}"></i></i>
+                                    :class="{'btn-danger': safe.is_disabled, 'btn-outline-success': !safe.is_disabled}"
+                                    @click="disableSafe(safe.id)" 
+                                    v-if="permission['can_disable_safe']">
+                                        <i class="fa-solid" :class="{'fa-lock': item.is_disabled, 'fa-lock-open': !item.is_disabled}"></i></i>
                                     </div>
                                 </div>
                             </div>

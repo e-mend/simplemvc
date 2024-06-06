@@ -66,6 +66,17 @@ const app = new Vue({
                 from: '',
                 to: '',
             },
+            safeSearch: {
+                deleted: false,
+                new: false,
+                favorites: false,
+                all: true,
+                pagination: 1,
+                search: '',
+                type: 'all',
+                from: '',
+                to: '',
+            },
             userToEdit: {
                 password: '',
                 permission: {
@@ -114,6 +125,7 @@ const app = new Vue({
             loadingItems: false,
             passwordFieldType: 'password',
             links: {},
+            safes: {},
             itemToAdd: {
                 name: '',
                 description: '',
@@ -1111,6 +1123,101 @@ const app = new Vue({
                     this.throwWarning(error.message, ['alert-danger']);
                 }
         },
+        editSafeModal(id) {
+            this.editSafeId = id;
+            this.getSafe('reload', false, 1);
+            $('#safe-modal').modal('show');
+        },
+        toggleSafeFavorite(id) {
+            this.getSafe('reload', false, 1);
+        },
+        disableSafe(id) {
+            this.getSafe('reload', false, 1);
+        },
+        addSafeModal() {
+            $('#safe-modal').modal('show');  
+        },
+        async getSafe(type = 'all', noAlert = true, pagination = 1) {
+            this.loadingItems = true;
+            this.loadingR();
+
+            let url = '/getsafe';
+            let first = true;
+            
+            if(type !== 'reload' && type !== 'search' && pagination === 1) {
+                this.itemSearch[type] = !this.itemSearch[type]; 
+            }
+
+            if(this.itemSearch['deleted']) {
+                url += (first ? '?' : '&') + 'deleted=true';
+                first = false;
+            }
+
+            if(this.itemSearch['new']) {
+                url += (first ? '?' : '&') + 'new=true';
+                first = false;
+            }
+
+            if(this.itemSearch['favorites']) {
+                url += (first ? '?' : '&') +  'favorites=true';
+                first = false;
+            }
+
+            if(this.itemSearch['search'].length > 0) {
+                url += (first ? '?' : '&') + 'search=' + this.itemSearch['search'];
+                first = false;
+            }
+
+            if(this.itemSearch['from'].length > 0) {
+                url += (first ? '?' : '&') + 'from=' + this.itemSearch['from'];
+                first = false;
+            }
+
+            if(this.itemSearch['to'].length > 0) {
+                url += (first ? '?' : '&') + 'to=' + this.itemSearch['to'];
+                first = false;
+            }
+
+            if(this.itemSearch['all']) {
+                url = '/getitems';
+                this.itemSearch['all'] = false;
+                this.itemSearch['deleted'] = false;
+                this.itemSearch['new'] = false;
+                this.itemSearch['favorites'] = false;
+                this.itemSearch['search'] = '';
+                this.itemSearch['from'] = '';
+                this.itemSearch['to'] = '';
+                first = true;
+            }
+
+            url += (first ? '?' : '&') + 'pagination=' + pagination;
+
+            try {
+                const response = await fetch(url);
+
+                if(!response.ok) {
+                    throw new Error('Algo deu errado');
+                }
+
+                const json = await response.json();
+
+                if(!json.success) {
+                    this.throwWarning(json['message']);
+                    return;
+                }
+
+                if(!noAlert){
+                    this.throwWarning(json['message'], ['alert-success']);
+                }
+
+                this.items = json['items'];
+                this.itemSearch.pagination = json['count'];
+            } catch (error) {
+                this.throwWarning(error.message, ['alert-danger']);
+            }
+
+            this.loadingItems = false;
+        },
         throwWarning(textMessage, classObject = {
             'alert-danger': true,
             'clipboard-copy': true
@@ -1210,6 +1317,10 @@ const app = new Vue({
 
             if(this.option === 'inventory') {
                 this.getItems();
+            }
+
+            if(this.option === 'safe') {
+                this.getSafe();
             }
         },
         qrCode(text){
