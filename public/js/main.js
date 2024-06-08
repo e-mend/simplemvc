@@ -153,6 +153,18 @@ const app = new Vue({
                 image2Link: null,
                 image3Link: null
             },
+            safeToAdd: {
+                title: '',
+                description: '',
+                file1: null,
+                file1Link: null,
+                safe1: null,
+                safe2: null,
+                safe3: null,
+                openToAll: false,
+                encrypt: false,
+                adminOnly: false
+            },
             imageModalContent: {},
         }
     },
@@ -1135,7 +1147,7 @@ const app = new Vue({
             this.getSafe('reload', false, 1);
         },
         addSafeModal() {
-            $('#safe-modal').modal('show');  
+            $('#add-safe-modal').modal('show');  
         },
         async getSafe(type = 'all', noAlert = true, pagination = 1) {
             this.loadingItems = true;

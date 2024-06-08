@@ -787,6 +787,152 @@
                         </div>
                     </div>
                 </div>
+                <div class="row d-flex justify-content-between rounded z-3 text-center">
+                    <ul class="pagination justify-content-center">
+                        <button v-for="page in this.safeSearch.pagination"
+                        class="btn btn-primary fs-4"
+                        @click="getSafe('reload', false, page)" :key="page">
+                            {{ page }}
+                        </button>
+                    </ul>
+                </div>
+                <div id="add-safe-modal" class="modal fade" id="staticBackdrop"
+                data-bs-backdrop="static" data-bs-keyboard="false" 
+                tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true"
+                v-if="this.permission['can_create_safe']">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                        <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="staticBackdropLabel">Adicionar Post</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="row d-flex justify-content-between mb-2">
+                            
+                        </div>
+                        <div class="modal-body">
+                            <div class="row d-flex justify-content-center mb-2">
+                                <div class="col-md-12 col-12 form-group fs-5 mb-2">
+                                    <label for="safe-title">Título</label>
+                                    <input type="text" class="form-control disabled fs-5" 
+                                    id="safe-title" v-model="safeToAdd.title">
+                                </div>
+                                <div class="col-md-12 col-12 form-group fs-5 mb-2">
+                                    <label for="safe-description">Descrição</label>
+                                    <textarea class="form-control fs-5"
+                                    id="safe-description" v-model="safeToAdd.description"
+                                    rows="5"></textarea>
+                                </div>
+                            </div>
+                            <div class="row d-flex justify-content-center mb-2">
+                                <div class="col-md-4 col-12 form-group fs-5 mb-2">
+                                    <div class="btn fs-5 w-100" id="encrypt"
+                                    :class="{'btn-dark': safeToAdd.encrypt, 
+                                            'btn-outline-dark': !safeToAdd.encrypt}"
+                                    @click="safeToAdd.encrypt = !safeToAdd.encrypt">
+                                        <span v-if="safeToAdd.encrypt">Encriptado</span>
+                                        <span v-else>Desencriptado</span>
+                                        <i class="fa-solid"
+                                        :class="{'fa-lock': safeToAdd.encrypt, 
+                                            'fa-lock-open': !safeToAdd.encrypt}"></i>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 col-12 form-group fs-5 mb-2">
+                                    <div class="btn fs-5 w-100" id="openToPublic"
+                                    :class="{'btn-dark': !safeToAdd.openToAll, 
+                                            'btn-outline-dark': safeToAdd.openToAll}"
+                                    @click="safeToAdd.openToAll = !safeToAdd.openToAll">
+                                        <span v-if="safeToAdd.openToAll">Aberto para todos</span>
+                                        <span v-else>Fechado</span>
+                                        <i class="fa-solid"
+                                        :class="{'fa-user-lock': !safeToAdd.openToAll, 
+                                            'fa-unlock-keyhole': safeToAdd.openToAll}"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row d-flex justify-content-center mb-2"
+                            v-if="!safeToAdd.openToAll">
+                                <div v-if="permission['safe_1']"
+                                class="col-md-3 col-12 form-group fs-5 mb-2 form-check form-switch">
+                                    <input class="form-check-input mx-auto" 
+                                    type="checkbox" role="switch" 
+                                    id="safe-1"
+                                    v-model="safeToAdd.safe1">
+                                    <label class="form-check-label" 
+                                    for="safe-1">
+                                        Nível 1
+                                    </label>
+                                </div>
+                                <div v-if="permission['safe_2']"
+                                class="col-md-3 col-12 form-group fs-5 mb-2 form-check form-switch">
+                                    <input class="form-check-input mx-auto" 
+                                    id="safe-2"
+                                    type="checkbox"
+                                     role="switch" 
+                                    v-model="safeToAdd.safe2">
+                                    <label class="form-check-label"
+                                    for="safe-2">
+                                        Nível 2
+                                    </label>
+                                </div>
+                                <div v-if="permission['safe_3']"
+                                class="col-md-3 col-12 form-group fs-5 mb-2 form-check form-switch">
+                                    <input class="form-check-input mx-auto" 
+                                    id="safe-3"
+                                    type="checkbox" 
+                                    role="switch" 
+                                    v-model="safeToAdd.safe3">
+                                    <label class="form-check-label"
+                                    for="safe-3">
+                                        Nível 3
+                                    </label>
+                                </div>
+                                <div v-if="permission['admin']"
+                                class="col-md-3 col-12 form-group fs-5 mb-2 form-check form-switch">
+                                    <input class="form-check-input mx-auto" 
+                                    id="safe-admin"
+                                    type="checkbox" 
+                                    role="switch" 
+                                    v-model="safeToAdd.adminOnly">
+                                    <label class="form-check-label"
+                                    for="safe-admin">
+                                        Admins
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="row d-flex justify-content-center mb-2">
+                                <div class="col-12 form-group fs-5 position-relative text-center">
+                                    <div class="">
+                                        Anexar arquivo
+                                    </div>
+                                    <div class="btn btn-danger position-absolute end-0"
+                                    v-if="safeToAdd.file1"
+                                    @click="removeFile('file1')">
+                                        <i class="fa-solid fa-xmark" role="button"></i>
+                                    </div>
+                                </div>
+                                <div class="form-group mt-2 fs-5 rounded 
+                                    btn border shadow col-md-2 p-0 col-12">
+                                    <label for="file1" class="w-100 p-3"
+                                            role="button">
+                                        <div class="">
+                                            <i class="fa-solid -image fs-1"
+                                            :class="{'fa-file-circle-check': safeToAdd.file1, 
+                                                'fa-file-shield': !safeToAdd.file1}"></i>
+                                        </div>
+                                        <input type="file" class="d-none" 
+                                        id="file1" @change="onFileChange($event, 'file1', 3)"
+                                        accept="">
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" @click="addItem()" class="btn btn-primary">Adicionar</button>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                        </div>
+                        </div>
+                    </div>
+                </div>
             </div>
             <!-- Users -->
             <div class="container-margin" v-if="option === 'users'">
