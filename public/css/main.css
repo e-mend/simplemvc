@@ -99,6 +99,11 @@
     backdrop-filter: blur(5px);
 }
 
+.form-check-input-black:checked {
+    background-color: black !important;
+    border-color: black !important;
+}
+
 .contenty {
     position: relative;
     z-index: 2000;

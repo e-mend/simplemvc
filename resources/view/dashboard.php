@@ -853,7 +853,7 @@
                             v-if="!safeToAdd.openToAll">
                                 <div v-if="permission['safe_1']"
                                 class="col-md-3 col-12 form-group fs-5 mb-2 form-check form-switch">
-                                    <input class="form-check-input mx-auto" 
+                                    <input class="form-check-input form-check-input-black mx-auto" 
                                     type="checkbox" role="switch" 
                                     id="safe-1"
                                     v-model="safeToAdd.safe1">
@@ -864,7 +864,7 @@
                                 </div>
                                 <div v-if="permission['safe_2']"
                                 class="col-md-3 col-12 form-group fs-5 mb-2 form-check form-switch">
-                                    <input class="form-check-input mx-auto" 
+                                    <input class="form-check-input form-check-input-black mx-auto" 
                                     id="safe-2"
                                     type="checkbox"
                                      role="switch" 
@@ -876,7 +876,7 @@
                                 </div>
                                 <div v-if="permission['safe_3']"
                                 class="col-md-3 col-12 form-group fs-5 mb-2 form-check form-switch">
-                                    <input class="form-check-input mx-auto" 
+                                    <input class="form-check-input form-check-input-black mx-auto" 
                                     id="safe-3"
                                     type="checkbox" 
                                     role="switch" 
@@ -888,7 +888,7 @@
                                 </div>
                                 <div v-if="permission['admin']"
                                 class="col-md-3 col-12 form-group fs-5 mb-2 form-check form-switch">
-                                    <input class="form-check-input mx-auto" 
+                                    <input class="form-check-input form-check-input-black mx-auto" 
                                     id="safe-admin"
                                     type="checkbox" 
                                     role="switch" 
@@ -896,6 +896,47 @@
                                     <label class="form-check-label"
                                     for="safe-admin">
                                         Admins
+                                    </label>
+                                </div>
+                                <div v-if="permission['admin']"
+                                class="col-md-3 col-12 form-group fs-5 mb-2 form-check form-switch">
+                                    <input class="form-check-input form-check-input-black mx-auto" 
+                                    id="safe-comments"
+                                    type="checkbox" 
+                                    role="switch" 
+                                    v-model="safeToAdd.comments">
+                                    <label class="form-check-label"
+                                    role="button"
+                                    for="safe-comment">
+                                        Comentários
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="row d-flex justify-content-center mb-2">
+                            <div v-if="permission['admin']"
+                                class="col-md-6 col-12 form-group fs-5 mb-2 form-check form-switch">
+                                    <input class="form-check-input form-check-input-black mx-auto" 
+                                    id="safe-auto-delete"
+                                    type="checkbox" 
+                                    role="switch" 
+                                    v-model="safeToAdd.autoDelete">
+                                    <label class="form-check-label"
+                                    role="button"
+                                    for="safe-auto-delete">
+                                        Auto delete
+                                    </label>
+                                </div>
+                                <div v-if="permission['admin']"
+                                class="col-md-6 col-12 form-group fs-5 mb-2 form-check form-switch">
+                                    <input class="form-check-input form-check-input-black mx-auto" 
+                                    id="safe-comments"
+                                    type="checkbox" 
+                                    role="switch" 
+                                    v-model="safeToAdd.comments">
+                                    <label class="form-check-label"
+                                    role="button"
+                                    for="safe-comment">
+                                        Senha
                                     </label>
                                 </div>
                             </div>

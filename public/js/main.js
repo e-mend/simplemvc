@@ -163,7 +163,9 @@ const app = new Vue({
                 safe3: null,
                 openToAll: false,
                 encrypt: false,
-                adminOnly: false
+                adminOnly: false,
+                comments: true,
+                autoDelete: false
             },
             imageModalContent: {},
         }
