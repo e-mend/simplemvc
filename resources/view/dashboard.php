@@ -824,10 +824,13 @@
                                 </div>
                             </div>
                             <div class="row d-flex justify-content-center mb-2">
+                                <div class="col-md-12 col-12 fs-4 form-group fs-5 mb-2 form-check form-switch text-center">
+                                        Privacidade <i class="fa-solid fa-share-nodes"></i>
+                                </div>
                                 <div class="col-md-4 col-12 form-group fs-5 mb-2">
                                     <div class="btn fs-5 w-100" id="encrypt"
-                                    :class="{'btn-dark': safeToAdd.encrypt, 
-                                            'btn-outline-dark': !safeToAdd.encrypt}"
+                                    :class="{'btn-dark': !safeToAdd.encrypt, 
+                                            'btn-warning': safeToAdd.encrypt}"
                                     @click="safeToAdd.encrypt = !safeToAdd.encrypt">
                                         <span v-if="safeToAdd.encrypt">Encriptado</span>
                                         <span v-else>Desencriptado</span>
@@ -839,7 +842,7 @@
                                 <div class="col-md-4 col-12 form-group fs-5 mb-2">
                                     <div class="btn fs-5 w-100" id="openToPublic"
                                     :class="{'btn-dark': !safeToAdd.openToAll, 
-                                            'btn-outline-dark': safeToAdd.openToAll}"
+                                            'btn-success': safeToAdd.openToAll}"
                                     @click="safeToAdd.openToAll = !safeToAdd.openToAll">
                                         <span v-if="safeToAdd.openToAll">Aberto para todos</span>
                                         <span v-else>Fechado</span>
@@ -848,99 +851,85 @@
                                             'fa-unlock-keyhole': safeToAdd.openToAll}"></i>
                                     </div>
                                 </div>
+                                <div class="col-md-4 col-12 form-group fs-5 mb-2">
+                                    <div class="btn fs-5 w-100"
+                                    :class="{'btn-dark': !safeToAdd.adminOnly, 
+                                            'btn-primary': safeToAdd.adminOnly || safeToAdd.openToAll}"
+                                    @click="safeToAdd.adminOnly = !safeToAdd.adminOnly">
+                                        <span v-if="safeToAdd.openToAll">Todos com link</span>
+                                        <span v-else-if="safeToAdd.adminOnly && !safeToAdd.openToAll">Apenas Admins</span>
+                                        <span v-else>Usuários</span>
+                                        <i class="fa-solid"
+                                        :class="{'fa-user-group': !safeToAdd.adminOnly || safeToAdd.openToAll, 
+                                            'fa-users-gear': safeToAdd.adminOnly && !safeToAdd.openToAll}"></i>
+                                    </div>
+                                </div>
                             </div>
                             <div class="row d-flex justify-content-center mb-2"
-                            v-if="!safeToAdd.openToAll">
+                            v-if="!safeToAdd.openToAll && !safeToAdd.adminOnly">
+                                <div class="col-md-12 col-12 fs-4 form-group fs-5 mb-2 text-center">
+                                        Níveis de usuário <i class="fa-solid fa-user-secret"></i>
+                                </div>
                                 <div v-if="permission['safe_1']"
-                                class="col-md-3 col-12 form-group fs-5 mb-2 form-check form-switch">
-                                    <input class="form-check-input form-check-input-black mx-auto" 
-                                    type="checkbox" role="switch" 
-                                    id="safe-1"
-                                    v-model="safeToAdd.safe1">
-                                    <label class="form-check-label" 
-                                    for="safe-1">
-                                        Nível 1
-                                    </label>
+                                class="col-md-4 col-12 form-group fs-5 mb-2">
+                                    <div class="btn fs-5 w-100"
+                                        :class="{'btn-dark': !safeToAdd.safe1, 
+                                                'btn-primary': safeToAdd.safe1}"
+                                        @click="safeToAdd.safe1 = !safeToAdd.safe1">
+                                            Nível 1
+                                    </div>
                                 </div>
                                 <div v-if="permission['safe_2']"
-                                class="col-md-3 col-12 form-group fs-5 mb-2 form-check form-switch">
-                                    <input class="form-check-input form-check-input-black mx-auto" 
-                                    id="safe-2"
-                                    type="checkbox"
-                                     role="switch" 
-                                    v-model="safeToAdd.safe2">
-                                    <label class="form-check-label"
-                                    for="safe-2">
-                                        Nível 2
-                                    </label>
+                                class="col-md-4 col-12 form-group fs-5 mb-2">
+                                    <div class="btn fs-5 w-100"
+                                        :class="{'btn-dark': !safeToAdd.safe2, 
+                                                'btn-primary': safeToAdd.safe2}"
+                                        @click="safeToAdd.safe2 = !safeToAdd.safe2">
+                                            Nível 2
+                                    </div>
                                 </div>
                                 <div v-if="permission['safe_3']"
-                                class="col-md-3 col-12 form-group fs-5 mb-2 form-check form-switch">
-                                    <input class="form-check-input form-check-input-black mx-auto" 
-                                    id="safe-3"
-                                    type="checkbox" 
-                                    role="switch" 
-                                    v-model="safeToAdd.safe3">
-                                    <label class="form-check-label"
-                                    for="safe-3">
-                                        Nível 3
-                                    </label>
+                                class="col-md-4 col-12 form-group fs-5 mb-2">
+                                    <div class="btn fs-5 w-100"
+                                        :class="{'btn-dark': !safeToAdd.safe3, 
+                                                'btn-primary': safeToAdd.safe3}"
+                                        @click="safeToAdd.safe3 = !safeToAdd.safe3">
+                                            Nível 3
+                                    </div>
                                 </div>
-                                <div v-if="permission['admin']"
-                                class="col-md-3 col-12 form-group fs-5 mb-2 form-check form-switch">
-                                    <input class="form-check-input form-check-input-black mx-auto" 
-                                    id="safe-admin"
-                                    type="checkbox" 
-                                    role="switch" 
-                                    v-model="safeToAdd.adminOnly">
-                                    <label class="form-check-label"
-                                    for="safe-admin">
-                                        Admins
-                                    </label>
+                            </div>
+                            <div class="row d-flex justify-content-center mb-2" v-if="permission['admin']">
+                                <div class="col-md-12 col-12 fs-4 form-group fs-5 mb-2 text-center">
+                                    Configurações da postagem <i class="fa-solid fa-user-shield"></i>
                                 </div>
-                                <div v-if="permission['admin']"
-                                class="col-md-3 col-12 form-group fs-5 mb-2 form-check form-switch">
-                                    <input class="form-check-input form-check-input-black mx-auto" 
-                                    id="safe-comments"
-                                    type="checkbox" 
-                                    role="switch" 
-                                    v-model="safeToAdd.comments">
-                                    <label class="form-check-label"
-                                    role="button"
-                                    for="safe-comment">
+                                <div class="col-md-6 col-12 form-group fs-5 mb-2">
+                                    <div class="btn fs-5 w-100"
+                                    :class="{'btn-dark': !safeToAdd.comments, 
+                                            'btn-primary': safeToAdd.comments}"
+                                    @click="safeToAdd.comments = !safeToAdd.comments">
                                         Comentários
-                                    </label>
+                                        <i class="fa-solid"
+                                        :class="{'fa-comments': safeToAdd.comments, 
+                                        'fa-comment-slash': !safeToAdd.comments}"></i>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 col-12 form-group fs-5 mb-2">
+                                    <div class="btn fs-5 w-100"
+                                    :class="{'btn-dark': !safeToAdd.autoDelete, 
+                                            'btn-danger': safeToAdd.autoDelete}"
+                                    @click="safeToAdd.autoDelete = !safeToAdd.autoDelete">
+                                        Auto deletar
+                                        <i class="fa-solid"
+                                        :class="{'fa-trash': safeToAdd.autoDelete,
+                                        'fa-minus': !safeToAdd.autoDelete}"></i>
+                                    </div>
+                                    <div class="d-flex justify-content-center" v-if="safeToAdd.autoDelete">
+                                        <input type="date" class="form-control" v-model="safeToAdd.autoDeleteDate">
+                                        <input type="time" class="form-control" v-model="safeToAdd.autoDeleteTime">
+                                    </div>
                                 </div>
                             </div>
-                            <div class="row d-flex justify-content-center mb-2">
-                            <div v-if="permission['admin']"
-                                class="col-md-6 col-12 form-group fs-5 mb-2 form-check form-switch">
-                                    <input class="form-check-input form-check-input-black mx-auto" 
-                                    id="safe-auto-delete"
-                                    type="checkbox" 
-                                    role="switch" 
-                                    v-model="safeToAdd.autoDelete">
-                                    <label class="form-check-label"
-                                    role="button"
-                                    for="safe-auto-delete">
-                                        Auto delete
-                                    </label>
-                                </div>
-                                <div v-if="permission['admin']"
-                                class="col-md-6 col-12 form-group fs-5 mb-2 form-check form-switch">
-                                    <input class="form-check-input form-check-input-black mx-auto" 
-                                    id="safe-comments"
-                                    type="checkbox" 
-                                    role="switch" 
-                                    v-model="safeToAdd.comments">
-                                    <label class="form-check-label"
-                                    role="button"
-                                    for="safe-comment">
-                                        Senha
-                                    </label>
-                                </div>
-                            </div>
-                            <div class="row d-flex justify-content-center mb-2">
+                            <!-- <div class="row d-flex justify-content-center mb-2">
                                 <div class="col-12 form-group fs-5 position-relative text-center">
                                     <div class="">
                                         Anexar arquivo
@@ -965,10 +954,10 @@
                                         accept="">
                                     </label>
                                 </div>
-                            </div>
+                            </div> -->
                         </div>
                         <div class="modal-footer">
-                            <button type="button" @click="addItem()" class="btn btn-primary">Adicionar</button>
+                            <button type="button" @click="addSafe()" class="btn btn-primary">Adicionar</button>
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
                         </div>
                         </div>

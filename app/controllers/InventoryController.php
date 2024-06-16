@@ -30,7 +30,7 @@ class InventoryController extends Controller
     {
         try {
             if(!$this->secure->isLoggedIn() 
-            || !$this->secure->hasPermission(AclRole::CAN_DISABLE_INVENTORY->value)) {
+            || !$this->secure->hasPermission(AclRole::CAN_DISABLE_INVENTORY)) {
                 throw new PermissionException();
             }
 
@@ -85,7 +85,7 @@ class InventoryController extends Controller
     {
         try {
             if(!$this->secure->isLoggedIn() 
-            || !$this->secure->hasPermission(AclRole::CAN_READ_INVENTORY->value)){
+            || !$this->secure->hasPermission(AclRole::CAN_READ_INVENTORY)){
                 throw new PermissionException(false);
             }
 
@@ -102,7 +102,7 @@ class InventoryController extends Controller
                 }
     
                 if($params['deleted'] 
-                && $this->secure->hasPermission(AclRole::CAN_SEE_DISABLED_INVENTORY->value)){
+                && $this->secure->hasPermission(AclRole::CAN_SEE_DISABLED_INVENTORY)){
                     $query['is_disabled'] = 1; 
                 }else{
                     $query['is_disabled'] = 0;
@@ -178,7 +178,7 @@ class InventoryController extends Controller
     {
         try {
             if (!$this->secure->isLoggedIn()
-            || !$this->secure->hasPermission(AclRole::CAN_UPDATE_INVENTORY->value)){
+            || !$this->secure->hasPermission(AclRole::CAN_UPDATE_INVENTORY)){
                 throw new PermissionException();
             }
 
@@ -252,7 +252,7 @@ class InventoryController extends Controller
     {
         try {
             if(!$this->secure->isLoggedIn()
-            || !$this->secure->hasPermission(AclRole::ADMIN->value)){
+            || !$this->secure->hasPermission(AclRole::ADMIN)){
                 throw new PermissionException();
             }
 
@@ -295,7 +295,7 @@ class InventoryController extends Controller
     {
         try {
             if(!$this->secure->isLoggedIn()
-            || !$this->secure->hasPermission(AclRole::CAN_CREATE_INVENTORY->value)){
+            || !$this->secure->hasPermission(AclRole::CAN_CREATE_INVENTORY)){
                 throw new PermissionException();
             }
 
@@ -342,7 +342,7 @@ class InventoryController extends Controller
     {
         try {
             if(!$this->secure->isLoggedIn()
-            || !$this->secure->hasPermission(AclRole::CAN_CREATE_INVENTORY->value)){
+            || !$this->secure->hasPermission(AclRole::CAN_CREATE_INVENTORY)){
                 throw new PermissionException();
             }
 
@@ -395,7 +395,7 @@ class InventoryController extends Controller
     {
         try {
             if(!$this->secure->isLoggedIn()
-            || !$this->secure->hasPermission(AclRole::SUPER_ADMIN->value)){
+            || !$this->secure->hasPermission(AclRole::SUPER_ADMIN)){
                 throw new PermissionException();
             }
 
@@ -437,7 +437,7 @@ class InventoryController extends Controller
     {
         try {
             if(!$this->secure->isLoggedIn()
-            || !$this->secure->hasPermission(AclRole::CAN_CREATE_INVENTORY->value)){
+            || !$this->secure->hasPermission(AclRole::CAN_CREATE_INVENTORY)){
                 throw new PermissionException();
             }
 

@@ -40,7 +40,7 @@ class DashboardController extends Controller
     public function toggleFavoriteApi()
     {
         try {
-            if(!$this->secure->isLoggedIn() || !$this->secure->hasPermission(AclRole::ADMIN->value)){
+            if(!$this->secure->isLoggedIn() || !$this->secure->hasPermission(AclRole::ADMIN)){
                 throw new PermissionException();
             }
 
@@ -83,7 +83,7 @@ class DashboardController extends Controller
     public function disableUserApi()
     {
         try {
-            if(!$this->secure->isLoggedIn() || !$this->secure->hasPermission(AclRole::ADMIN->value)){
+            if(!$this->secure->isLoggedIn() || !$this->secure->hasPermission(AclRole::ADMIN)){
                 throw new PermissionException("Não autorizado");
             }
 
@@ -203,7 +203,7 @@ class DashboardController extends Controller
     public function getUsersApi()
     {
         try {
-            if(!$this->secure->isLoggedIn() || !$this->secure->hasPermission(AclRole::ADMIN->value)){
+            if(!$this->secure->isLoggedIn() || !$this->secure->hasPermission(AclRole::ADMIN)){
                 throw new PermissionException("Não autorizado");
             }
 
@@ -286,7 +286,7 @@ class DashboardController extends Controller
     public function sendPasswordApi()
     {
         try {
-            if(!$this->secure->isLoggedIn() || !$this->secure->hasPermission(AclRole::ADMIN->value)){
+            if(!$this->secure->isLoggedIn() || !$this->secure->hasPermission(AclRole::ADMIN)){
                 throw new PermissionException();
             }
 
@@ -347,7 +347,7 @@ class DashboardController extends Controller
     {
         try {
             if(!$this->secure->isLoggedIn() 
-            || !$this->secure->hasPermission(AclRole::ADMIN->value)){
+            || !$this->secure->hasPermission(AclRole::ADMIN)){
                 throw new PermissionException();
             }
 
@@ -387,7 +387,7 @@ class DashboardController extends Controller
     public function updatePasswordApi()
     {
         try {
-            if(!$this->secure->isLoggedIn() || !$this->secure->hasPermission(AclRole::ADMIN->value)){
+            if(!$this->secure->isLoggedIn() || !$this->secure->hasPermission(AclRole::ADMIN)){
                 throw new PermissionException("Não autorizado");
             }
 

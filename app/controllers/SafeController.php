@@ -30,7 +30,7 @@ class SafeController extends Controller
     {
         try {
             if(!$this->secure->isLoggedIn() 
-            || !$this->secure->hasPermission(AclRole::CAN_DISABLE_SAFE->value)) {
+            || !$this->secure->hasPermission(AclRole::CAN_DISABLE_SAFE)) {
                 throw new PermissionException();
             }
 
@@ -81,11 +81,11 @@ class SafeController extends Controller
         }
     }
 
-    public function getItemsApi()
+    public function getSafeApi()
     {
         try {
             if(!$this->secure->isLoggedIn() 
-            || !$this->secure->hasPermission(AclRole::CAN_READ_INVENTORY->value)){
+            || !$this->secure->hasPermission(AclRole::CAN_READ_SAFE)){
                 throw new PermissionException(false);
             }
 
@@ -102,7 +102,7 @@ class SafeController extends Controller
                 }
     
                 if($params['deleted'] 
-                && $this->secure->hasPermission(AclRole::CAN_SEE_DISABLED_INVENTORY->value)){
+                && $this->secure->hasPermission(AclRole::CAN_SEE_DISABLED_INVENTORY)){
                     $query['is_disabled'] = 1; 
                 }else{
                     $query['is_disabled'] = 0;
@@ -122,7 +122,7 @@ class SafeController extends Controller
                 }
 
                 if($params['pagination']){
-                    $query['offset'] = ($params['pagination'] - 1) * Inventory::OFFSET;
+                    $query['offset'] = ($params['pagination'] - 1) * Safe::OFFSET;
                 }else{
                     $query['offset'] = 0;
                 }
@@ -135,28 +135,28 @@ class SafeController extends Controller
             $items = $this->safe->get($query);
             $count = $this->safe->get($query, true);
 
-            foreach ($items as &$item) {
-                $item['created_at_formatted'] = Carbon::createFromFormat('Y-m-d H:i:s', $item['created_at'])
-                                                ->format('d/m/Y H:i:s');
+            // foreach ($items as &$item) {
+            //     $item['created_at_formatted'] = Carbon::createFromFormat('Y-m-d H:i:s', $item['created_at'])
+            //                                     ->format('d/m/Y H:i:s');
 
-                if($item['updated_at']){
-                    $item['updated_at_formatted'] = Carbon::createFromFormat('Y-m-d H:i:s', $item['updated_at'])
-                    ->format('d/m/Y H:i:s');
-                }
+            //     if($item['updated_at']){
+            //         $item['updated_at_formatted'] = Carbon::createFromFormat('Y-m-d H:i:s', $item['updated_at'])
+            //         ->format('d/m/Y H:i:s');
+            //     }
 
-                $item['isNew'] = Carbon::createFromFormat('Y-m-d H:i:s', $item['created_at'])
-                                ->diffInDays(Carbon::now()) <= Inventory::NEW_ITEM_DAYS;
+            //     $item['isNew'] = Carbon::createFromFormat('Y-m-d H:i:s', $item['created_at'])
+            //                     ->diffInDays(Carbon::now()) <= Safe::NEW_ITEM_DAYS;
                 
-                if($item['image']){
-                    $item['image'] = json_decode($item['image'], true);
-                }
-            }
+            //     if($item['image']){
+            //         $item['image'] = json_decode($item['image'], true);
+            //     }
+            // }
 
             Json::send([
                 'success' => true,
                 'items' => $items,
                 'message' => 'Pesquisa concluída',
-                'count' => ceil($count / Inventory::OFFSET)
+                'count' => ceil($count / Safe::OFFSET)
             ]);
             
         } catch (PermissionException $e) {
@@ -174,11 +174,11 @@ class SafeController extends Controller
         }
     }
 
-    public function updateItemApi()
+    public function updateSafeApi()
     {
         try {
             if (!$this->secure->isLoggedIn()
-            || !$this->secure->hasPermission(AclRole::CAN_UPDATE_INVENTORY->value)){
+            || !$this->secure->hasPermission(AclRole::CAN_UPDATE_INVENTORY)){
                 throw new PermissionException();
             }
 
@@ -236,23 +236,11 @@ class SafeController extends Controller
         }
     }
 
-    private function addDotBeforeZeros(string $string): string
-    {
-        $length = strlen($string);
-    
-        if ($length < 2) {
-            return $string;
-        }
-        
-        $newNumberStr = substr($string, 0, $length - 2) . '.' . substr($string, $length - 2);
-        return $newNumberStr;
-    }
-
     public function toggleFavoriteApi()
     {
         try {
             if(!$this->secure->isLoggedIn()
-            || !$this->secure->hasPermission(AclRole::ADMIN->value)){
+            || !$this->secure->hasPermission(AclRole::ADMIN)){
                 throw new PermissionException();
             }
 
@@ -291,111 +279,11 @@ class SafeController extends Controller
         }
     }
 
-    public function uploadImageApi()
-    {
-        try {
-            if(!$this->secure->isLoggedIn()
-            || !$this->secure->hasPermission(AclRole::CAN_CREATE_INVENTORY->value)){
-                throw new PermissionException();
-            }
-
-            $files = Req::getFiles();
-
-            if (!$files){
-                throw new RequestException();
-            }
-
-            if(count($files) <= Req::MAX_IMAGES){
-                foreach ($files as $file) {
-                    if(!Req::validateFile($file)){
-                        throw new ReachableException("Imagem inválida");
-                    }
-                }
-            }
-
-            $insert = $this->safe->update([
-                'image' => json_encode(Req::getImages()),
-            ], $_POST['id']);
-
-            if(!$insert){
-                throw new ReachableException("Algo deu errado");
-            }
-
-            Json::send([
-                'success' => true,
-                'message' => 'Imagem enviada com sucesso'
-            ]);
-        } catch (ReachableException $e) {
-            Json::send([
-                'success' => false,
-                'message' => $e->getMessage(),
-            ]); 
-        } catch (Throwable $th) {
-            Json::send([
-                'success' => false,
-                'message' => 'Erro ao processar a requisição',
-            ]);
-        }
-    }
-
-    public function uploadEditApi()
-    {
-        try {
-            if(!$this->secure->isLoggedIn()
-            || !$this->secure->hasPermission(AclRole::CAN_CREATE_INVENTORY->value)){
-                throw new PermissionException();
-            }
-
-            $files = Req::getFiles();
-
-            if ($files){
-                if(count($files) <= Req::MAX_IMAGES){
-                    foreach ($files as $file) {
-                        if(!Req::validateFile($file)){
-                            throw new ReachableException("Imagem inválida");
-                        }
-                    }
-                }
-    
-                $insert = $this->safe->update([
-                    'image' => json_encode(Req::getImages()),
-                ], $_POST['id']);
-    
-                if(!$insert){
-                    throw new ReachableException("Algo deu errado");
-                }
-            }else{
-                $insert = $this->safe->update([
-                    'image' => null,
-                ], $_POST['id']);
-    
-                if(!$insert){
-                    throw new ReachableException("Algo deu errado");
-                }
-            }
-            
-            Json::send([
-                'success' => true,
-                'message' => 'Imagem alterada com sucesso'
-            ]);
-        } catch (ReachableException $e) {
-            Json::send([
-                'success' => false,
-                'message' => $e->getMessage(),
-            ]); 
-        } catch (Throwable $th) {
-            Json::send([
-                'success' => false,
-                'message' => 'Erro ao processar a requisição',
-            ]);
-        }
-    }
-
     public function deleteItemApi()
     {
         try {
             if(!$this->secure->isLoggedIn()
-            || !$this->secure->hasPermission(AclRole::SUPER_ADMIN->value)){
+            || !$this->secure->hasPermission(AclRole::SUPER_ADMIN)){
                 throw new PermissionException();
             }
 
@@ -432,12 +320,11 @@ class SafeController extends Controller
         }
     }
 
-
     public function addItemApi()
     {
         try {
             if(!$this->secure->isLoggedIn()
-            || !$this->secure->hasPermission(AclRole::CAN_CREATE_INVENTORY->value)){
+            || !$this->secure->hasPermission(AclRole::CAN_CREATE_SAFE)){
                 throw new PermissionException();
             }
 
@@ -447,19 +334,23 @@ class SafeController extends Controller
                 throw new RequestException();
             }
 
-            if(!$json['name'] || !$this->secure->isValid('name', $json['name'])){
-                throw new ReachableException("Revise o nome");
+            if(!$json['title'] || !$this->secure->isValid('text', $json['title'])){
+                throw new ReachableException("Revise o título");
             }
 
-            if(!$json['price'] || !$this->secure->isValid('price', $json['price'])){
-                throw new ReachableException("Revise o valor");
+            if(!$json['description'] || !$this->secure->isValid('description', $json['description'])){
+                throw new ReachableException("Revise a descrição");
             }
 
-            if(!$json['quantity'] || !$this->secure->isValid('quantity', $json['quantity'])){
-                throw new ReachableException("Revise a quantidade");
+            if(!is_bool($json['encrypt']) || is_null($json['encrypt'])){
+                throw new ReachableException("Revise a encriptação");
             }
 
-            if($json['description'] != '' && !$this->secure->isValid('description', $json['description'])){
+            if(!is_bool($json['openToAll']) || is_null($json['openToAll'])){
+                throw new ReachableException("Revise a privacidade");
+            }
+
+            if($json['openToAll'] === true && $json['encrypt'] === true){
                 throw new ReachableException("Revise a descrição");
             }
 

@@ -221,7 +221,7 @@ class NewUserController extends Controller
     {
         try {
             if(!$this->secure->isLoggedIn() || 
-            !$this->secure->hasPermission(AclRole::ADMIN->value)){
+            !$this->secure->hasPermission(AclRole::ADMIN)){
                 throw new PermissionException();
             }
 
@@ -281,7 +281,7 @@ class NewUserController extends Controller
     {
         try {
             if(!$this->secure->isLoggedIn() 
-            || !$this->secure->hasPermission(AclRole::ADMIN->value)){
+            || !$this->secure->hasPermission(AclRole::ADMIN)){
                 throw new PermissionException();
             }
 

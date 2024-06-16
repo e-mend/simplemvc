@@ -20,7 +20,7 @@ class Safe
     private $sql;
     private $adapter;
 
-    public const OFFSET = 40;
+    public const OFFSET = 10;
     public const NEW_ITEM_DAYS = 7;
 
     public function __construct()

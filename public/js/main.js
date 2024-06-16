@@ -158,14 +158,16 @@ const app = new Vue({
                 description: '',
                 file1: null,
                 file1Link: null,
-                safe1: null,
-                safe2: null,
-                safe3: null,
+                safe1: false,
+                safe2: false,
+                safe3: false,
                 openToAll: false,
                 encrypt: false,
                 adminOnly: false,
                 comments: true,
-                autoDelete: false
+                autoDelete: false,
+                autoDeleteDate: '',
+                autoDeleteHour: '',
             },
             imageModalContent: {},
         }
@@ -1136,6 +1138,19 @@ const app = new Vue({
                 } catch (error) {
                     this.throwWarning(error.message, ['alert-danger']);
                 }
+        },
+        async addSafe() {
+            try {
+                const response = await fetch('/addsafe', {
+                    method: 'POST',
+                    headers: {
+                        'Content-type': 'application/json'
+                    },
+                    body: JSON.stringify(this.safeToAdd)
+                });
+            } catch (error) {
+                this.throwWarning(error.message, ['alert-danger']);
+            }
         },
         editSafeModal(id) {
             this.editSafeId = id;

@@ -46,6 +46,7 @@ final class Router
                 '/getitems' => fn() => self::load('InventoryController', 'getItemsApi'),
                 '/disableitem' => fn() => self::load('InventoryController', 'disableItemApi'),
                 '/deleteitem' => fn() => self::load('InventoryController', 'deleteItemApi'),
+                '/getsafe' => fn() => self::load('SafeController', 'getSafeApi'),
           ],
           'post' => [
                 '/login' => fn() => self::load('HomeController', 'loginApi'),
