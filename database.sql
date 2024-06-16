@@ -72,6 +72,8 @@ CREATE TABLE `InventoryApp`.`safe`(
     `disabled_at` DATETIME,
     `favorite` BOOLEAN NOT NULL DEFAULT 0,
     `is_disabled` BOOLEAN NOT NULL DEFAULT 0,
+    `updated_at` DATETIME,
+    `updated_by` INT,
     `option` JSON,
     FOREIGN KEY (disabled_by) REFERENCES user(id),
     FOREIGN KEY (created_by) REFERENCES user(id)

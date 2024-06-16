@@ -33,7 +33,7 @@ class Safe
     public function update(array $data, string $id)
     {
         try {
-            $update = $this->sql->update('inventory');
+            $update = $this->sql->update('safe');
             $update->set(array_merge($data, [
                 'updated_at' => Carbon::now(), 
                 'updated_by' => $_SESSION['user']['id'],
@@ -50,7 +50,7 @@ class Safe
     public function delete(string $id)
     {
         try {
-            $delete = $this->sql->delete('inventory');
+            $delete = $this->sql->delete('safe');
             $delete->where(['id' => $id]);
             $delete = $this->sql->buildSqlString($delete);
             $result = $this->adapter->query($delete, Adapter::QUERY_MODE_EXECUTE);
@@ -62,16 +62,16 @@ class Safe
 
     public function get(array $search = null, bool $isCount = false)
     {
-        $select = $this->sql->select('inventory');
+        $select = $this->sql->select(['sa' => 'safe']);
         $select->columns(['*']);
 
         $select->join(['uc' => 'user'], 
-        'uc.id = inventory.created_by', 
+        'uc.id = sa.created_by', 
         ['created_by_name' => new Expression('concat(uc.first_name, " ", uc.last_name)')], 
         Select::JOIN_LEFT);
 
         $select->join(['uu' => 'user'], 
-        'uu.id = inventory.updated_by', 
+        'uu.id = sa.updated_by', 
         ['updated_by_name' => new Expression('concat(uu.first_name, " ", uu.last_name)')], 
         Select::JOIN_LEFT);
 
@@ -79,13 +79,9 @@ class Safe
             $searchTerm = '%' . $search['search'] . '%';
             $select->where(function ($where) use ($searchTerm) {
                 $where->nest()
-                    ->like('inventory.name', $searchTerm)
+                    ->like('safe.title', $searchTerm)
                     ->or
-                    ->like('inventory.description', $searchTerm)
-                    ->or
-                    ->like('inventory.price', $searchTerm)
-                    ->or
-                    ->like('inventory.quantity', $searchTerm)
+                    ->like('safe.body', $searchTerm)
                     ->unnest();
                 });
         }
@@ -96,28 +92,28 @@ class Safe
 
         if($search['days']){
             $select->where([
-                'inventory.created_at >= ?' => $search['days']
+                'safe.created_at >= ?' => $search['days']
             ]);
         }
 
         if($search['from']){
             $select->where([
-                'inventory.created_at >= ?' => $search['from']
+                'safe.created_at >= ?' => $search['from']
             ]);
         }
 
         if($search['to']){
             $select->where([
-                'inventory.created_at <= ?' => $search['to']
+                'safe.created_at <= ?' => $search['to']
             ]);
         }
 
         if($search['favorite']){
-            $select->where(['inventory.favorite' => $search['favorite']]);
+            $select->where(['safe.favorite' => $search['favorite']]);
         }
 
         if($search['is_disabled']){
-            $select->where(['inventory.is_disabled' => $search['is_disabled']]); 
+            $select->where(['safe.is_disabled' => $search['is_disabled']]); 
         }
 
         $select->order($search['order'] ?? 'favorite DESC, id DESC, created_at DESC');
@@ -133,17 +129,22 @@ class Safe
         return $isCount ? $result->count() : $result->toArray();
     }
 
-    public function createItem(array $data)
+    public function createSafe(array $data)
     {
-        $insert = new Insert();
-        $insert->into('inventory');
-        $insert->values(array_merge($data, [
-            'created_at' => Carbon::now(),
-            'created_by' => $_SESSION['user']['id']
-        ]));
-        
-        $statement = $this->sql->prepareStatementForSqlObject($insert);
-        $results = $statement->execute();
-        return $results->getGeneratedValue();
+        try {
+            $insert = new Insert();
+            $insert->into('safe');
+            $insert->values(array_merge($data, [
+                'created_at' => Carbon::now(),
+                'created_by' => $_SESSION['user']['id']
+            ]));
+            
+            $statement = $this->sql->prepareStatementForSqlObject($insert);
+            $results = $statement->execute();
+
+            return $results->count() > 0;
+        } catch (Throwable $th) {
+            return false;
+        }
     }
 }

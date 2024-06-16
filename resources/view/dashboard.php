@@ -716,7 +716,7 @@
                     </div>
                 </div>
                 <div class="row d-flex justify-content-start rounded z-3 text-center">
-                    <div v-for="safe in safes" :key="safe.id" 
+                    <div v-for="post in posts" :key="post.id" 
                     class="col-12 col-md-12 bg-light rounded
                     shadow-lg border-dark-subtle
                     card rounded text-black mt-1 text-center 
@@ -724,17 +724,15 @@
                         <div class="row d-flex rounded">
                             <div class="card-body">
                                 <div class="col-md-12 col-12 fs-4">
-                                    {{ safe.title }}
+                                    {{ post.title }}
                                 </div>
                                 <div class="py-4 fs-5 position-relative
                                 col-md-12 col-12 bg-light text-black text-start">
-                                    Descrição:
-                                    <br>
-                                    {{ safe.description }}
+                                    {{ post.body }}
                                 </div>
                                 <div class="col-md-12 col-12 text-start">
                                     <i class="fa-solid fa-clock"></i>
-                                    {{ safe.created_at }}
+                                    {{ post.created_at }}
                                 </div>
                                 <div class="col-md-12 col-12 text-start mb-1">
                                     <i class="fa-solid fa-mobile"></i>
@@ -742,44 +740,44 @@
                                     <i class="fa-solid fa-laptop"></i>
                                     <i class="fa-solid fa-desktop"></i>
                                     <i class="fa-solid fa-mobile-button"></i>
-                                    {{ safe.created_by }}
+                                    {{ post.created_by }}
                                 </div>
                                 <div class="col-md-12 col-12 text-start">
                                     <i class="fa-solid fa-trash"></i>
-                                    {{ safe.disabled_at }}
+                                    {{ post.disabled_at }}
                                 </div>
                                 <div class="col-md-12 col-12 text-start">
                                     <i class="fa-solid fa-key"></i>
-                                    {{ safe.disabled_by }}
+                                    {{ post.disabled_by }}
                                 </div>
                                 <div class="col-md-12 col-12 text-start">
                                     <div class="col-md-12 col-12 text-black fs-5 btn btn-light" 
-                                    v-if="safe.isNew">
+                                    v-if="post.isNew">
                                         <i class="fa-solid fa-fire fs-4"></i>
                                         Post Novo
                                     </div>
                                     <div class="col-md-12 col-12 text-black fs-5 btn btn-light" 
-                                    v-if="safe.is_disabled">
+                                    v-if="post.is_disabled">
                                         <i class="fa-solid fa-trash fs-4"></i>
                                         Post Desabilitado
                                     </div>
                                 </div>
                                 <div class="col-md-12 col-12">
                                     <div class="btn text-center p-3 fs-5" 
-                                    :class="{'btn-light': safe.favorite, 'btn-outline-light text-black': !safe.favorite}"
-                                    @click="toggleSafeFavorite(safe.id)" v-if="permission['admin']">
+                                    :class="{'btn-light': post.favorite, 'btn-outline-light text-black': !post.favorite}"
+                                    @click="togglePostFavorite(post.id)" v-if="permission['admin']">
                                         <i class="fa-star"
-                                        :class="{'fa-solid': safe.favorite, 'fa-regular': !safe.favorite}"></i>
+                                        :class="{'fa-solid': post.favorite, 'fa-regular': !post.favorite}"></i>
                                     </div>
                                     <div class="btn btn-primary text-center p-3 fs-5" 
-                                    @click="editSafeModal(safe.id)"
-                                    v-if="permission['can_update_safe']">
+                                    @click="editPostModal(post.id)"
+                                    v-if="permission['can_update_post']">
                                         <i class="fa-solid fa-pencil"></i>
                                     </div>
                                     <div class="btn text-center p-3 fs-5"
-                                    :class="{'btn-danger': safe.is_disabled, 'btn-outline-success': !safe.is_disabled}"
-                                    @click="disableSafe(safe.id)" 
-                                    v-if="permission['can_disable_safe']">
+                                    :class="{'btn-danger': post.is_disabled, 'btn-outline-success': !post.is_disabled}"
+                                    @click="disablePost(post.id)" 
+                                    v-if="permission['can_disable_post']">
                                         <i class="fa-solid" :class="{'fa-lock': item.is_disabled, 'fa-lock-open': !item.is_disabled}"></i></i>
                                     </div>
                                 </div>

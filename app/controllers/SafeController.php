@@ -135,26 +135,26 @@ class SafeController extends Controller
             $items = $this->safe->get($query);
             $count = $this->safe->get($query, true);
 
-            // foreach ($items as &$item) {
-            //     $item['created_at_formatted'] = Carbon::createFromFormat('Y-m-d H:i:s', $item['created_at'])
-            //                                     ->format('d/m/Y H:i:s');
+            foreach ($items as &$item) {
+                $item['created_at_formatted'] = Carbon::createFromFormat('Y-m-d H:i:s', $item['created_at'])
+                                                ->format('d/m/Y H:i:s');
 
-            //     if($item['updated_at']){
-            //         $item['updated_at_formatted'] = Carbon::createFromFormat('Y-m-d H:i:s', $item['updated_at'])
-            //         ->format('d/m/Y H:i:s');
-            //     }
+                if($item['updated_at']){
+                    $item['updated_at_formatted'] = Carbon::createFromFormat('Y-m-d H:i:s', $item['updated_at'])
+                    ->format('d/m/Y H:i:s');
+                }
 
-            //     $item['isNew'] = Carbon::createFromFormat('Y-m-d H:i:s', $item['created_at'])
-            //                     ->diffInDays(Carbon::now()) <= Safe::NEW_ITEM_DAYS;
+                $item['isNew'] = Carbon::createFromFormat('Y-m-d H:i:s', $item['created_at'])
+                                ->diffInDays(Carbon::now()) <= Safe::NEW_ITEM_DAYS;
                 
-            //     if($item['image']){
-            //         $item['image'] = json_decode($item['image'], true);
-            //     }
-            // }
+                if($item['option']){
+                    $item['option'] = json_decode($item['option'], true);
+                }
+            }
 
             Json::send([
                 'success' => true,
-                'items' => $items,
+                'posts' => $items,
                 'message' => 'Pesquisa concluída',
                 'count' => ceil($count / Safe::OFFSET)
             ]);
@@ -320,10 +320,10 @@ class SafeController extends Controller
         }
     }
 
-    public function addItemApi()
+    public function addSafeApi()
     {
         try {
-            if(!$this->secure->isLoggedIn()
+            if (!$this->secure->isLoggedIn()
             || !$this->secure->hasPermission(AclRole::CAN_CREATE_SAFE)){
                 throw new PermissionException();
             }
@@ -334,31 +334,55 @@ class SafeController extends Controller
                 throw new RequestException();
             }
 
-            if(!$json['title'] || !$this->secure->isValid('text', $json['title'])){
+            if (!$json['title'] || !$this->secure->isValid('text', $json['title'])){
                 throw new ReachableException("Revise o título");
             }
 
-            if(!$json['description'] || !$this->secure->isValid('description', $json['description'])){
+            if (!$json['description'] || !$this->secure->isValid('description', $json['description'])){
                 throw new ReachableException("Revise a descrição");
             }
 
-            if(!is_bool($json['encrypt']) || is_null($json['encrypt'])){
+            if (!is_bool($json['encrypt'])
+            || !is_bool($json['openToAll'])
+            || !is_bool($json['comments'])
+            || !is_bool($json['adminOnly'])
+            || !is_bool($json['autoDelete'])) {
                 throw new ReachableException("Revise a encriptação");
             }
 
-            if(!is_bool($json['openToAll']) || is_null($json['openToAll'])){
-                throw new ReachableException("Revise a privacidade");
+            if ($json['openToAll'] === true){
+                unset($json['safe1'], $json['safe2'], $json['safe3'], $json['adminOnly']);
             }
 
-            if($json['openToAll'] === true && $json['encrypt'] === true){
-                throw new ReachableException("Revise a descrição");
+            if ($json['adminOnly'] === true){
+                unset($json['safe1'], $json['safe2'], $json['safe3'], $json['openToAll']);
             }
 
-            $insert = $this->safe->createItem([
-                'name' => $json['name'],
-                'price' => $this->addDotBeforeZeros($json['price']),
-                'quantity' => $json['quantity'],
-                'description' => $json['description'],
+            if ($json['safe1'] === true
+            || $json['safe2'] === true
+            || $json['safe3'] === true){
+                unset($json['openToAll'], $json['adminOnly']);
+            }
+
+            if ($json['autoDelete'] === true){
+                if (!$json['autoDeleteDate'] || !$json['autoDeleteTime']){
+                    throw new ReachableException("Revise a data");
+                }
+
+                $date = Carbon::createFromFormat('Y-m-d H:i', $json['autoDeleteDate'] . ' ' . $json['autoDeleteTime']);
+
+                if (!$date->isValid() || !$date->isFuture()) {
+                    throw new ReachableException("Revise a data");
+                }
+            } else {
+                unset($json['autoDeleteDate'], $json['autoDeleteTime']);
+                $json['autoDelete'] = false;
+            }
+
+            $insert = $this->safe->createSafe([
+                'title' => $json['title'],
+                'body' => $json['description'],
+                'option' => json_encode($json),
             ]);
 
             if(!$insert){

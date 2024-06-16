@@ -125,7 +125,7 @@ const app = new Vue({
             loadingItems: false,
             passwordFieldType: 'password',
             links: {},
-            safes: {},
+            posts: {},
             itemToAdd: {
                 name: '',
                 description: '',
@@ -154,8 +154,8 @@ const app = new Vue({
                 image3Link: null
             },
             safeToAdd: {
-                title: '',
-                description: '',
+                title: 'Este é um post de teste',
+                description: `Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum scelerisque finibus sodales. Duis sit amet augue fringilla, tristique eros a, bibendum ex. Nam tristique enim nec ultrices venenatis. Suspendisse sodales dui ante, dignissim scelerisque lectus imperdiet eget. Morbi interdum malesuada ante at posuere. Curabitur hendrerit sed justo eget molestie. Phasellus eget libero quis erat placerat aliquet nec nec leo. Praesent convallis turpis enim, sit amet auctor lacus vulputate ut. Cras luctus nunc vel mi hendrerit ullamcorper. Donec non ligula nec urna condimentum vulputate.`,
                 file1: null,
                 file1Link: null,
                 safe1: false,
@@ -167,7 +167,7 @@ const app = new Vue({
                 comments: true,
                 autoDelete: false,
                 autoDeleteDate: '',
-                autoDeleteHour: '',
+                autoDeleteTime: '',
             },
             imageModalContent: {},
         }
@@ -1148,8 +1148,21 @@ const app = new Vue({
                     },
                     body: JSON.stringify(this.safeToAdd)
                 });
+
+                if (!response.ok) {
+                    throw new Error('Algo deu errado');
+                }
+
+                const json = await response.json();
+
+                if (!json.success) {
+                    throw new Error(json['message']);
+                }
+
+                this.throwWarning(json['message'], ['alert-success']);
+                await this.getSafe('reload');
             } catch (error) {
-                this.throwWarning(error.message, ['alert-danger']);
+                this.throwWarning(error.message+' <i class="fa-solid fa-check"></i>', ['alert-danger']);
             }
         },
         editSafeModal(id) {
@@ -1239,10 +1252,10 @@ const app = new Vue({
                     this.throwWarning(json['message'], ['alert-success']);
                 }
 
-                this.items = json['items'];
-                this.itemSearch.pagination = json['count'];
+                this.posts = json['posts'];
+                this.safeSearch.pagination = json['count'];
             } catch (error) {
-                this.throwWarning(error.message, ['alert-danger']);
+                this.throwWarning(error.message+' <i class="fa-solid fa-check"></i>', ['alert-danger']);
             }
 
             this.loadingItems = false;

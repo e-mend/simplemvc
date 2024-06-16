@@ -68,6 +68,7 @@ final class Router
                 '/toggleitemfavorite' => fn() => self::load('InventoryController', 'toggleFavoriteApi'),
                 '/updateitem' => fn() => self::load('InventoryController', 'updateItemApi'),
                 '/uploadedit' => fn() => self::load('InventoryController', 'uploadEditApi'),
+                '/addsafe' => fn() => self::load('SafeController', 'addSafeApi'),
           ]
         ];
     }
