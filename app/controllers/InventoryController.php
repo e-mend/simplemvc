@@ -7,7 +7,7 @@ use App\Models\Inventory;
 use App\Requests\Json;
 use App\Requests\Req;
 use Carbon\Carbon;
-use App\enum\AclRole;
+use App\Enum\AclRole;
 use App\Exceptions\ReachableException;
 use App\Exceptions\PermissionException;
 use App\Exceptions\RequestException;

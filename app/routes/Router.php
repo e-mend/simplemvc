@@ -1,5 +1,5 @@
 <?php 
-namespace App\routes;
+namespace App\Routes;
 
 use Exception;
 use Throwable;

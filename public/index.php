@@ -6,7 +6,7 @@ date_default_timezone_set('America/Sao_Paulo');
 
 require '../vendor/autoload.php';
 
-use App\routes\Router;
+use App\Routes\Router;
 use App\Helpers\Secure;
 
 Secure::generateToken();

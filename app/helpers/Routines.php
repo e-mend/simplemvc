@@ -5,7 +5,7 @@ namespace App\Helpers;
 use App\Models\Database;
 use Laminas\Db\Sql\Predicate\PredicateSet;
 use Laminas\Db\Sql\Select;
-use App\enum\AclRole;
+use App\Enum\AclRole;
 use Laminas\Db\Adapter\Adapter;
 use Laminas\Db\Sql\Sql;
 use Laminas\Db\Sql\Insert;
