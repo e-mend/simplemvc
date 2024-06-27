@@ -84,8 +84,8 @@ CREATE TABLE `InventoryApp`.`comment`(
     `body` VARCHAR(255) NOT NULL,
     `created_at` DATETIME NOT NULL,
     `created_by` INT,
-    `post_id` INT,
-    FOREIGN KEY (post_id) REFERENCES post(id),
+    `safe_id` INT,
+    FOREIGN KEY (safe_id) REFERENCES safe(id),
     FOREIGN KEY (created_by) REFERENCES user(id)
 );
 
