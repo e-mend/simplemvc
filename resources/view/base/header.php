@@ -6,7 +6,7 @@
         <title>iSecurity</title>
 
         <!-- custom css -->
-        <link rel="stylesheet" href="css/main.css">
+        <link rel="stylesheet" href="<?= getPublicPath() ?>css/main.css">
 
         <!-- bootstrap -->
         <link 
@@ -22,17 +22,17 @@
         </script>
 
         <!-- qrcode -->
-        <script src="js/qrcode.js" defer></script>
-        <script src="js/qrcode.min.js" defer></script>
-        <script src="js/jquery.min.js" defer></script>
+        <script src="<?= getPublicPath() ?>js/qrcode.js" defer></script>
+        <script src="<?= getPublicPath() ?>js/qrcode.min.js" defer></script>
+        <script src="<?= getPublicPath() ?>js/jquery.min.js" defer></script>
 
         <!-- jquery -->
         <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 
         <!-- Favicon -->
-        <link rel="apple-touch-icon" sizes="180x180" href="img/apple-touch-icon.png">
-        <link rel="icon" type="image/png" sizes="32x32" href="img/favicon-32x32.png">
-        <link rel="icon" type="image/png" sizes="16x16" href="img/favicon-16x16.png">
+        <link rel="apple-touch-icon" sizes="180x180" href="<?= getPublicPath() ?>img/apple-touch-icon.png">
+        <link rel="icon" type="image/png" sizes="32x32" href="<?= getPublicPath() ?>img/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="<?= getPublicPath() ?>img/favicon-16x16.png">
         <link rel="manifest" href="/site.webmanifest">
         <meta name="msapplication-TileColor" content="#da532c">
         <meta name="theme-color" content="#ffffff">

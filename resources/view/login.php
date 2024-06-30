@@ -53,7 +53,7 @@
                 <div class="text-white fs-3">
                     Um app
                     <a href="http://crm.sjpinfo.com.br/authentication/login" target="_blank">
-                        <img src="img/logo2.png" id="logo" >
+                        <img src="<?= getPublicPath() ?>img/logo2.png" id="logo" >
                     </a>
                 </div>
             </div>

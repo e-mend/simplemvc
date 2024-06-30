@@ -6,7 +6,7 @@
             <div class="row d-flex justify-content-between bg-primary py-3 py-md-3 rounded">
                 <div class="col-6 col-md-2 px-0">
                     <a href="http://crm.sjpinfo.com.br/authentication/login" target="_blank">
-                        <img src="img/logo2.png" id="logo-header" class="ms-md-3">
+                        <img src="<?= getPublicPath() ?>img/logo2.png" id="logo-header" class="ms-md-3">
                     </a> 
                 </div> 
                 <div class="d-flex col-6 col-md-10 justify-content-end">
@@ -1682,7 +1682,7 @@
         </div>
     </div>
 
-    <script src="js/main.js" defer></script>
+    <script src="<?= getPublicPath() ?>js/main.js" defer></script>
     
 </body>
 
