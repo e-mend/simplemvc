@@ -15,6 +15,7 @@ class ComposerStaticInit99028d73ec07c66fe987bb1bc67affba
         'a1105708a18b76903365ca1c4aa61b02' => __DIR__ . '/..' . '/symfony/translation/Resources/functions.php',
         '667aeda72477189d0494fecd327c3641' => __DIR__ . '/..' . '/symfony/var-dumper/Resources/functions/dump.php',
         '0e423a14e27410a071e5d815d3ffc856' => __DIR__ . '/..' . '/larapack/dd/src/helper.php',
+        '6b320538d26109c7639c7660a4cebaaa' => __DIR__ . '/../..' . '/App/Helpers/Functions.php',
     );
 
     public static $prefixLengthsPsr4 = array (
@@ -143,7 +144,7 @@ class ComposerStaticInit99028d73ec07c66fe987bb1bc67affba
         ),
         'App\\' => 
         array (
-            0 => __DIR__ . '/../..' . '/app',
+            0 => __DIR__ . '/../..' . '/App',
         ),
     );
 

@@ -2,7 +2,7 @@
 
 <body>
     <div id="bgVideo">
-            <video src="video/sky.mp4" autoplay loop muted class="w-100" type="video/mp4">
+            <video src="<?= getPublicPath() ?>video/sky.mp4" autoplay loop muted class="w-100" type="video/mp4">
             </video>
     </div>
     <div class="container-fluid vertical-center position-absolute top-0 start-0" id="app">
