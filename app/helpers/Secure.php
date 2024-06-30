@@ -5,7 +5,6 @@ namespace App\Helpers;
 use Carbon\Carbon;
 use Exception;
 use App\Models\User;
-use Dotenv\Dotenv;
 
 class Secure
 {
@@ -162,9 +161,6 @@ class Secure
 
     public function getFullLink(?array $data = null)
     {
-        $dotenv = Dotenv::createImmutable(__DIR__ . '/../../');
-        $dotenv->load();
-
         if ($data) {
             foreach ($data as &$key) {
                 $key['raw'] = $_ENV['BASE_URL'] . '/newuser?token=' . $key['link'];

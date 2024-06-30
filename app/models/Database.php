@@ -5,7 +5,6 @@ namespace App\Models;
 use Laminas\Db\Adapter\Adapter;
 use Laminas\Db\ResultSet\ResultSet;
 use Laminas\Db\Sql\Sql;
-use Dotenv\Dotenv;
 
 class Database
 {
@@ -28,9 +27,6 @@ class Database
 
     public function getConnection(): Adapter
     {
-        $dotenv = Dotenv::createImmutable(__DIR__ . '/../../');
-        $dotenv->load();
-
         $this->adapter = new Adapter([
             'driver'   => 'Pdo_Mysql',
             'database' => $_ENV['DB_NAME'],

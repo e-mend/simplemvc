@@ -4,7 +4,6 @@ namespace App\Helpers;
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
-use Dotenv\Dotenv;
 use App\Helpers\Secure;
 use BaconQrCode\Renderer\ImageRenderer;
 use BaconQrCode\Renderer\Image\ImagickImageBackEnd;
@@ -23,9 +22,6 @@ class Mailer
     
     public static function sendCode(array $to)
     {
-        $dotenv = Dotenv::createImmutable(__DIR__ . '/../../');
-        $dotenv->load();
-
         $secure = Secure::getInstance();
         $secure->generatePin();
 
@@ -84,9 +80,6 @@ class Mailer
 
     public static function sendPassword(array $to)
     {
-        $dotenv = Dotenv::createImmutable(__DIR__ . '/../../');
-        $dotenv->load();
-
         $secure = Secure::getInstance();
         $secure->generatePasswordToken($to['for']);
 
@@ -148,9 +141,6 @@ class Mailer
 
     public static function sendLink(array $to)
     {
-        $dotenv = Dotenv::createImmutable(__DIR__ . '/../../');
-        $dotenv->load();
-
         self::$mail = new PHPMailer(true);
 
         try {
