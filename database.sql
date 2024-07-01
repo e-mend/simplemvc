@@ -37,7 +37,7 @@ CREATE TABLE `InventoryApp`.`inventory`(
     `id` INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(255) NOT NULL,
     `quantity` INT NOT NULL,
-    `description` VARCHAR(255),
+    `description` TEXT,
     `price` FLOAT NOT NULL,
     `created_at` DATETIME NOT NULL,
     `created_by` INT,
@@ -65,7 +65,7 @@ CREATE TABLE `InventoryApp`.`throttle`(
 CREATE TABLE `InventoryApp`.`safe`(
     `id` INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
     `title` VARCHAR(255) NOT NULL,
-    `body` VARCHAR(255) NOT NULL,
+    `body` TEXT NOT NULL,
     `created_at` DATETIME NOT NULL,
     `created_by` INT,
     `disabled_by` INT,

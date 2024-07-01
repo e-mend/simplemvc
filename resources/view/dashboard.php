@@ -740,7 +740,12 @@
                                     <i class="fa-solid fa-laptop"></i>
                                     <i class="fa-solid fa-desktop"></i>
                                     <i class="fa-solid fa-mobile-button"></i>
-                                    {{ post.created_by }}
+                                    <div v-if="post.created_by === user.id">
+                                        Eu
+                                    </div>
+                                    <div v-else>
+                                        {{ post.created_by_name }}
+                                    </div>
                                 </div>
                                 <div class="col-md-12 col-12 text-start">
                                     <i class="fa-solid fa-trash"></i>

@@ -170,4 +170,14 @@ class Secure
 
         return $_ENV['BASE_URL'] . '/newuser?token=' . $this->passwordToken;
     }
+
+    public function getIp(): string
+    {
+        return $_SERVER['REMOTE_ADDR'];
+    }
+
+    public function getUserAgent(): string
+    {
+        return $_SERVER['HTTP_USER_AGENT'];
+    }
 }

@@ -170,6 +170,10 @@ const app = new Vue({
                 autoDeleteTime: '',
             },
             imageModalContent: {},
+            geolocation: {
+                lat: 0,
+                lon: 0
+            }
         }
     },
     methods: {
@@ -1139,6 +1143,39 @@ const app = new Vue({
                     this.throwWarning(error.message, ['alert-danger']);
                 }
         },
+        getGeolocation() {
+            function getLocation() {
+                if (navigator.geolocation) {
+                  navigator.geolocation.getCurrentPosition(showPosition, showError);
+                } else {
+                  alert("Geolocation is not supported by this browser.");
+                }
+              }
+              
+              function showPosition(position) {
+                latitude = position.coords.latitude;
+                longitude = position.coords.longitude;
+                // You can now use the latitude and longitude values
+                console.log("Latitude: " + latitude + ", Longitude: " + longitude);
+              }
+              
+              function showError(error) {
+                switch (error.code) {
+                  case error.PERMISSION_DENIED:
+                    alert("User denied the request for Geolocation.");
+                    break;
+                  case error.POSITION_UNAVAILABLE:
+                    alert("Location information is unavailable.");
+                    break;
+                  case error.TIMEOUT:
+                    alert("The request to get user location timed out.");
+                    break;
+                  default:
+                    alert("An unknown error occurred.");
+                }
+              }
+              getLocation();
+        },
         async addSafe() {
             try {
                 const response = await fetch('/addsafe', {
@@ -1146,7 +1183,10 @@ const app = new Vue({
                     headers: {
                         'Content-type': 'application/json'
                     },
-                    body: JSON.stringify(this.safeToAdd)
+                    body: JSON.stringify({
+                        user_agent: navigator.userAgent,
+                        geolocation: this.geolocation
+                    })
                 });
 
                 if (!response.ok) {
@@ -1434,9 +1474,10 @@ const app = new Vue({
 
         await this.loadingR();
         await this.getUserData();
+        this.getGeolocation();
         this.option = 'main';
 
-        if(this.permission['admin']) {
+        if(this.permission['super_admin']) {
             return;
         }
 

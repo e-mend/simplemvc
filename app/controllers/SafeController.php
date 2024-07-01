@@ -379,10 +379,17 @@ class SafeController extends Controller
                 $json['autoDelete'] = false;
             }
 
+            $deviceData = [
+                'user_info' => [
+                    'ip' => $this->secure->getIp(),
+                    'user_agent' => $this->secure->getUserAgent(),
+                ]
+            ];
+
             $insert = $this->safe->createSafe([
                 'title' => $json['title'],
                 'body' => $json['description'],
-                'option' => json_encode($json),
+                'option' => json_encode(array_merge($deviceData, $json)),
             ]);
 
             if(!$insert){
